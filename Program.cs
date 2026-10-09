@@ -1,3 +1,6 @@
+using Microsoft.EntityFrameworkCore;
+using QuanLyThuVien_UNETI04_TI17A1HN.Data;
+
 namespace QuanLyThuVien_UNETI04_TI17A1HN
 {
     public class Program
@@ -5,6 +8,11 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            // Kết nối ApplicationDbContext với SQL Server
+            builder.Services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseSqlServer(
+                    builder.Configuration.GetConnectionString("DefaultConnection")));
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
@@ -16,6 +24,7 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN
             {
                 app.UseExceptionHandler("/Home/Error");
             }
+
             app.UseRouting();
 
             app.UseAuthorization();
