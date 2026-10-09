@@ -1,21 +1,33 @@
-﻿namespace QuanLyThuVien_UNETI04_T117A1HN.Models
+﻿
+using System;
+using System.Collections.Generic;
+using QuanLyThuVien_UNETI04_TI17A1HN.Models;
+
+namespace QuanLyThuVien_UNETI04_TI17A1HN.Models
 {
     public class MuonTraViewModel
     {
-        public int MaPhieuMuon { get; set; }
+        public List<PhieuMuon> DanhSachPhieuMuon { get; set; }
+            = new List<PhieuMuon>();
 
-        public string TenDocGia { get; set; }
+        public int TongPhieu { get; set; }
 
-        public string TenSach { get; set; }
+        public int DangMuon { get; set; }
 
-        public DateTime NgayMuon { get; set; }
+        public int QuaHan { get; set; }
 
-        public DateTime? HanTra { get; set; }
+        public int DaTra { get; set; }
 
-        public DateTime? NgayTra { get; set; }
+        public string? TrangThaiLoc { get; set; }
 
-        public string TrangThai { get; set; }
+        public string? TuKhoa { get; set; }
 
-        public int SoNgayQuaHan { get; set; }
+        public DateTime? NgayTu { get; set; }
+
+        public DateTime? NgayDen { get; set; }
+
+        public int TrangHienTai { get; set; } = 1;
+
+        public int TongSoTrang { get; set; }
     }
 }

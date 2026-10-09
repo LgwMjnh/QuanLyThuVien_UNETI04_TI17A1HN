@@ -1,17 +1,13 @@
-﻿namespace QuanLyThuVien_UNETI04_T117A1HN.Models
+﻿
+namespace QuanLyThuVien_UNETI04_TI17A1HN.Models
 {
     public class ThongKeViewModel
     {
-        public int TongLuotMuon { get; set; }
-
-        public int TongSachDangMuon { get; set; }
-
-        public int TongSachDaTra { get; set; }
-
-        public int TongSachQuaHan { get; set; }
-
-        public string SachMuonNhieuNhat { get; set; }
-
-        public int SoLuotMuonNhieuNhat { get; set; }
+        public int TongPhieuMuon { get; set; }
+        public int DangMuon { get; set; }
+        public int DaTra { get; set; }
+        public int QuaHan { get; set; }
+        public int TongDocGia { get; set; }
+        public int TongSach { get; set; }
     }
 }
