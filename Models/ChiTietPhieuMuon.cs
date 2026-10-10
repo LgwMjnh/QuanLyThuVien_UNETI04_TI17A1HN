@@ -1,5 +1,10 @@
-﻿namespace QuanLyThuVien_UNETI04_TI17A1HN.Models
+﻿
+using System.ComponentModel.DataAnnotations;
+using Microsoft.EntityFrameworkCore;
+
+namespace QuanLyThuVien_UNETI04_TI17A1HN.Models
 {
+    [PrimaryKey(nameof(MaPhieuMuon), nameof(MaSach))]
     public class ChiTietPhieuMuon
     {
         public int MaPhieuMuon { get; set; }

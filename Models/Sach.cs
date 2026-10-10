@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace QuanLyThuVien_UNETI04_TI17A1HN.Models
 {
+    [Table("Sach")]
     public class Sach
     {
         [Key]

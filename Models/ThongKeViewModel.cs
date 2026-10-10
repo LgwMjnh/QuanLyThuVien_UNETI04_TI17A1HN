@@ -10,7 +10,7 @@
 
         public int TongSachQuaHan { get; set; }
 
-        public string SachMuonNhieuNhat { get; set; }
+        public string SachMuonNhieuNhat { get; set; } = string.Empty;
 
         public int SoLuotMuonNhieuNhat { get; set; }
     }
