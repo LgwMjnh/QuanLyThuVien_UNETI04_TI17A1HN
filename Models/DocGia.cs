@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace QuanLyThuVien_UNETI04_TI17A1HN.Models
 {
@@ -11,7 +13,7 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Models
 
         [Required(ErrorMessage = "Họ tên không được để trống")]
         [StringLength(100)]
-        public string HoTen { get; set; }
+        public string HoTen { get; set; } = string.Empty;
 
         [DataType(DataType.Date)]
         public DateTime? NgaySinh { get; set; }
@@ -28,6 +30,9 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Models
 
         public DateTime NgayDangKy { get; set; }
 
-        public string TrangThai { get; set; }
+        public string TrangThai { get; set; } = string.Empty;
+
+        [ForeignKey(nameof(MaTaiKhoan))]
+        public virtual TaiKhoan? TaiKhoan { get; set; }
     }
 }
