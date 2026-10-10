@@ -1,0 +1,37 @@
+﻿@model IEnumerable<QuanLyThuVien_UNETI04_TI17A1HN.Models.Sach>
+
+@{
+    ViewData["Title"] = "Quản lý Sách";
+}
+
+<h1>Danh sách Sách</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Thêm Sách mới</a>
+</p>
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>@Html.DisplayNameFor(model => model.TenSach)</th>
+            <th>@Html.DisplayNameFor(model => model.TacGia)</th>
+            <th>Thể loại</th>
+            <th>Số lượng</th>
+            <th>Hành động</th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>@Html.DisplayFor(modelItem => item.TenSach)</td>
+            <td>@Html.DisplayFor(modelItem => item.TacGia)</td>
+            <td>@Html.DisplayFor(modelItem => item.TheLoai.TenTheLoai)</td>
+            <td>@Html.DisplayFor(modelItem => item.SoLuongCon) / @Html.DisplayFor(modelItem => item.SoLuong)</td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.MaSach" class="btn btn-sm btn-warning">Sửa</a> |
+                <a asp-action="Details" asp-route-id="@item.MaSach" class="btn btn-sm btn-info">Chi tiết</a> |
+                <a asp-action="Delete" asp-route-id="@item.MaSach" class="btn btn-sm btn-danger">Xóa</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
