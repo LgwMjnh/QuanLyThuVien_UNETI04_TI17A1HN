@@ -4,60 +4,59 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
+<h1>Quản lý phiếu mượn</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create" class="btn btn-primary">Thêm phiếu mượn</a>
 </p>
-<table class="table">
+
+<!-- Lọc theo 4 trạng thái (Mục 7.2) -->
+<div class="mb-3">
+    <a asp-action="Index" class="btn btn-sm @(string.IsNullOrEmpty(ViewBag.TrangThai) ? "btn-primary" : "btn-outline-primary")">Tất cả (@ViewBag.TongSo)</a>
+    <a asp-action="Index" asp-route-trangThai="Chờ xác nhận" class="btn btn-sm @(ViewBag.TrangThai == "Chờ xác nhận" ? "btn-warning" : "btn-outline-warning")">Chờ xác nhận (@ViewBag.SoChoXacNhan)</a>
+    <a asp-action="Index" asp-route-trangThai="Đang mượn" class="btn btn-sm @(ViewBag.TrangThai == "Đang mượn" ? "btn-primary" : "btn-outline-primary")">Đang mượn (@ViewBag.SoDangMuon)</a>
+    <a asp-action="Index" asp-route-trangThai="Đã trả" class="btn btn-sm @(ViewBag.TrangThai == "Đã trả" ? "btn-success" : "btn-outline-success")">Đã trả (@ViewBag.SoDaTra)</a>
+    <a asp-action="Index" asp-route-trangThai="Đã hủy" class="btn btn-sm @(ViewBag.TrangThai == "Đã hủy" ? "btn-secondary" : "btn-outline-secondary")">Đã hủy (@ViewBag.SoDaHuy)</a>
+</div>
+
+<table class="table table-bordered table-striped">
     <thead>
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.MaDocGia)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.NgayMuon)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.HanTra)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.TrangThai)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DocGia)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ChiTietPhieuMuons)
-            </th>
-            <th></th>
+            <th>Mã phiếu</th>
+            <th>Độc giả</th>
+            <th>@Html.DisplayNameFor(model => model.NgayMuon)</th>
+            <th>@Html.DisplayNameFor(model => model.HanTra)</th>
+            <th>Sách mượn (Mục 7.3)</th>
+            <th>@Html.DisplayNameFor(model => model.TrangThai)</th>
+            <th>Hành động</th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
+@if (!Model.Any())
+{
         <tr>
+            <td colspan="7" class="text-center text-muted">Không có phiếu mượn nào trong mục này.</td>
+        </tr>
+}
+@foreach (var item in Model) {
+    var quaHan = item.TrangThai == "Đang mượn" && DateTime.Today > item.HanTra.Date;
+        <tr>
+            <td>#@item.MaPhieuMuon</td>
+            <td>@(item.DocGia?.HoTen ?? ("Độc giả #" + item.MaDocGia))</td>
+            <td>@item.NgayMuon.ToString("dd/MM/yyyy")</td>
             <td>
-                @Html.DisplayFor(model => item.MaDocGia)
+                @item.HanTra.ToString("dd/MM/yyyy")
+                @if (quaHan)
+                {
+                    <span class="badge bg-danger ms-1">Quá hạn</span>
+                }
             </td>
             <td>
-                @Html.DisplayFor(model => item.NgayMuon)
+                @string.Join(", ", item.ChiTietPhieuMuons.Select(ct => (ct.Sach?.TenSach ?? ("#" + ct.MaSach)) + " (" + ct.SoLuongMuon + " quyển)"))
             </td>
+            <td>@Html.DisplayFor(modelItem => item.TrangThai)</td>
             <td>
-                @Html.DisplayFor(model => item.HanTra)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.TrangThai)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.DocGia)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.ChiTietPhieuMuons)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.MaPhieuMuon">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.MaPhieuMuon">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.MaPhieuMuon">Delete</a>
+                <a asp-action="Details" asp-route-id="@item.MaPhieuMuon" class="btn btn-sm btn-info">Chi tiết</a>
             </td>
         </tr>
 }

@@ -2,58 +2,89 @@
 
 @{
     ViewData["Title"] = "Details";
+    var quaHan = Model.TrangThai == "Đang mượn" && DateTime.Today > Model.HanTra.Date;
 }
 
 <h1>Details</h1>
 
 <div>
-    <h4>PhieuMuon</h4>
+    <h4>Phiếu mượn #@Model.MaPhieuMuon</h4>
     <hr />
     <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.MaDocGia)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.MaDocGia)
+        <dt class="col-sm-2">Mã phiếu</dt>
+        <dd class="col-sm-10">#@Model.MaPhieuMuon</dd>
+
+        <dt class="col-sm-2">Độc giả</dt>
+        <dd class="col-sm-10">@(Model.DocGia?.HoTen ?? ("Độc giả #" + Model.MaDocGia))</dd>
+
+        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.NgayMuon)</dt>
+        <dd class="col-sm-10">@Model.NgayMuon.ToString("dd/MM/yyyy")</dd>
+
+        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.HanTra)</dt>
+        <dd class="col-sm-10">
+            @Model.HanTra.ToString("dd/MM/yyyy")
+            @if (quaHan)
+            {
+                <span class="badge bg-danger ms-1">Quá hạn</span>
+            }
         </dd>
+
+        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.TrangThai)</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(model => model.TrangThai)</dd>
     </dl>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.NgayMuon)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.NgayMuon)
-        </dd>
-    </dl>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.HanTra)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.HanTra)
-        </dd>
-    </dl>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TrangThai)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TrangThai)
-        </dd>
-    </dl>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.DocGia)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.DocGia)
-        </dd>
-    </dl>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ChiTietPhieuMuons)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ChiTietPhieuMuons)
-        </dd>
-    </dl>
+
+    <!-- Chuyển trạng thái để test (Mục 7.2) -->
+    <form asp-action="CapNhatTrangThai" asp-route-id="@Model.MaPhieuMuon" method="post" class="row g-2 align-items-center mb-3">
+        @Html.AntiForgeryToken()
+        <div class="col-auto">
+            <label class="fw-bold">Chuyển trạng thái:</label>
+        </div>
+        <div class="col-auto">
+            <select name="trangThai" class="form-select form-select-sm">
+                <!option value="Chờ xác nhận" @(Model.TrangThai == "Chờ xác nhận" ? "selected" : "")>Chờ xác nhận</!option>
+                <!option value="Đang mượn" @(Model.TrangThai == "Đang mượn" ? "selected" : "")>Đang mượn</!option>
+                <!option value="Đã trả" @(Model.TrangThai == "Đã trả" ? "selected" : "")>Đã trả</!option>
+                <!option value="Đã hủy" @(Model.TrangThai == "Đã hủy" ? "selected" : "")>Đã hủy</!option>
+            </select>
+        </div>
+        <div class="col-auto">
+            <input type="submit" value="Lưu" class="btn btn-sm btn-primary" />
+        </div>
+    </form>
 </div>
+
+<hr />
+<h4>Chi tiết các sách được mượn (Mục 7.3)</h4>
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Tên sách</th>
+            <th>Thể loại</th>
+            <th>Số lượng mượn</th>
+            <th>Ngày trả thực tế</th>
+            <th>Tình trạng trả</th>
+        </tr>
+    </thead>
+    <tbody>
+@if (!Model.ChiTietPhieuMuons.Any())
+{
+        <tr>
+            <td colspan="5" class="text-center text-muted">Chưa có chi tiết sách cho phiếu này.</td>
+        </tr>
+}
+@foreach (var ct in Model.ChiTietPhieuMuons)
+{
+        <tr>
+            <td>@(ct.Sach?.TenSach ?? ("Sách #" + ct.MaSach))</td>
+            <td>@(ct.Sach?.TheLoai?.TenTheLoai ?? "-")</td>
+            <td>@ct.SoLuongMuon</td>
+            <td>@(ct.NgayTra?.ToString("dd/MM/yyyy") ?? "-")</td>
+            <td>@(ct.TinhTrangTra ?? "-")</td>
+        </tr>
+}
+    </tbody>
+</table>
+
 <div>
-    <a asp-action="Edit" asp-route-id="@Model?.MaPhieuMuon">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
 </div>
