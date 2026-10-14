@@ -1,3 +1,6 @@
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -13,24 +16,22 @@ public class SachController : Controller
         _context = context;
     }
 
-    // GET: SACHS
     public async Task<IActionResult> Index()
     {
         var sachs = _context.Set<Sach>().Include(s => s.TheLoai);
         return View(await sachs.ToListAsync());
     }
 
-    // GET: SACHS/Details/5
-    public async Task<IActionResult> Details(int? masach)
+    public async Task<IActionResult> Details(int? id)
     {
-        if (masach == null)
+        if (id == null)
         {
             return NotFound();
         }
 
         var sach = await _context.Set<Sach>()
             .Include(s => s.TheLoai)
-            .FirstOrDefaultAsync(m => m.MaSach == masach);
+            .FirstOrDefaultAsync(m => m.MaSach == id);
 
         if (sach == null)
         {
@@ -40,18 +41,33 @@ public class SachController : Controller
         return View(sach);
     }
 
-    // GET: SACHS/Create
     public IActionResult Create()
     {
         ViewData["MaTheLoai"] = new SelectList(_context.TheLoais, "MaTheLoai", "TenTheLoai");
         return View();
     }
 
-    // POST: SACHS/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create([Bind("MaSach,TenSach,MaTheLoai,TacGia,NhaXuatBan,NamXuatBan,SoLuong,SoLuongCon,GiaSach,MoTa,TrangThai")] Sach sach)
     {
+        if (sach.SoLuongCon > sach.SoLuong)
+        {
+            ModelState.AddModelError("SoLuongCon", "Số lượng còn không được vượt quá số lượng tổng.");
+        }
+        if (sach.GiaSach <= 0)
+        {
+            ModelState.AddModelError("GiaSach", "Giá sách phải lớn hơn 0.");
+        }
+        if (sach.NamXuatBan > DateTime.Now.Year)
+        {
+            ModelState.AddModelError("NamXuatBan", "Năm xuất bản không được lớn hơn năm hiện tại.");
+        }
+        if (sach.NamXuatBan < 1000)
+        {
+            ModelState.AddModelError("NamXuatBan", "Năm xuất bản không hợp lệ.");
+        }
+
         if (ModelState.IsValid)
         {
             _context.Set<Sach>().Add(sach);
@@ -62,15 +78,14 @@ public class SachController : Controller
         return View(sach);
     }
 
-    // GET: SACHS/Edit/5
-    public async Task<IActionResult> Edit(int? masach)
+    public async Task<IActionResult> Edit(int? id)
     {
-        if (masach == null)
+        if (id == null)
         {
             return NotFound();
         }
 
-        var sach = await _context.Set<Sach>().FindAsync(masach);
+        var sach = await _context.Set<Sach>().FindAsync(id);
         if (sach == null)
         {
             return NotFound();
@@ -79,14 +94,30 @@ public class SachController : Controller
         return View(sach);
     }
 
-    // POST: SACHS/Edit/5
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int masach, [Bind("MaSach,TenSach,MaTheLoai,TacGia,NhaXuatBan,NamXuatBan,SoLuong,SoLuongCon,GiaSach,MoTa,TrangThai")] Sach sach)
+    public async Task<IActionResult> Edit(int id, [Bind("MaSach,TenSach,MaTheLoai,TacGia,NhaXuatBan,NamXuatBan,SoLuong,SoLuongCon,GiaSach,MoTa,TrangThai")] Sach sach)
     {
-        if (masach != sach.MaSach)
+        if (id != sach.MaSach)
         {
             return NotFound();
+        }
+
+        if (sach.SoLuongCon > sach.SoLuong)
+        {
+            ModelState.AddModelError("SoLuongCon", "Số lượng còn không được vượt quá số lượng tổng.");
+        }
+        if (sach.GiaSach <= 0)
+        {
+            ModelState.AddModelError("GiaSach", "Giá sách phải lớn hơn 0.");
+        }
+        if (sach.NamXuatBan > DateTime.Now.Year)
+        {
+            ModelState.AddModelError("NamXuatBan", "Năm xuất bản không được lớn hơn năm hiện tại.");
+        }
+        if (sach.NamXuatBan < 1000)
+        {
+            ModelState.AddModelError("NamXuatBan", "Năm xuất bản không hợp lệ.");
         }
 
         if (ModelState.IsValid)
@@ -113,17 +144,16 @@ public class SachController : Controller
         return View(sach);
     }
 
-    // GET: SACHS/Delete/5
-    public async Task<IActionResult> Delete(int? masach)
+    public async Task<IActionResult> Delete(int? id)
     {
-        if (masach == null)
+        if (id == null)
         {
             return NotFound();
         }
 
         var sach = await _context.Set<Sach>()
             .Include(s => s.TheLoai)
-            .FirstOrDefaultAsync(m => m.MaSach == masach);
+            .FirstOrDefaultAsync(m => m.MaSach == id);
 
         if (sach == null)
         {
@@ -133,12 +163,11 @@ public class SachController : Controller
         return View(sach);
     }
 
-    // POST: SACHS/Delete/5
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> DeleteConfirmed(int masach)
+    public async Task<IActionResult> DeleteConfirmed(int id)
     {
-        var sach = await _context.Set<Sach>().FindAsync(masach);
+        var sach = await _context.Set<Sach>().FindAsync(id);
         if (sach != null)
         {
             _context.Set<Sach>().Remove(sach);
