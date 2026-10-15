@@ -1,0 +1,200 @@
+﻿@{
+    ViewData["Title"] = "Lập phiếu mượn";
+    var danhSachSach = ViewBag.Sach as List<QuanLyThuVien_UNETI04_TI17A1HN.Models.Sach>;
+}
+
+<div class="container py-4">
+
+    <div class="mb-4">
+        <h2 class="fw-bold">LẬP PHIẾU MƯỢN SÁCH</h2>
+        <p class="text-muted">
+            Chọn độc giả, sách và số lượng cần mượn.
+        </p>
+    </div>
+
+    @if (TempData["Loi"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["Loi"]
+        </div>
+    }
+
+    <div class="card shadow-sm border-0">
+
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Thông tin phiếu mượn</h5>
+        </div>
+
+        <div class="card-body">
+
+            <form asp-controller="MuonTra"
+                  asp-action="Create"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+
+                <!-- ĐỘC GIẢ -->
+                <div class="mb-3">
+
+                    <label class="form-label fw-semibold">
+                        Độc giả
+                    </label>
+
+                    <select name="MaDocGia"
+                            class="form-select"
+                            required>
+
+                        <option value="">
+                            -- Chọn độc giả --
+                        </option>
+
+                        @foreach (var docGia in (SelectList)ViewBag.DocGias)
+                        {
+                            <option value="@docGia.Value">
+                                @docGia.Text
+                            </option>
+                        }
+
+                    </select>
+
+                </div>
+
+
+                <!-- SÁCH -->
+                <div class="mb-3">
+
+                    <label class="form-label fw-semibold">
+                        Sách
+                    </label>
+
+                    <select name="MaSach"
+                            id="MaSach"
+                            class="form-select"
+                            required
+                            onchange="capNhatSoLuong()">
+
+                        <option value="">
+                            -- Chọn sách --
+                        </option>
+
+                        @if (danhSachSach != null)
+                        {
+                            foreach (var sach in danhSachSach)
+                            {
+                                <option value="@sach.MaSach"
+                                        data-soluong="@sach.SoLuongCon">
+
+                                    @sach.TenSach
+                                    - Còn @sach.SoLuongCon cuốn
+
+                                </option>
+                            }
+                        }
+
+                    </select>
+
+                </div>
+
+
+                <!-- SỐ LƯỢNG -->
+                <div class="mb-3">
+
+                    <label class="form-label fw-semibold">
+                        Số lượng mượn
+                    </label>
+
+                    <input type="number"
+                           name="SoLuong"
+                           id="SoLuong"
+                           class="form-control"
+                           value="1"
+                           min="1"
+                           required />
+
+                    <small id="thongBaoSoLuong"
+                           class="text-muted">
+                        Vui lòng chọn sách.
+                    </small>
+
+                </div>
+
+
+                <!-- THỜI HẠN -->
+                <div class="alert alert-info">
+
+                    <strong>Thời hạn mượn:</strong>
+
+                    14 ngày kể từ ngày lập phiếu.
+
+                </div>
+
+
+                <!-- NÚT -->
+                <div class="d-flex gap-2">
+
+                    <button type="submit"
+                            class="btn btn-primary">
+                        Lập phiếu mượn
+                    </button>
+
+                    <a asp-controller="MuonTra"
+                       asp-action="Index"
+                       class="btn btn-secondary">
+                        Quay lại
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    function capNhatSoLuong() {
+
+        var select = document.getElementById("MaSach");
+
+        var option =
+            select.options[select.selectedIndex];
+
+        var soLuong =
+            option.getAttribute("data-soluong");
+
+        var input =
+            document.getElementById("SoLuong");
+
+        var thongBao =
+            document.getElementById("thongBaoSoLuong");
+
+        if (!soLuong) {
+
+            input.max = "";
+            input.value = 1;
+
+            thongBao.innerText =
+                "Vui lòng chọn sách.";
+
+            return;
+        }
+
+        input.max = soLuong;
+
+        if (parseInt(input.value) > parseInt(soLuong)) {
+
+            input.value = soLuong;
+        }
+
+        thongBao.innerText =
+            "Sách hiện còn " +
+            soLuong +
+            " cuốn.";
+
+    }
+
+</script>

@@ -1,5 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace QuanLyThuVien_UNETI04_TI17A1HN.Models
 {
@@ -8,18 +10,26 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Models
         [Key]
         public int MaPhieuMuon { get; set; }
 
+        [Required]
         public int MaDocGia { get; set; }
 
-        public DateTime NgayMuon { get; set; }
+        [Required]
+        public DateTime NgayMuon { get; set; } = DateTime.Today;
 
-        public DateTime HanTra { get; set; }
+        [Required]
+        public DateTime HanTra { get; set; } = DateTime.Today.AddDays(14);
 
-        public string TrangThai { get; set; } = "Chờ xác nhận";
+        public DateTime? NgayTra { get; set; }
 
-        [ForeignKey(nameof(MaDocGia))]
-        public virtual DocGia? DocGia { get; set; }
+        [StringLength(30)]
+        public string TrangThai { get; set; } = "Đang mượn";
 
-        public virtual ICollection<ChiTietPhieuMuon> ChiTietPhieuMuons { get; set; }
-            = new List<ChiTietPhieuMuon>();
+        public DocGia? DocGia { get; set; }
+
+        public ICollection<ChiTietPhieuMuon> ChiTietPhieuMuons
+        {
+            get;
+            set;
+        } = new List<ChiTietPhieuMuon>();
     }
 }

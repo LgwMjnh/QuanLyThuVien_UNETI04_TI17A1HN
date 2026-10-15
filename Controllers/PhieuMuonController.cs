@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace QuanLyThuVien_UNETI04_T11TA1HN.Controllers
+namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
 {
     public class PhieuMuonController : Controller
     {
