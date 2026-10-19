@@ -68,6 +68,8 @@ public class SachController : Controller
             ModelState.AddModelError("NamXuatBan", "Năm xuất bản không hợp lệ.");
         }
 
+        ModelState.Remove("TheLoai");
+
         if (ModelState.IsValid)
         {
             _context.Set<Sach>().Add(sach);
@@ -119,6 +121,8 @@ public class SachController : Controller
         {
             ModelState.AddModelError("NamXuatBan", "Năm xuất bản không hợp lệ.");
         }
+
+        ModelState.Remove("TheLoai");
 
         if (ModelState.IsValid)
         {
