@@ -1,0 +1,311 @@
+﻿
+@model QuanLyThuVien_UNETI04_TI17A1HN.Models.ThongKeViewModel
+
+@{
+    ViewData["Title"] = "Thống kê chi tiết";
+}
+
+<div class="container-fluid py-4">
+    <div class="mb-4">
+        <h2 class="fw-bold">THỐNG KÊ THƯ VIỆN</h2>
+        <p class="text-muted">
+            Tổng hợp tình hình sách, độc giả và hoạt động mượn trả.
+        </p>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-4 col-lg-2">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted">Tổng phiếu mượn</div>
+                    <h3 class="fw-bold">@Model.TongPhieuMuon</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 col-lg-2">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted">Đang mượn</div>
+                    <h3 class="fw-bold">@Model.DangMuon</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 col-lg-2">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted">Đã trả</div>
+                    <h3 class="fw-bold">@Model.DaTra</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 col-lg-2">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted">Quá hạn</div>
+                    <h3 class="fw-bold">@Model.QuaHan</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 col-lg-2">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted">Tổng độc giả</div>
+                    <h3 class="fw-bold">@Model.TongDocGia</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 col-lg-2">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted">Đầu sách</div>
+                    <h3 class="fw-bold">@Model.TongSach</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header fw-bold">
+            1. Số đầu sách theo thể loại
+        </div>
+        <div class="card-body table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>STT</th>
+                        <th>Thể loại</th>
+                        <th>Số đầu sách</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.SachTheoTheLoai.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="3" class="text-center">
+                                Chưa có dữ liệu thể loại.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        var stt = 0;
+                        foreach (var item in Model.SachTheoTheLoai)
+                        {
+                            <tr>
+                                <td>@(++stt)</td>
+                                <td>@item.TenTheLoai</td>
+                                <td>@item.SoDauSach</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header fw-bold">
+            2. Lượt mượn theo sách
+        </div>
+        <div class="card-body table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>STT</th>
+                        <th>Tên sách</th>
+                        <th>Số lượt có trong chi tiết phiếu</th>
+                        <th>Tổng số cuốn được mượn</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.LuotMuonTheoSach.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="4" class="text-center">
+                                Chưa có dữ liệu mượn sách.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        var stt = 0;
+                        foreach (var item in Model.LuotMuonTheoSach)
+                        {
+                            <tr>
+                                <td>@(++stt)</td>
+                                <td>@item.TenSach</td>
+                                <td>@item.SoLuotMuon</td>
+                                <td>@item.TongSoLuong</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header fw-bold">
+            3. Số phiếu theo trạng thái
+        </div>
+        <div class="card-body table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>STT</th>
+                        <th>Trạng thái</th>
+                        <th>Số phiếu</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.PhieuTheoTrangThai.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="3" class="text-center">
+                                Chưa có dữ liệu phiếu mượn.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        var stt = 0;
+                        foreach (var item in Model.PhieuTheoTrangThai)
+                        {
+                            <tr>
+                                <td>@(++stt)</td>
+                                <td>@item.TrangThai</td>
+                                <td>@item.SoPhieu</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header fw-bold">
+            4. Top 10 sách được mượn nhiều nhất
+        </div>
+        <div class="card-body table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Thứ hạng</th>
+                        <th>Tên sách</th>
+                        <th>Số lượt có trong chi tiết phiếu</th>
+                        <th>Tổng số cuốn được mượn</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.SachMuonNhieuNhat.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="4" class="text-center">
+                                Chưa có dữ liệu mượn sách.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        var stt = 0;
+                        foreach (var item in Model.SachMuonNhieuNhat)
+                        {
+                            <tr>
+                                <td>@(++stt)</td>
+                                <td>@item.TenSach</td>
+                                <td>@item.SoLuotMuon</td>
+                                <td>@item.TongSoLuong</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header fw-bold">
+            5. Lượt mượn theo độc giả
+        </div>
+        <div class="card-body table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>STT</th>
+                        <th>Họ tên độc giả</th>
+                        <th>Số phiếu mượn</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.LuotMuonTheoDocGia.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="3" class="text-center">
+                                Chưa có dữ liệu mượn của độc giả.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        var stt = 0;
+                        foreach (var item in Model.LuotMuonTheoDocGia)
+                        {
+                            <tr>
+                                <td>@(++stt)</td>
+                                <td>@item.HoTen</td>
+                                <td>@item.SoLuotMuon</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header fw-bold">
+            6. Phiếu mượn theo tháng
+        </div>
+        <div class="card-body table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>STT</th>
+                        <th>Tháng</th>
+                        <th>Năm</th>
+                        <th>Số phiếu mượn</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.PhieuMuonTheoThang.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="4" class="text-center">
+                                Chưa có dữ liệu thống kê theo tháng.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        var stt = 0;
+                        foreach (var item in Model.PhieuMuonTheoThang)
+                        {
+                            <tr>
+                                <td>@(++stt)</td>
+                                <td>@item.Thang</td>
+                                <td>@item.Nam</td>
+                                <td>@item.SoPhieu</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

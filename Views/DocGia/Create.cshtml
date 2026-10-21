@@ -1,0 +1,123 @@
+﻿
+@model QuanLyThuVien_UNETI04_TI17A1HN.Models.DocGia
+
+@{
+    ViewData["Title"] = "Thêm độc giả";
+}
+
+<div class="container py-4">
+    <h2 class="text-primary fw-bold mb-4">THÊM ĐỘC GIẢ</h2>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <form asp-controller="DocGia" asp-action="Create" method="post">
+                @Html.AntiForgeryToken()
+
+                <div asp-validation-summary="ModelOnly"
+                     class="text-danger mb-3"></div>
+
+                <div class="mb-3">
+                    <label asp-for="MaTaiKhoan" class="form-label">
+                        Tài khoản
+                    </label>
+                    <select asp-for="MaTaiKhoan"
+                            asp-items="ViewBag.MaTaiKhoan"
+                            class="form-select">
+                        <option value="">-- Chọn tài khoản --</option>
+                    </select>
+                    <span asp-validation-for="MaTaiKhoan"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="HoTen" class="form-label">Họ và tên</label>
+                    <input asp-for="HoTen" class="form-control"
+                           placeholder="Nhập họ và tên" />
+                    <span asp-validation-for="HoTen"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="NgaySinh" class="form-label">Ngày sinh</label>
+                    <input asp-for="NgaySinh" type="date" class="form-control" />
+                    <span asp-validation-for="NgaySinh"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="GioiTinh" class="form-label">Giới tính</label>
+                    <select asp-for="GioiTinh" class="form-select">
+                        <option value="">-- Chọn giới tính --</option>
+                        <option value="Nam">Nam</option>
+                        <option value="Nữ">Nữ</option>
+                        <option value="Khác">Khác</option>
+                    </select>
+                    <span asp-validation-for="GioiTinh"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="SoDienThoai" class="form-label">
+                        Số điện thoại
+                    </label>
+                    <input asp-for="SoDienThoai" class="form-control"
+                           placeholder="Nhập số điện thoại" />
+                    <span asp-validation-for="SoDienThoai"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label">Email</label>
+                    <input asp-for="Email" type="email" class="form-control"
+                           placeholder="Nhập email" />
+                    <span asp-validation-for="Email"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="DiaChi" class="form-label">Địa chỉ</label>
+                    <textarea asp-for="DiaChi" class="form-control"
+                              rows="3" placeholder="Nhập địa chỉ"></textarea>
+                    <span asp-validation-for="DiaChi"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="NgayDangKy" class="form-label">
+                        Ngày đăng ký
+                    </label>
+                    <input asp-for="NgayDangKy" type="date"
+                           class="form-control" />
+                    <span asp-validation-for="NgayDangKy"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="TrangThai" class="form-label">
+                        Trạng thái
+                    </label>
+                    <select asp-for="TrangThai" class="form-select">
+                        <option value="Hoạt động">Hoạt động</option>
+                        <option value="Tạm khóa">Tạm khóa</option>
+                    </select>
+                    <span asp-validation-for="TrangThai"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        Lưu độc giả
+                    </button>
+                    <a asp-controller="DocGia" asp-action="Index"
+                       class="btn btn-secondary">
+                        Quay lại
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

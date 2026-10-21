@@ -66,7 +66,7 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Data
                     .OnDelete(DeleteBehavior.Restrict);
             });
 
-            // Anh xa cac bang hien co trong database
+      
             modelBuilder.Entity<TaiKhoan>()
                 .ToTable("TaiKhoans");
 

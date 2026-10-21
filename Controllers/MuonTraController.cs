@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using QuanLyThuVien_UNETI04_TI17A1HN.Data;
@@ -15,9 +16,6 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
             _context = context;
         }
 
-        // =========================
-        // DANH SÁCH PHIẾU MƯỢN
-        // =========================
         public async Task<IActionResult> Index(
             string? trangThai,
             string? tuKhoa,
@@ -31,33 +29,40 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
                     .ThenInclude(ct => ct.Sach)
                 .AsQueryable();
 
-            if (!string.IsNullOrEmpty(trangThai))
+            switch (trangThai)
             {
-                if (trangThai == "QuaHan")
-                {
+                case "ChoXacNhan":
+                    query = query.Where(p =>
+                        p.TrangThai == "Chờ xác nhận");
+                    break;
+
+                case "DangMuon":
                     query = query.Where(p =>
                         p.TrangThai == "Đang mượn" &&
-                        p.HanTra < DateTime.Today);
-                }
-                else if (trangThai == "DangMuon")
-                {
-                    query = query.Where(p =>
-                        p.TrangThai == "Đang mượn" &&
+                        p.NgayTra == null &&
                         p.HanTra >= DateTime.Today);
-                }
-                else if (trangThai == "DaTra")
-                {
+                    break;
+
+                case "QuaHan":
+                    query = query.Where(p =>
+                        p.TrangThai == "Đang mượn" &&
+                        p.NgayTra == null &&
+                        p.HanTra < DateTime.Today);
+                    break;
+
+                case "DaTra":
                     query = query.Where(p =>
                         p.TrangThai == "Đã trả" ||
                         p.NgayTra != null);
-                }
-                else
-                {
-                    query = query.Where(p => p.TrangThai == trangThai);
-                }
+                    break;
+
+                case "DaHuy":
+                    query = query.Where(p =>
+                        p.TrangThai == "Đã hủy");
+                    break;
             }
 
-            if (!string.IsNullOrEmpty(tuKhoa))
+            if (!string.IsNullOrWhiteSpace(tuKhoa))
             {
                 query = query.Where(p =>
                     p.DocGia != null &&
@@ -67,71 +72,58 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
             if (ngayTu.HasValue)
             {
                 query = query.Where(p =>
-                    p.NgayMuon >= ngayTu.Value);
+                    p.NgayMuon >= ngayTu.Value.Date);
             }
 
             if (ngayDen.HasValue)
             {
-                DateTime den = ngayDen.Value.Date.AddDays(1);
-
-                query = query.Where(p =>
-                    p.NgayMuon < den);
+                var den = ngayDen.Value.Date.AddDays(1);
+                query = query.Where(p => p.NgayMuon < den);
             }
 
             query = query.OrderByDescending(p => p.NgayMuon);
 
-            int soLuongTrenTrang = 10;
-
-            int tongSoPhieu = await query.CountAsync();
-
-            int tongSoTrang = (int)Math.Ceiling(
+            const int soLuongTrenTrang = 10;
+            var tongSoPhieu = await query.CountAsync();
+            var tongSoTrang = (int)Math.Ceiling(
                 tongSoPhieu / (double)soLuongTrenTrang);
 
-            if (page < 1)
-            {
-                page = 1;
-            }
-
+            if (page < 1) page = 1;
             if (tongSoTrang > 0 && page > tongSoTrang)
-            {
                 page = tongSoTrang;
-            }
 
             var danhSachPhieu = await query
                 .Skip((page - 1) * soLuongTrenTrang)
                 .Take(soLuongTrenTrang)
                 .ToListAsync();
 
-            // =========================
-            // THỐNG KÊ
-            // =========================
+            var homNay = DateTime.Today;
 
-            ViewBag.TongPhieu = await _context.PhieuMuons
-                .CountAsync();
+            ViewBag.TongPhieu =
+                await _context.PhieuMuons.CountAsync();
 
-            ViewBag.DangMuon = await _context.PhieuMuons
-                .CountAsync(p =>
-                    p.NgayTra == null &&
+            ViewBag.ChoXacNhan =
+                await _context.PhieuMuons.CountAsync(p =>
+                    p.TrangThai == "Chờ xác nhận");
+
+            ViewBag.DangMuon =
+                await _context.PhieuMuons.CountAsync(p =>
                     p.TrangThai == "Đang mượn" &&
-                    p.HanTra >= DateTime.Today);
-
-            ViewBag.QuaHan = await _context.PhieuMuons
-                .CountAsync(p =>
                     p.NgayTra == null &&
+                    p.HanTra >= homNay);
+
+            ViewBag.QuaHan =
+                await _context.PhieuMuons.CountAsync(p =>
                     p.TrangThai == "Đang mượn" &&
-                    p.HanTra < DateTime.Today);
+                    p.NgayTra == null &&
+                    p.HanTra < homNay);
 
-            ViewBag.DaTra = await _context.PhieuMuons
-                .CountAsync(p =>
-                    p.NgayTra != null ||
-                    p.TrangThai == "Đã trả");
-
-            // =========================
-            // GIỮ THÔNG TIN TÌM KIẾM
-            // =========================
+            ViewBag.DaTra =
+                await _context.PhieuMuons.CountAsync(p =>
+                    p.TrangThai == "Đã trả" ||
+                    p.NgayTra != null);
 
             ViewBag.TrangThaiLoc = trangThai;
-            ViewBag.TrangThai = trangThai;
             ViewBag.TuKhoa = tuKhoa;
             ViewBag.NgayTu = ngayTu;
             ViewBag.NgayDen = ngayDen;
@@ -141,10 +133,6 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
             return View(danhSachPhieu);
         }
 
-
-        // =========================
-        // GET: LẬP PHIẾU MƯỢN
-        // =========================
         [HttpGet]
         public async Task<IActionResult> Create()
         {
@@ -157,20 +145,14 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
                 .OrderBy(s => s.TenSach)
                 .ToListAsync();
 
-            ViewBag.DocGias = new SelectList(
-                docGias,
-                "MaDocGia",
-                "HoTen");
+            ViewBag.DocGias =
+                new SelectList(docGias, "MaDocGia", "HoTen");
 
             ViewBag.Sach = sach;
 
             return View();
         }
 
-
-        // =========================
-        // POST: LƯU PHIẾU MƯỢN
-        // =========================
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(
@@ -178,7 +160,6 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
             int MaSach,
             int SoLuong)
         {
-            // Kiểm tra độc giả
             var docGia = await _context.DocGias
                 .FirstOrDefaultAsync(d => d.MaDocGia == MaDocGia);
 
@@ -188,7 +169,6 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
                 return RedirectToAction(nameof(Create));
             }
 
-            // Kiểm tra sách
             var sach = await _context.Sachs
                 .FirstOrDefaultAsync(s => s.MaSach == MaSach);
 
@@ -198,150 +178,228 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
                 return RedirectToAction(nameof(Create));
             }
 
-            // Kiểm tra số lượng
             if (SoLuong <= 0)
             {
-                TempData["Loi"] = "Số lượng mượn phải lớn hơn 0.";
+                TempData["Loi"] =
+                    "Số lượng mượn phải lớn hơn 0.";
                 return RedirectToAction(nameof(Create));
             }
 
             if (SoLuong > sach.SoLuongCon)
             {
                 TempData["Loi"] =
-                    $"Sách \"{sach.TenSach}\" chỉ còn {sach.SoLuongCon} cuốn.";
+                    $"Sách \"{sach.TenSach}\" hiện chỉ còn " +
+                    $"{sach.SoLuongCon} cuốn.";
                 return RedirectToAction(nameof(Create));
             }
 
-            using var transaction =
+            var phieuMuon = new PhieuMuon
+            {
+                MaDocGia = MaDocGia,
+                NgayMuon = DateTime.Today,
+                HanTra = DateTime.Today.AddDays(14),
+                TrangThai = "Chờ xác nhận",
+                NgayTra = null
+            };
+
+            _context.PhieuMuons.Add(phieuMuon);
+            await _context.SaveChangesAsync();
+
+            var chiTiet = new ChiTietPhieuMuon
+            {
+                MaPhieuMuon = phieuMuon.MaPhieuMuon,
+                MaSach = MaSach,
+                SoLuong = SoLuong
+            };
+
+            _context.ChiTietPhieuMuons.Add(chiTiet);
+            await _context.SaveChangesAsync();
+
+            // Chưa trừ SoLuongCon ở bước gửi yêu cầu.
+            // Chỉ trừ khi Admin xác nhận mượn.
+
+            TempData["ThongBao"] =
+                $"Đã tạo yêu cầu mượn số {phieuMuon.MaPhieuMuon}. " +
+                "Phiếu đang chờ xác nhận.";
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> XacNhan(int id)
+        {
+            await using var transaction =
                 await _context.Database.BeginTransactionAsync();
 
             try
             {
-                // =========================
-                // TẠO PHIẾU MƯỢN
-                // =========================
+                var phieuMuon = await _context.PhieuMuons
+                    .Include(p => p.ChiTietPhieuMuons)
+                        .ThenInclude(ct => ct.Sach)
+                    .FirstOrDefaultAsync(p =>
+                        p.MaPhieuMuon == id);
 
-                var phieuMuon = new PhieuMuon
+                if (phieuMuon == null)
                 {
-                    MaDocGia = MaDocGia,
-                    NgayMuon = DateTime.Today,
-                    HanTra = DateTime.Today.AddDays(14),
-                    TrangThai = "Đang mượn",
-                    NgayTra = null
-                };
+                    TempData["Loi"] = "Không tìm thấy phiếu mượn.";
+                    return RedirectToAction(nameof(Index));
+                }
 
-                _context.PhieuMuons.Add(phieuMuon);
+                if (phieuMuon.TrangThai != "Chờ xác nhận")
+                {
+                    TempData["Loi"] =
+                        "Chỉ xác nhận được phiếu đang chờ xác nhận.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                if (!phieuMuon.ChiTietPhieuMuons.Any())
+                {
+                    TempData["Loi"] =
+                        "Phiếu mượn chưa có chi tiết sách.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                // Kiểm tra tồn kho trước khi trừ số lượng.
+                foreach (var ct in phieuMuon.ChiTietPhieuMuons)
+                {
+                    if (ct.Sach == null ||
+                        ct.SoLuong <= 0 ||
+                        ct.Sach.SoLuongCon < ct.SoLuong)
+                    {
+                        TempData["Loi"] =
+                            $"Sách trong phiếu {id} không còn đủ số lượng. " +
+                            "Vui lòng kiểm tra lại kho.";
+                        return RedirectToAction(nameof(Index));
+                    }
+                }
+
+                foreach (var ct in phieuMuon.ChiTietPhieuMuons)
+                {
+                    ct.Sach!.SoLuongCon -= ct.SoLuong;
+                }
+
+                phieuMuon.TrangThai = "Đang mượn";
+                phieuMuon.NgayTra = null;
 
                 await _context.SaveChangesAsync();
-
-                // =========================
-                // TẠO CHI TIẾT PHIẾU
-                // =========================
-
-                var chiTiet = new ChiTietPhieuMuon
-                {
-                    MaPhieuMuon = phieuMuon.MaPhieuMuon,
-                    MaSach = MaSach,
-                    SoLuong = SoLuong
-                };
-
-                _context.ChiTietPhieuMuons.Add(chiTiet);
-
-                // =========================
-                // TRỪ SỐ LƯỢNG SÁCH
-                // =========================
-
-                sach.SoLuongCon -= SoLuong;
-
-                await _context.SaveChangesAsync();
-
                 await transaction.CommitAsync();
 
                 TempData["ThongBao"] =
-                    $"Lập phiếu mượn thành công! Mã phiếu: {phieuMuon.MaPhieuMuon}";
+                    $"Đã xác nhận phiếu mượn số {id}.";
 
                 return RedirectToAction(nameof(Index));
             }
             catch
             {
                 await transaction.RollbackAsync();
-
                 TempData["Loi"] =
-                    "Có lỗi xảy ra khi lập phiếu mượn.";
-
-                return RedirectToAction(nameof(Create));
+                    "Có lỗi khi xác nhận phiếu mượn.";
+                return RedirectToAction(nameof(Index));
             }
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Huy(int id)
+        {
+            var phieuMuon = await _context.PhieuMuons
+                .FirstOrDefaultAsync(p => p.MaPhieuMuon == id);
 
-        // =========================
-        // POST: TRẢ SÁCH
-        // =========================
+            if (phieuMuon == null)
+            {
+                TempData["Loi"] = "Không tìm thấy phiếu mượn.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (phieuMuon.TrangThai != "Chờ xác nhận")
+            {
+                TempData["Loi"] =
+                    "Chỉ được hủy phiếu đang chờ xác nhận.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            phieuMuon.TrangThai = "Đã hủy";
+
+            await _context.SaveChangesAsync();
+
+            TempData["ThongBao"] =
+                $"Đã hủy yêu cầu mượn số {id}.";
+
+            return RedirectToAction(nameof(Index));
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Tra(int id)
         {
-            var phieuMuon = await _context.PhieuMuons
-                .Include(p => p.ChiTietPhieuMuons)
-                    .ThenInclude(ct => ct.Sach)
-                .FirstOrDefaultAsync(p =>
-                    p.MaPhieuMuon == id);
-
-            if (phieuMuon == null)
-            {
-                TempData["Loi"] =
-                    "Không tìm thấy phiếu mượn.";
-
-                return RedirectToAction(nameof(Index));
-            }
-
-            if (phieuMuon.NgayTra != null)
-            {
-                TempData["Loi"] =
-                    "Phiếu mượn này đã được trả trước đó.";
-
-                return RedirectToAction(nameof(Index));
-            }
-
-            using var transaction =
+            await using var transaction =
                 await _context.Database.BeginTransactionAsync();
 
             try
             {
-                foreach (var chiTiet in phieuMuon.ChiTietPhieuMuons)
+                var phieuMuon = await _context.PhieuMuons
+                    .Include(p => p.ChiTietPhieuMuons)
+                        .ThenInclude(ct => ct.Sach)
+                    .FirstOrDefaultAsync(p =>
+                        p.MaPhieuMuon == id);
+
+                if (phieuMuon == null)
                 {
-                    var sach = chiTiet.Sach;
+                    TempData["Loi"] = "Không tìm thấy phiếu mượn.";
+                    return RedirectToAction(nameof(Index));
+                }
 
-                    if (sach != null)
+                if (phieuMuon.TrangThai != "Đang mượn" ||
+                    phieuMuon.NgayTra != null)
+                {
+                    TempData["Loi"] =
+                        "Phiếu này không ở trạng thái có thể trả sách.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                foreach (var ct in phieuMuon.ChiTietPhieuMuons)
+                {
+                    if (ct.Sach == null)
                     {
-                        sach.SoLuongCon += chiTiet.SoLuong;
-
-                        if (sach.SoLuongCon > sach.SoLuong)
-                        {
-                            sach.SoLuongCon = sach.SoLuong;
-                        }
+                        TempData["Loi"] =
+                            "Không tìm thấy thông tin sách trong phiếu.";
+                        return RedirectToAction(nameof(Index));
                     }
+
+                    if (ct.Sach.SoLuongCon + ct.SoLuong >
+                        ct.Sach.SoLuong)
+                    {
+                        TempData["Loi"] =
+                            $"Số lượng sách \"{ct.Sach.TenSach}\" " +
+                            "không hợp lệ; đã hủy thao tác trả.";
+                        return RedirectToAction(nameof(Index));
+                    }
+                }
+
+                foreach (var ct in phieuMuon.ChiTietPhieuMuons)
+                {
+                    ct.Sach!.SoLuongCon += ct.SoLuong;
+                    ct.NgayTra = DateTime.Today;
+                    ct.TinhTrangTra = "Đã nhận trả";
                 }
 
                 phieuMuon.NgayTra = DateTime.Today;
                 phieuMuon.TrangThai = "Đã trả";
 
                 await _context.SaveChangesAsync();
-
                 await transaction.CommitAsync();
 
                 TempData["ThongBao"] =
-                    "Trả sách thành công!";
+                    $"Đã ghi nhận trả sách cho phiếu {id}.";
 
                 return RedirectToAction(nameof(Index));
             }
             catch
             {
                 await transaction.RollbackAsync();
-
                 TempData["Loi"] =
-                    "Có lỗi xảy ra khi trả sách.";
-
+                    "Có lỗi khi trả sách. Vui lòng thử lại.";
                 return RedirectToAction(nameof(Index));
             }
         }
