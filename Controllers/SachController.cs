@@ -41,16 +41,42 @@ public class SachController : Controller
         return View(sach);
     }
 
-    public IActionResult Create()
+    public async Task<IActionResult> Create()
     {
-        ViewData["MaTheLoai"] = new SelectList(_context.TheLoais, "MaTheLoai", "TenTheLoai");
+        ViewBag.DanhSachTheLoai = await _context.TheLoais
+            .Select(t => t.TenTheLoai)
+            .Distinct()
+            .OrderBy(t => t)
+            .ToListAsync();
         return View();
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("MaSach,TenSach,MaTheLoai,TacGia,NhaXuatBan,NamXuatBan,SoLuong,SoLuongCon,GiaSach,MoTa,TrangThai")] Sach sach)
+    public async Task<IActionResult> Create([Bind("MaSach,TenSach,TacGia,NhaXuatBan,NamXuatBan,SoLuong,SoLuongCon,GiaSach,MoTa,TrangThai")] Sach sach, string? tenTheLoai)
     {
+        if (string.IsNullOrWhiteSpace(tenTheLoai))
+        {
+            ModelState.AddModelError("TenTheLoai", "Vui lòng nhập hoặc chọn thể loại.");
+        }
+        else
+        {
+            var cleanTenTheLoai = tenTheLoai.Trim();
+            var theLoai = await _context.TheLoais
+                .FirstOrDefaultAsync(t => t.TenTheLoai.ToLower() == cleanTenTheLoai.ToLower());
+            if (theLoai == null)
+            {
+                theLoai = new TheLoai
+                {
+                    TenTheLoai = cleanTenTheLoai,
+                    TrangThai = true
+                };
+                _context.TheLoais.Add(theLoai);
+                await _context.SaveChangesAsync();
+            }
+            sach.MaTheLoai = theLoai.MaTheLoai;
+        }
+
         if (sach.SoLuongCon > sach.SoLuong)
         {
             ModelState.AddModelError("SoLuongCon", "Số lượng còn không được vượt quá số lượng tổng.");
@@ -69,6 +95,7 @@ public class SachController : Controller
         }
 
         ModelState.Remove("TheLoai");
+        ModelState.Remove("MaTheLoai");
 
         if (ModelState.IsValid)
         {
@@ -76,7 +103,13 @@ public class SachController : Controller
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
-        ViewData["MaTheLoai"] = new SelectList(_context.TheLoais, "MaTheLoai", "TenTheLoai", sach.MaTheLoai);
+
+        ViewBag.DanhSachTheLoai = await _context.TheLoais
+            .Select(t => t.TenTheLoai)
+            .Distinct()
+            .OrderBy(t => t)
+            .ToListAsync();
+        ViewBag.TenTheLoaiHienTai = tenTheLoai?.Trim();
         return View(sach);
     }
 
@@ -87,22 +120,52 @@ public class SachController : Controller
             return NotFound();
         }
 
-        var sach = await _context.Set<Sach>().FindAsync(id);
+        var sach = await _context.Set<Sach>()
+            .Include(s => s.TheLoai)
+            .FirstOrDefaultAsync(s => s.MaSach == id);
         if (sach == null)
         {
             return NotFound();
         }
-        ViewData["MaTheLoai"] = new SelectList(_context.TheLoais, "MaTheLoai", "TenTheLoai", sach.MaTheLoai);
+
+        ViewBag.DanhSachTheLoai = await _context.TheLoais
+            .Select(t => t.TenTheLoai)
+            .Distinct()
+            .OrderBy(t => t)
+            .ToListAsync();
+        ViewBag.TenTheLoaiHienTai = sach.TheLoai?.TenTheLoai ?? string.Empty;
         return View(sach);
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, [Bind("MaSach,TenSach,MaTheLoai,TacGia,NhaXuatBan,NamXuatBan,SoLuong,SoLuongCon,GiaSach,MoTa,TrangThai")] Sach sach)
+    public async Task<IActionResult> Edit(int id, [Bind("MaSach,TenSach,TacGia,NhaXuatBan,NamXuatBan,SoLuong,SoLuongCon,GiaSach,MoTa,TrangThai")] Sach sach, string? tenTheLoai)
     {
         if (id != sach.MaSach)
         {
             return NotFound();
+        }
+
+        if (string.IsNullOrWhiteSpace(tenTheLoai))
+        {
+            ModelState.AddModelError("TenTheLoai", "Vui lòng nhập hoặc chọn thể loại.");
+        }
+        else
+        {
+            var cleanTenTheLoai = tenTheLoai.Trim();
+            var theLoai = await _context.TheLoais
+                .FirstOrDefaultAsync(t => t.TenTheLoai.ToLower() == cleanTenTheLoai.ToLower());
+            if (theLoai == null)
+            {
+                theLoai = new TheLoai
+                {
+                    TenTheLoai = cleanTenTheLoai,
+                    TrangThai = true
+                };
+                _context.TheLoais.Add(theLoai);
+                await _context.SaveChangesAsync();
+            }
+            sach.MaTheLoai = theLoai.MaTheLoai;
         }
 
         if (sach.SoLuongCon > sach.SoLuong)
@@ -123,6 +186,7 @@ public class SachController : Controller
         }
 
         ModelState.Remove("TheLoai");
+        ModelState.Remove("MaTheLoai");
 
         if (ModelState.IsValid)
         {
@@ -144,7 +208,13 @@ public class SachController : Controller
             }
             return RedirectToAction(nameof(Index));
         }
-        ViewData["MaTheLoai"] = new SelectList(_context.TheLoais, "MaTheLoai", "TenTheLoai", sach.MaTheLoai);
+
+        ViewBag.DanhSachTheLoai = await _context.TheLoais
+            .Select(t => t.TenTheLoai)
+            .Distinct()
+            .OrderBy(t => t)
+            .ToListAsync();
+        ViewBag.TenTheLoaiHienTai = tenTheLoai?.Trim();
         return View(sach);
     }
 

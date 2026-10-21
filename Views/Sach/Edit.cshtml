@@ -28,9 +28,26 @@
                     </div>
 
                     <div class="col-md-6 mb-3">
-                        <label asp-for="MaTheLoai" class="form-label">Thể loại</label>
-                        <select asp-for="MaTheLoai" class="form-select" asp-items="ViewBag.MaTheLoai"></select>
-                        <span asp-validation-for="MaTheLoai" class="text-danger"></span>
+                        <label class="form-label">Thể loại <span class="text-danger">*</span></label>
+                        <input type="text" 
+                               name="tenTheLoai" 
+                               id="tenTheLoaiInput"
+                               list="theLoaiList" 
+                               class="form-control" 
+                               placeholder="Chọn từ gợi ý hoặc tự gõ thể loại mới..." 
+                               value="@ViewBag.TenTheLoaiHienTai" 
+                               autocomplete="off" 
+                               required />
+                        <datalist id="theLoaiList">
+                            @if (ViewBag.DanhSachTheLoai != null)
+                            {
+                                foreach (var cat in (List<string>)ViewBag.DanhSachTheLoai)
+                                {
+                                    <option value="@cat"></option>
+                                }
+                            }
+                        </datalist>
+                        <span class="text-danger">@Html.ValidationMessage("TenTheLoai")</span>
                     </div>
                 </div>
 
