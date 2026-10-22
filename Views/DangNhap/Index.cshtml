@@ -1,0 +1,90 @@
+﻿@model QuanLyThuVien_UNETI04_TI17A1HN.Models.DangNhap
+
+@{
+    ViewData["Title"] = "Đăng nhập";
+}
+
+<div class="login-page">
+    <div class="login-content">
+
+       
+        <div class="login-brand">
+
+            <!-- Anh logo -->
+            <div class="login-logo">
+                LOGO
+            </div>
+
+            <h1>Thư viện UNETI</h1>
+            <p>Đăng nhập để sử dụng thư viện</p>
+        </div>
+
+        <!-- Body khung chua cac thuoc tinh -->
+        <div class="login-card">
+
+            <h2>Đăng nhập</h2>
+
+            <p class="login-description">
+                Vui lòng nhập thông tin tài khoản của bạn
+            </p>
+
+            <form asp-controller="DangNhap"
+                  asp-action="Index"
+                  method="post">
+
+                <div asp-validation-summary="ModelOnly"
+                     class="text-danger login-validation"></div>
+
+                <!-- Ten dang nhap -->
+                <div class="mb-3">
+                    <label asp-for="TenDangNhap" class="form-label">
+                        Tên đăng nhập
+                    </label>
+
+                    <input asp-for="TenDangNhap"
+                           class="form-control"
+                           placeholder="Nhập tên đăng nhập"
+                           autocomplete="username" />
+
+                    <span asp-validation-for="TenDangNhap"
+                          class="text-danger"></span>
+                </div>
+
+                <!-- Mat khau -->
+                <div class="mb-4">
+                        <label asp-for="MatKhau" class="form-label">Mật khẩu</label>
+                        <div class="pass-box">
+                            <input asp-for="MatKhau" type="password" id="MatKhau" class="form-control" placeholder="Nhập mật khẩu" autocomplete="current-password" />
+                            <button type="button" class="pass-btn" onclick="togglePassword('MatKhau', this)">Hiện</button>
+                        </div>
+                        <span asp-validation-for="MatKhau" class="text-danger"></span>
+                </div>
+
+                <!-- Nut dang nhap -->
+                <button type="submit"
+                        class="btn btn-primary login-submit">
+                    Đăng nhập
+                </button>
+
+            </form>
+
+            <!-- Link dang ki -->
+            <div class="login-register">
+                <span>Bạn chưa có tài khoản?</span>
+                <a href="#" class="login-register-link">Đăng ký</a>
+            </div>
+
+        </div>
+
+        <p class="login-bottom-note">
+            Hệ thống quản lý thư viện UNETI
+        </p>
+
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

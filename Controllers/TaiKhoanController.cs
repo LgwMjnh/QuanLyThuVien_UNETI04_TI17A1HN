@@ -46,19 +46,39 @@ public class TaiKhoanController : Controller
     // POST: TAIKHOANS/Create
     // To protect from overposting attacks, enable the specific properties you want to bind to.
     // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+
+    ///---------------------- 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("MaTaiKhoan,TenDangNhap,MatKhau,HoTen,VaiTro,TrangThai")] TaiKhoan taikhoan)
+    public async Task<IActionResult> Create(
+        [Bind("MaTaiKhoan,TenDangNhap,MatKhau,HoTen,VaiTro")] // bo trang thai khoi bind de ep trang thai la true
+    TaiKhoan taikhoan)
     {
-        if (ModelState.IsValid)
+        // Kiem tra toi khoan da tung ton tai chua
+        bool tenDangNhapDaTonTai = await _context.TaiKhoans
+            .AnyAsync(tk => tk.TenDangNhap == taikhoan.TenDangNhap);
+
+        if (tenDangNhapDaTonTai)
+        {
+            ModelState.AddModelError(
+                nameof(taikhoan.TenDangNhap),
+                "Tên đăng nhập này đã tồn tại.");
+        }
+
+        taikhoan.TrangThai = true;
+
+        if (ModelState.IsValid) /// huy luu tai khoan
         {
             _context.Add(taikhoan);
             await _context.SaveChangesAsync();
+
             return RedirectToAction(nameof(Index));
         }
+
         return View(taikhoan);
     }
 
+    ///---------------------
     // GET: TAIKHOANS/Edit/5
     public async Task<IActionResult> Edit(int? mataikhoan)
     {
@@ -86,6 +106,19 @@ public class TaiKhoanController : Controller
         {
             return NotFound();
         }
+
+        // kiem tra luc edit ten dang nhap da ton tai hay chua
+        bool tenDangNhapDaTonTai = await _context.TaiKhoans
+            .AnyAsync(tk => tk.TenDangNhap == taikhoan.TenDangNhap
+                         && tk.MaTaiKhoan != taikhoan.MaTaiKhoan);
+
+        if (tenDangNhapDaTonTai)
+        {
+            ModelState.AddModelError(
+                nameof(taikhoan.TenDangNhap),
+                "Tên đăng nhập này đã tồn tại.");
+        }
+
 
         if (ModelState.IsValid)
         {

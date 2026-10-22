@@ -17,6 +17,9 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN
             // Add services to the container.
             builder.Services.AddControllersWithViews();
 
+            builder.Services.AddDistributedMemoryCache();
+            builder.Services.AddSession();
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -26,6 +29,7 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN
             }
 
             app.UseRouting();
+            app.UseSession();
 
             app.UseAuthorization();
 

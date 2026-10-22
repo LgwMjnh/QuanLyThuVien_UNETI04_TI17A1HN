@@ -1,53 +1,98 @@
 @model IEnumerable<QuanLyThuVien_UNETI04_TI17A1HN.Models.TheLoai>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Quản lý thể loại";
 }
 
-<h1>Index</h1>
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <h1 class="mb-1">Quản lý thể loại</h1>
+            <p class="text-muted mb-0">Danh sách thể loại sách trong hệ thống thư viện</p>
+        </div>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.TenTheLoai)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.MoTa)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.TrangThai)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Saches)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(model => item.TenTheLoai)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.MoTa)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.TrangThai)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.Saches)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.MaTheLoai">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.MaTheLoai">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.MaTheLoai">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+        <a asp-action="Create" class="btn btn-primary">
+            + Thêm thể loại
+        </a>
+    </div>
+
+    @if (TempData["Loi"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Loi"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
+        </div>
+    }
+
+    <div class="card">
+        <div class="card-header py-3">
+            Danh sách thể loại
+        </div>
+
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Mã thể loại</th>
+                            <th>Tên thể loại</th>
+                            <th>Mô tả</th>
+                            <th>Trạng thái</th>
+                            <th class="text-center">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.MaTheLoai</td>
+                                <td>@item.TenTheLoai</td>
+                                <td>
+                                    @(string.IsNullOrWhiteSpace(item.MoTa)
+                                        ? "Chưa có mô tả"
+                                        : item.MoTa)
+                                </td>
+                                <td>
+                                    @if (item.TrangThai)
+                                    {
+                                        <span class="badge bg-success">Hoạt động</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Ngừng hoạt động</span>
+                                    }
+                                </td>
+                                <td class="text-center text-nowrap">
+                                    <a asp-action="Details"
+                                       asp-route-matheloai="@item.MaTheLoai"
+                                       class="btn btn-sm btn-outline-primary">
+                                        Chi tiết
+                                    </a>
+
+                                    <a asp-action="Edit"
+                                       asp-route-matheloai="@item.MaTheLoai"
+                                       class="btn btn-sm btn-outline-primary">
+                                        Sửa
+                                    </a>
+
+                                    <a asp-action="Delete"
+                                       asp-route-matheloai="@item.MaTheLoai"
+                                       class="btn btn-sm btn-outline-danger">
+                                        Xóa
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @if (!Model.Any())
+            {
+                <p class="text-center text-muted py-4 mb-0">
+                    Chưa có thể loại nào trong hệ thống.
+                </p>
+            }
+        </div>
+    </div>
+</div>

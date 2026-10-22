@@ -1,54 +1,87 @@
 @model QuanLyThuVien_UNETI04_TI17A1HN.Models.TaiKhoan
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Sửa tài khoản";
 }
 
-<h1>Edit</h1>
+<div class="container py-4">
+    <div class="mx-auto" style="max-width: 600px;">
+        <div class="mb-4">
+            <h2 class="fw-bold">Sửa tài khoản</h2>
+            <p class="text-muted mb-0">Cập nhật thông tin tài khoản trong hệ thống.</p>
+        </div>
 
-<h4>TaiKhoan</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="MaTaiKhoan" />
-            <div class="form-group">
-                <label asp-for="TenDangNhap" class="control-label"></label>
-                <input asp-for="TenDangNhap" class="form-control" />
-                <span asp-validation-for="TenDangNhap" class="text-danger"></span>
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4">
+                <form asp-action="Edit" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <input type="hidden" asp-for="MaTaiKhoan" />
+
+                    <div class="mb-3">
+                        <label asp-for="TenDangNhap" class="form-label">Tên đăng nhập</label>
+                        <input asp-for="TenDangNhap" class="form-control" />
+                        <span asp-validation-for="TenDangNhap" class="text-danger"></span>
+                    </div>
+
+                    
+                    <div class="mb-3">
+                        <label asp-for="MatKhau" class="form-label">Mật khẩu</label>
+                        <div class="pass-box">
+                            <input asp-for="MatKhau" type="password" id="MatKhau" class="form-control" value="@Model.MatKhau" />
+                            <button type="button" class="pass-btn" onclick="togglePassword('MatKhau', this)">Hiện</button>
+                        </div>
+                        <span asp-validation-for="MatKhau" class="text-danger"></span>
+                    </div>
+
+
+
+                    <div class="mb-3">
+                        <label asp-for="HoTen" class="form-label">Họ tên</label>
+                        <input asp-for="HoTen" class="form-control" />
+                        <span asp-validation-for="HoTen" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="VaiTro" class="form-label">Vai trò</label>
+                        <select asp-for="VaiTro" class="form-select">
+                            <option value="Admin">Admin</option>
+                            <option value="DocGia">Độc giả</option>
+                        </select>
+                        <span asp-validation-for="VaiTro" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-check form-switch mb-4">
+                        <input asp-for="TrangThai" class="form-check-input" />
+                        <label asp-for="TrangThai" class="form-check-label">
+                            Tài khoản đang hoạt động
+                        </label>
+                        <span asp-validation-for="TrangThai" class="text-danger"></span>
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save me-1"></i> Lưu thay đổi
+                        </button>
+
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            Quay lại danh sách
+                        </a>
+
+                        <a asp-action="Delete"
+                           asp-route-id="@Model.MaTaiKhoan"
+                           class="btn btn-outline-danger ms-sm-auto">
+                            <i class="bi bi-trash me-1"></i> Xóa tài khoản
+                        </a>
+                    </div>
+                </form>
             </div>
-            <div class="form-group">
-                <label asp-for="MatKhau" class="control-label"></label>
-                <input asp-for="MatKhau" class="form-control" />
-                <span asp-validation-for="MatKhau" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="HoTen" class="control-label"></label>
-                <input asp-for="HoTen" class="form-control" />
-                <span asp-validation-for="HoTen" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="VaiTro" class="control-label"></label>
-                <input asp-for="VaiTro" class="form-control" />
-                <span asp-validation-for="VaiTro" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="TrangThai" class="control-label"></label>
-                <input asp-for="TrangThai" class="form-check-input" />
-                <span asp-validation-for="TrangThai" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
+        </div>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }
