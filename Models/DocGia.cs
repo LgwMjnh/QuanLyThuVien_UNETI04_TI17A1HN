@@ -1,3 +1,4 @@
+
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
@@ -22,11 +23,13 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Models
         [Display(Name = "Ngày sinh")]
         public DateTime? NgaySinh { get; set; }
 
-        [Display(Name = "Giới tính")]
         [StringLength(10)]
+        [Display(Name = "Giới tính")]
         public string? GioiTinh { get; set; }
 
-        [RegularExpression(@"^$|^(0[0-9]{9})$", ErrorMessage = "Số điện thoại phải gồm 10 chữ số và bắt đầu bằng số 0")]
+        [RegularExpression(
+            @"^$|^(0[0-9]{9})$",
+            ErrorMessage = "Số điện thoại phải gồm 10 chữ số và bắt đầu bằng số 0")]
         [Display(Name = "Số điện thoại")]
         public string? SoDienThoai { get; set; }
 
@@ -50,6 +53,7 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Models
         public virtual TaiKhoan? TaiKhoan { get; set; }
 
         [ValidateNever]
-        public virtual ICollection<PhieuMuon> PhieuMuons { get; set; } = new List<PhieuMuon>();
+        public virtual ICollection<PhieuMuon> PhieuMuons { get; set; }
+            = new List<PhieuMuon>();
     }
 }

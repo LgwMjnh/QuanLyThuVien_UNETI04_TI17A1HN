@@ -1,0 +1,50 @@
+﻿
+@model IEnumerable<QuanLyThuVien_UNETI04_TI17A1HN.Models.DocGia>
+
+@{
+    ViewData["Title"] = "Quản lý độc giả";
+}
+
+<div class="container py-4">
+    <h2 class="fw-bold mb-3">QUẢN LÝ ĐỘC GIẢ</h2>
+
+    @if (TempData["ThongBao"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["ThongBao"]
+        </div>
+    }
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="alert alert-info">
+            Hiện chưa có độc giả trong hệ thống.
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Mã độc giả</th>
+                        <th>Họ tên</th>
+                        <th>Email</th>
+                        <th>Số điện thoại</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var docGia in Model)
+                    {
+                        <tr>
+                            <td>@docGia.MaDocGia</td>
+                            <td>@docGia.HoTen</td>
+                            <td>@docGia.Email</td>
+                            <td>@docGia.SoDienThoai</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

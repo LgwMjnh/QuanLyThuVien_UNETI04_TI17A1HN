@@ -1,3 +1,4 @@
+
 @model QuanLyThuVien_UNETI04_TI17A1HN.Models.TaiKhoan
 
 @{
@@ -19,31 +20,23 @@
 
         <div class="card-body">
             <dl class="row mb-0">
-                <dt class="col-sm-3 mb-3">
-                    Tên đăng nhập
-                </dt>
+                <dt class="col-sm-3 mb-3">Tên đăng nhập</dt>
                 <dd class="col-sm-9 mb-3">
                     @Html.DisplayFor(model => model.TenDangNhap)
                 </dd>
 
-                <dt class="col-sm-3 mb-3">
-                    Họ và tên
-                </dt>
+                <dt class="col-sm-3 mb-3">Họ và tên</dt>
                 <dd class="col-sm-9 mb-3">
                     @Html.DisplayFor(model => model.HoTen)
                 </dd>
 
-                <dt class="col-sm-3 mb-3">
-                    Vai trò
-                </dt>
+                <dt class="col-sm-3 mb-3">Vai trò</dt>
                 <dd class="col-sm-9 mb-3">
                     @(Model.VaiTro == "DocGia" ? "Độc giả" :
-                     Model.VaiTro == "Admin" ? "Admin" : Model.VaiTro)
+                      Model.VaiTro == "Admin" ? "Admin" : Model.VaiTro)
                 </dd>
 
-                <dt class="col-sm-3 mb-3">
-                    Trạng thái
-                </dt>
+                <dt class="col-sm-3 mb-3">Trạng thái</dt>
                 <dd class="col-sm-9 mb-3">
                     @if (Model.TrangThai)
                     {

@@ -1,3 +1,6 @@
+
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
@@ -24,6 +27,7 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Models
         public DateTime HanTra { get; set; } = DateTime.Today.AddDays(14);
 
         [Display(Name = "Trạng thái")]
+        [StringLength(30)]
         public string TrangThai { get; set; } = "Chờ xác nhận";
 
         [ForeignKey(nameof(MaDocGia))]
@@ -34,4 +38,4 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Models
         public virtual ICollection<ChiTietPhieuMuon> ChiTietPhieuMuons { get; set; }
             = new List<ChiTietPhieuMuon>();
     }
-}
+}

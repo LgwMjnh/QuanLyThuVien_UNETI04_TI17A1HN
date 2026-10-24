@@ -1,3 +1,4 @@
+
 @model QuanLyThuVien_UNETI04_TI17A1HN.Models.TheLoai
 
 @{
@@ -7,7 +8,9 @@
 <div class="container py-4">
     <div class="mb-4">
         <h1 class="mb-1">Thêm thể loại</h1>
-        <p class="text-muted mb-0">Nhập thông tin thể loại sách mới vào hệ thống thư viện</p>
+        <p class="text-muted mb-0">
+            Nhập thông tin thể loại sách mới vào hệ thống thư viện.
+        </p>
     </div>
 
     <div class="card">
@@ -19,37 +22,51 @@
             <div class="row">
                 <div class="col-md-8 col-lg-6">
                     <form asp-action="Create" method="post">
-                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                        @Html.AntiForgeryToken()
+
+                        <div asp-validation-summary="ModelOnly"
+                             class="text-danger mb-3"></div>
 
                         <div class="mb-3">
-                            <label asp-for="TenTheLoai" class="form-label"></label>
-                            <input asp-for="TenTheLoai" class="form-control"
+                            <label asp-for="TenTheLoai"
+                                   class="form-label"></label>
+                            <input asp-for="TenTheLoai"
+                                   class="form-control"
                                    placeholder="Nhập tên thể loại" />
-                            <span asp-validation-for="TenTheLoai" class="text-danger"></span>
+                            <span asp-validation-for="TenTheLoai"
+                                  class="text-danger"></span>
                         </div>
 
                         <div class="mb-3">
-                            <label asp-for="MoTa" class="form-label"></label>
-                            <textarea asp-for="MoTa" class="form-control" rows="4"
+                            <label asp-for="MoTa"
+                                   class="form-label"></label>
+                            <textarea asp-for="MoTa"
+                                      class="form-control"
+                                      rows="4"
                                       placeholder="Nhập mô tả thể loại (nếu có)"></textarea>
-                            <span asp-validation-for="MoTa" class="text-danger"></span>
+                            <span asp-validation-for="MoTa"
+                                  class="text-danger"></span>
                         </div>
 
                         <div class="mb-4">
                             <div class="form-check">
-                                <input asp-for="TrangThai" class="form-check-input" />
-                                <label asp-for="TrangThai" class="form-check-label">
+                                <input asp-for="TrangThai"
+                                       class="form-check-input" />
+                                <label asp-for="TrangThai"
+                                       class="form-check-label">
                                     Hoạt động
                                 </label>
                             </div>
-                            <span asp-validation-for="TrangThai" class="text-danger"></span>
+                            <span asp-validation-for="TrangThai"
+                                  class="text-danger"></span>
                         </div>
 
                         <div class="d-flex flex-wrap gap-2">
                             <button type="submit" class="btn btn-primary">
                                 Thêm thể loại
                             </button>
-                            <a asp-action="Index" class="btn btn-outline-secondary">
+                            <a asp-action="Index"
+                               class="btn btn-outline-secondary">
                                 Quay lại
                             </a>
                         </div>

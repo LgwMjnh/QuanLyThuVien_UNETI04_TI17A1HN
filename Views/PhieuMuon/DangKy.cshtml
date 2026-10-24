@@ -1,44 +1,108 @@
-@model QuanLyThuVien_UNETI04_TI17A1HN.Models.DangKyMuonViewModel
+
+@model QuanLyThuVien_UNETI04_TI17A1HN.Models.PhieuMuon
 
 @{
     ViewData["Title"] = "Đăng ký mượn sách";
 }
 
 <h1>Đăng ký mượn sách</h1>
-<p class="text-muted">Yêu cầu sẽ ở trạng thái <strong>Chờ xác nhận</strong> cho đến khi quản trị viên duyệt (Module 4).</p>
+
+<p class="text-muted">
+    Yêu cầu mượn sẽ ở trạng thái <strong>Chờ xác nhận</strong>
+    cho đến khi quản trị viên duyệt.
+</p>
+
 <hr />
 
 <div class="row">
     <div class="col-md-6">
-        <form asp-action="DangKy" method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <form asp-action="Create" method="post">
+            @Html.AntiForgeryToken()
+
+            <div asp-validation-summary="ModelOnly"
+                 class="text-danger"></div>
 
             <div class="mb-3">
-                <label asp-for="MaSach" class="form-label"></label>
-                <select asp-for="MaSach" class="form-select" asp-items="ViewBag.MaSach">
-                    <option value="">-- Chọn sách đang phục vụ --</option>
+                <label asp-for="MaDocGia" class="form-label">
+                    Độc giả
+                </label>
+                <select asp-for="MaDocGia"
+                        class="form-select"
+                        asp-items="ViewBag.MaDocGia">
+                    <option value="">-- Chọn độc giả --</option>
                 </select>
-                <span asp-validation-for="MaSach" class="text-danger"></span>
+                <span asp-validation-for="MaDocGia"
+                      class="text-danger"></span>
             </div>
 
             <div class="mb-3">
-                <label asp-for="SoLuongMuon" class="form-label"></label>
-                <input asp-for="SoLuongMuon" type="number" min="1" class="form-control" />
-                <span asp-validation-for="SoLuongMuon" class="text-danger"></span>
+                <label class="form-label" for="maSach">
+                    Sách cần mượn
+                </label>
+                <select id="maSach"
+                        name="maSach"
+                        class="form-select"
+                        asp-items="ViewBag.MaSach">
+                    <option value="">-- Chọn sách --</option>
+                </select>
+                <span class="text-danger">
+                    @Html.ValidationMessage("maSach")
+                </span>
             </div>
 
             <div class="mb-3">
-                <label asp-for="HanTra" class="form-label"></label>
-                <input asp-for="HanTra" type="date" class="form-control" />
-                <span asp-validation-for="HanTra" class="text-danger"></span>
+                <label class="form-label" for="soLuongMuon">
+                    Số lượng mượn
+                </label>
+                <input id="soLuongMuon"
+                       name="soLuongMuon"
+                       type="number"
+                       min="1"
+                       value="@(ViewBag.SoLuongMuon ?? 1)"
+                       class="form-control" />
+                <span class="text-danger">
+                    @Html.ValidationMessage("soLuongMuon")
+                </span>
             </div>
 
-            <button type="submit" class="btn btn-primary">Gửi yêu cầu mượn</button>
-            <a asp-action="Index" class="btn btn-outline-secondary">Phiếu của tôi</a>
+            <div class="mb-3">
+                <label asp-for="NgayMuon" class="form-label">
+                    Ngày mượn
+                </label>
+                <input asp-for="NgayMuon"
+                       type="date"
+                       class="form-control"
+                       asp-format="{0:yyyy-MM-dd}" />
+                <span asp-validation-for="NgayMuon"
+                      class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="HanTra" class="form-label">
+                    Hạn trả
+                </label>
+                <input asp-for="HanTra"
+                       type="date"
+                       class="form-control"
+                       asp-format="{0:yyyy-MM-dd}" />
+                <span asp-validation-for="HanTra"
+                      class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                Gửi yêu cầu mượn
+            </button>
+
+            <a asp-action="Index"
+               class="btn btn-outline-secondary">
+                Danh sách phiếu mượn
+            </a>
         </form>
     </div>
 </div>
 
 @section Scripts {
-    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

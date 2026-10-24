@@ -15,8 +15,7 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
             _context = context;
         }
 
-        // GET: PhieuMuon Mục 7.2: Danh sách và lọc phiếu mượn theo trạng thái
-        // Vẫn chưa cần đăng nhập
+        // GET: PhieuMuon
         public async Task<IActionResult> Index(string? trangThai)
         {
             var query = _context.PhieuMuons
@@ -32,7 +31,6 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
 
             ViewBag.TrangThai = trangThai;
 
-            // Thống kê số lượng theo từng trạng thái để hiển thị badge/bộ lọc
             var tatCaPhieu = await _context.PhieuMuons.ToListAsync();
             ViewBag.TongSo = tatCaPhieu.Count;
             ViewBag.SoChoXacNhan = tatCaPhieu.Count(p => p.TrangThai == "Chờ xác nhận");
@@ -47,7 +45,7 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
             return View(danhSach);
         }
 
-        // GET: PhieuMuon/Details/5 Mục 7.2 & 7.3: Xem chi tiết phiếu mượn và danh sách sách trong phiếu
+        // GET: PhieuMuon/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -70,10 +68,11 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
             return View(phieu);
         }
 
-        // GET: PhieuMuon/Create Tạo nhanh phiếu mượn để kiểm thử Mục 7.2 & 7.3
+        // GET: PhieuMuon/Create
         public async Task<IActionResult> Create()
         {
             await NapDuLieuChonAsync();
+
             return View(new PhieuMuon
             {
                 NgayMuon = DateTime.Today,
@@ -82,59 +81,96 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
             });
         }
 
-        // POST: PhieuMuon/Create Mục 7.3: Một phiếu có thể có một hoặc nhiều sách
+        // POST: PhieuMuon/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(PhieuMuon phieuMuon, int maSach, int soLuongMuon)
+        public async Task<IActionResult> Create(
+            PhieuMuon phieuMuon,
+            int maSach,
+            int soLuongMuon)
         {
             if (phieuMuon.HanTra.Date <= phieuMuon.NgayMuon.Date)
             {
-                ModelState.AddModelError(nameof(PhieuMuon.HanTra), "Hạn trả phải sau ngày mượn.");
+                ModelState.AddModelError(
+                    nameof(PhieuMuon.HanTra),
+                    "Hạn trả phải sau ngày mượn.");
             }
 
             if (maSach <= 0)
             {
-                ModelState.AddModelError("maSach", "Vui lòng chọn sách cần mượn.");
+                ModelState.AddModelError(
+                    "maSach",
+                    "Vui lòng chọn sách cần mượn.");
             }
 
             if (soLuongMuon <= 0)
             {
-                ModelState.AddModelError("soLuongMuon", "Số lượng mượn phải lớn hơn 0.");
+                ModelState.AddModelError(
+                    "soLuongMuon",
+                    "Số lượng mượn phải lớn hơn 0.");
             }
 
             if (ModelState.IsValid)
             {
-                // Thêm chi tiết phiếu mượn Mục 7.3
-                phieuMuon.ChiTietPhieuMuons.Add(new ChiTietPhieuMuon
+                var sach = await _context.Sachs
+                    .FirstOrDefaultAsync(s => s.MaSach == maSach);
+
+                if (sach == null)
                 {
-                    MaSach = maSach,
-                    SoLuongMuon = soLuongMuon
-                });
+                    ModelState.AddModelError("maSach", "Sách không tồn tại.");
+                }
+                else if (soLuongMuon > sach.SoLuongCon)
+                {
+                    ModelState.AddModelError(
+                        "soLuongMuon",
+                        "Số lượng mượn vượt quá số lượng sách còn.");
+                }
+                else
+                {
+                    phieuMuon.TrangThai = "Chờ xác nhận";
 
-                _context.PhieuMuons.Add(phieuMuon);
-                await _context.SaveChangesAsync();
+                    phieuMuon.ChiTietPhieuMuons.Add(new ChiTietPhieuMuon
+                    {
+                        MaSach = maSach,
+                        SoLuongMuon = soLuongMuon
+                    });
 
-                TempData["Success"] = $"Tạo phiếu mượn #{phieuMuon.MaPhieuMuon} thành công!";
-                return RedirectToAction(nameof(Details), new { id = phieuMuon.MaPhieuMuon });
+                    _context.PhieuMuons.Add(phieuMuon);
+                    await _context.SaveChangesAsync();
+
+                    TempData["Success"] =
+                        $"Tạo phiếu mượn #{phieuMuon.MaPhieuMuon} thành công!";
+
+                    return RedirectToAction(
+                        nameof(Details),
+                        new { id = phieuMuon.MaPhieuMuon });
+                }
             }
 
             await NapDuLieuChonAsync(phieuMuon.MaDocGia, maSach);
             ViewBag.SoLuongMuon = soLuongMuon;
+
             return View(phieuMuon);
         }
 
-        // POST: PhieuMuon/CapNhatTrangThai/5 Tiện ích chuyển nhanh trạng thái để kiểm thử 4 trạng thái theo Mục 7.2
+        // POST: PhieuMuon/CapNhatTrangThai/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CapNhatTrangThai(int id, string trangThai)
         {
             var phieu = await _context.PhieuMuons.FindAsync(id);
+
             if (phieu == null)
             {
                 return NotFound();
             }
 
-            var hopLe = trangThai == "Chờ xác nhận" || trangThai == "Đang mượn" || trangThai == "Đã trả" || trangThai == "Đã hủy";
+            var hopLe =
+                trangThai == "Chờ xác nhận" ||
+                trangThai == "Đang mượn" ||
+                trangThai == "Đã trả" ||
+                trangThai == "Đã hủy";
+
             if (!hopLe)
             {
                 TempData["Error"] = "Trạng thái phiếu mượn không hợp lệ.";
@@ -144,11 +180,15 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
             phieu.TrangThai = trangThai;
             await _context.SaveChangesAsync();
 
-            TempData["Success"] = $"Đã cập nhật trạng thái phiếu mượn #{id} thành '{trangThai}'.";
+            TempData["Success"] =
+                $"Đã cập nhật trạng thái phiếu mượn #{id} thành '{trangThai}'.";
+
             return RedirectToAction(nameof(Details), new { id });
         }
 
-        private async Task NapDuLieuChonAsync(int? maDocGiaChon = null, int? maSachChon = null)
+        private async Task NapDuLieuChonAsync(
+            int? maDocGiaChon = null,
+            int? maSachChon = null)
         {
             var docGias = await _context.DocGias
                 .Where(d => d.TrangThai == "Hoạt động")
@@ -156,7 +196,8 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
                 .Select(d => new
                 {
                     d.MaDocGia,
-                    TenHienThi = d.HoTen + " (SĐT: " + (d.SoDienThoai ?? "Chưa có") + ")"
+                    TenHienThi = d.HoTen + " (SĐT: " +
+                        (d.SoDienThoai ?? "Chưa có") + ")"
                 })
                 .ToListAsync();
 
@@ -166,13 +207,16 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
                 .Select(s => new
                 {
                     s.MaSach,
-                    TenHienThi = s.TenSach + " (Còn: " + s.SoLuongCon + " quyển)"
+                    TenHienThi = s.TenSach + " (Còn: " +
+                        s.SoLuongCon + " quyển)"
                 })
                 .ToListAsync();
 
-            ViewBag.MaDocGia = new SelectList(docGias, "MaDocGia", "TenHienThi", maDocGiaChon);
-            ViewBag.MaSach = new SelectList(sachs, "MaSach", "TenHienThi", maSachChon);
+            ViewBag.MaDocGia = new SelectList(
+                docGias, "MaDocGia", "TenHienThi", maDocGiaChon);
+
+            ViewBag.MaSach = new SelectList(
+                sachs, "MaSach", "TenHienThi", maSachChon);
         }
     }
 }
-

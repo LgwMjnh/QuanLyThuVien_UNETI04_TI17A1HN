@@ -1,4 +1,6 @@
+
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using QuanLyThuVien_UNETI04_TI17A1HN.Data;
 using QuanLyThuVien_UNETI04_TI17A1HN.Models;
@@ -14,8 +16,7 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
             _context = context;
         }
 
-        // GET: DocGia Mục 7.1: Xem danh sách và tìm kiếm độc giả
-        // Vẫn chưa cần đăng nhập
+        // Danh sách và tìm kiếm độc giả
         public async Task<IActionResult> Index(string? keyword, string? trangThai)
         {
             var query = _context.DocGias
@@ -25,11 +26,13 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
             if (!string.IsNullOrWhiteSpace(keyword))
             {
                 keyword = keyword.Trim();
+
                 query = query.Where(d =>
                     d.HoTen.Contains(keyword) ||
                     (d.Email != null && d.Email.Contains(keyword)) ||
                     (d.SoDienThoai != null && d.SoDienThoai.Contains(keyword)) ||
-                    (d.TaiKhoan != null && d.TaiKhoan.TenDangNhap.Contains(keyword)));
+                    (d.TaiKhoan != null &&
+                     d.TaiKhoan.TenDangNhap.Contains(keyword)));
             }
 
             if (!string.IsNullOrWhiteSpace(trangThai))
@@ -47,13 +50,11 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
             return View(danhSach);
         }
 
-        // GET: DocGia/Details/5 Mục 7.1: Xem chi tiết độc giả & danh sách phiếu mượn của độc giả đó
+        // Xem chi tiết độc giả và lịch sử mượn
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
             var docGia = await _context.DocGias
                 .Include(d => d.TaiKhoan)
@@ -63,16 +64,17 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
                 .FirstOrDefaultAsync(d => d.MaDocGia == id);
 
             if (docGia == null)
-            {
                 return NotFound();
-            }
 
             return View(docGia);
         }
 
-        // GET: DocGia/Create Tạo mới độc giả để dễ dàng nạp dữ liệu kiểm thử
-        public IActionResult Create()
+        // Hiển thị form thêm độc giả
+        [HttpGet]
+        public async Task<IActionResult> Create()
         {
+            await NapDanhSachTaiKhoan();
+
             return View(new DocGia
             {
                 NgayDangKy = DateTime.Today,
@@ -80,135 +82,246 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
             });
         }
 
-        // POST: DocGia/Create
+        // Thêm độc giả; có thể liên kết tài khoản có sẵn
+        // hoặc tự tạo tài khoản nếu không chọn tài khoản.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(DocGia docGia, string? tenDangNhap, string? matKhau)
+        public async Task<IActionResult> Create(
+            [Bind("MaTaiKhoan,HoTen,NgaySinh,GioiTinh,SoDienThoai,Email,DiaChi,NgayDangKy,TrangThai")]
+            DocGia docGia,
+            string? tenDangNhap,
+            string? matKhau)
         {
-            if (docGia.NgaySinh.HasValue && docGia.NgaySinh.Value.Date > DateTime.Today)
+            if (docGia.NgaySinh.HasValue &&
+                docGia.NgaySinh.Value.Date > DateTime.Today)
             {
-                ModelState.AddModelError(nameof(DocGia.NgaySinh), "Ngày sinh không được lớn hơn ngày hiện tại.");
+                ModelState.AddModelError(
+                    nameof(docGia.NgaySinh),
+                    "Ngày sinh không được lớn hơn ngày hiện tại.");
             }
 
-            // Nếu người dùng nhập tên đăng nhập thì kiểm tra trùng
-            if (!string.IsNullOrWhiteSpace(tenDangNhap))
+            if (docGia.MaTaiKhoan > 0)
             {
-                var tonTaiTk = await _context.TaiKhoans.AnyAsync(t => t.TenDangNhap == tenDangNhap.Trim());
-                if (tonTaiTk)
+                bool taiKhoanTonTai = await _context.TaiKhoans
+                    .AnyAsync(t => t.MaTaiKhoan == docGia.MaTaiKhoan);
+
+                if (!taiKhoanTonTai)
                 {
-                    ModelState.AddModelError("tenDangNhap", "Tên đăng nhập này đã tồn tại, vui lòng chọn tên khác.");
+                    ModelState.AddModelError(
+                        nameof(docGia.MaTaiKhoan),
+                        "Tài khoản được chọn không tồn tại.");
                 }
+
+                bool taiKhoanDaSuDung = await _context.DocGias
+                    .AnyAsync(d => d.MaTaiKhoan == docGia.MaTaiKhoan);
+
+                if (taiKhoanDaSuDung)
+                {
+                    ModelState.AddModelError(
+                        nameof(docGia.MaTaiKhoan),
+                        "Tài khoản này đã được liên kết với độc giả khác.");
+                }
+            }
+            else if (!string.IsNullOrWhiteSpace(tenDangNhap))
+            {
+                tenDangNhap = tenDangNhap.Trim();
+
+                bool trungTen = await _context.TaiKhoans
+                    .AnyAsync(t => t.TenDangNhap == tenDangNhap);
+
+                if (trungTen)
+                {
+                    ModelState.AddModelError(
+                        nameof(tenDangNhap),
+                        "Tên đăng nhập này đã tồn tại.");
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(docGia.HoTen))
+            {
+                ModelState.AddModelError(
+                    nameof(docGia.HoTen),
+                    "Họ tên không được để trống.");
             }
 
             if (ModelState.IsValid)
             {
-                // Tự động tạo tài khoản đi kèm với độc giả nếu chưa có
-                var username = string.IsNullOrWhiteSpace(tenDangNhap)
-                    ? "docgia_" + DateTime.Now.Ticks.ToString()[^6..]
-                    : tenDangNhap.Trim();
-
-                var pass = string.IsNullOrWhiteSpace(matKhau) ? "123456" : matKhau;
-
-                var taiKhoan = new TaiKhoan
-                {
-                    TenDangNhap = username,
-                    MatKhau = pass,
-                    HoTen = docGia.HoTen.Trim(),
-                    VaiTro = "DocGia",
-                    TrangThai = (docGia.TrangThai == "Hoạt động")
-                };
-
-                _context.TaiKhoans.Add(taiKhoan);
-                await _context.SaveChangesAsync();
-
-                docGia.MaTaiKhoan = taiKhoan.MaTaiKhoan;
+                docGia.HoTen = docGia.HoTen.Trim();
                 docGia.NgayDangKy = DateTime.Today;
+
+                if (string.IsNullOrWhiteSpace(docGia.TrangThai))
+                    docGia.TrangThai = "Hoạt động";
+
+                // Nếu chưa chọn tài khoản thì tự tạo tài khoản mới.
+                if (docGia.MaTaiKhoan <= 0)
+                {
+                    string username = string.IsNullOrWhiteSpace(tenDangNhap)
+                        ? "docgia_" + Guid.NewGuid().ToString("N")[..10]
+                        : tenDangNhap.Trim();
+
+                    bool trungTen = await _context.TaiKhoans
+                        .AnyAsync(t => t.TenDangNhap == username);
+
+                    if (trungTen)
+                    {
+                        ModelState.AddModelError(
+                            nameof(tenDangNhap),
+                            "Tên đăng nhập này đã tồn tại.");
+
+                        ViewBag.TenDangNhap = tenDangNhap;
+                        await NapDanhSachTaiKhoan();
+                        return View(docGia);
+                    }
+
+                    var taiKhoan = new TaiKhoan
+                    {
+                        TenDangNhap = username,
+                        MatKhau = string.IsNullOrWhiteSpace(matKhau)
+                            ? "123456"
+                            : matKhau,
+                        HoTen = docGia.HoTen,
+                        VaiTro = "DocGia",
+                        TrangThai = docGia.TrangThai == "Hoạt động"
+                    };
+
+                    _context.TaiKhoans.Add(taiKhoan);
+                    await _context.SaveChangesAsync();
+
+                    docGia.MaTaiKhoan = taiKhoan.MaTaiKhoan;
+                }
 
                 _context.DocGias.Add(docGia);
                 await _context.SaveChangesAsync();
 
-                TempData["Success"] = $"Thêm độc giả '{docGia.HoTen}' thành công! (Tài khoản: {username})";
+                TempData["Success"] =
+                    $"Thêm độc giả '{docGia.HoTen}' thành công!";
+
+                TempData["ThongBao"] =
+                    $"Thêm độc giả '{docGia.HoTen}' thành công!";
+
                 return RedirectToAction(nameof(Index));
             }
 
             ViewBag.TenDangNhap = tenDangNhap;
+            await NapDanhSachTaiKhoan(docGia.MaTaiKhoan);
+
             return View(docGia);
         }
 
-        // GET: DocGia/Edit/5 Mục 7.1: Cập nhật thông tin cá nhân được phép
+        // Hiển thị form sửa độc giả
+        [HttpGet]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
             var docGia = await _context.DocGias
                 .Include(d => d.TaiKhoan)
                 .FirstOrDefaultAsync(d => d.MaDocGia == id);
 
             if (docGia == null)
-            {
                 return NotFound();
-            }
+
+            await NapDanhSachTaiKhoan(docGia.MaTaiKhoan);
 
             return View(docGia);
         }
 
-        // POST: DocGia/Edit/5
+        // Cập nhật thông tin độc giả
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("MaDocGia,HoTen,NgaySinh,GioiTinh,SoDienThoai,Email,DiaChi")] DocGia input)
+        public async Task<IActionResult> Edit(
+            int id,
+            [Bind("MaDocGia,MaTaiKhoan,HoTen,NgaySinh,GioiTinh,SoDienThoai,Email,DiaChi,NgayDangKy,TrangThai")]
+            DocGia input)
         {
             if (id != input.MaDocGia)
-            {
                 return NotFound();
+
+            if (input.NgaySinh.HasValue &&
+                input.NgaySinh.Value.Date > DateTime.Today)
+            {
+                ModelState.AddModelError(
+                    nameof(input.NgaySinh),
+                    "Ngày sinh không được lớn hơn ngày hiện tại.");
             }
 
-            if (input.NgaySinh.HasValue && input.NgaySinh.Value.Date > DateTime.Today)
-            {
-                ModelState.AddModelError(nameof(DocGia.NgaySinh), "Ngày sinh không được lớn hơn ngày hiện tại.");
-            }
+            bool taiKhoanDaSuDung = await _context.DocGias
+                .AnyAsync(d =>
+                    d.MaTaiKhoan == input.MaTaiKhoan &&
+                    d.MaDocGia != input.MaDocGia);
 
-            var docGia = await _context.DocGias
-                .Include(d => d.TaiKhoan)
-                .FirstOrDefaultAsync(d => d.MaDocGia == id);
-
-            if (docGia == null)
+            if (taiKhoanDaSuDung)
             {
-                return NotFound();
+                ModelState.AddModelError(
+                    nameof(input.MaTaiKhoan),
+                    "Tài khoản này đã được liên kết với độc giả khác.");
             }
 
             if (ModelState.IsValid)
             {
+                var docGia = await _context.DocGias
+                    .Include(d => d.TaiKhoan)
+                    .FirstOrDefaultAsync(d => d.MaDocGia == id);
+
+                if (docGia == null)
+                    return NotFound();
+
                 docGia.HoTen = input.HoTen.Trim();
                 docGia.NgaySinh = input.NgaySinh;
                 docGia.GioiTinh = input.GioiTinh;
-                docGia.SoDienThoai = string.IsNullOrWhiteSpace(input.SoDienThoai) ? null : input.SoDienThoai.Trim();
-                docGia.Email = string.IsNullOrWhiteSpace(input.Email) ? null : input.Email.Trim();
-                docGia.DiaChi = string.IsNullOrWhiteSpace(input.DiaChi) ? null : input.DiaChi.Trim();
+                docGia.SoDienThoai =
+                    string.IsNullOrWhiteSpace(input.SoDienThoai)
+                        ? null
+                        : input.SoDienThoai.Trim();
+                docGia.Email =
+                    string.IsNullOrWhiteSpace(input.Email)
+                        ? null
+                        : input.Email.Trim();
+                docGia.DiaChi =
+                    string.IsNullOrWhiteSpace(input.DiaChi)
+                        ? null
+                        : input.DiaChi.Trim();
 
-                // Đồng bộ tên vào bảng TaiKhoan
+                // Không cho phép sửa trạng thái hoặc ngày đăng ký
+                // thông qua dữ liệu gửi lên từ form.
                 if (docGia.TaiKhoan != null)
-                {
                     docGia.TaiKhoan.HoTen = docGia.HoTen;
-                }
 
                 await _context.SaveChangesAsync();
-                TempData["Success"] = "Cập nhật thông tin độc giả thành công!";
-                return RedirectToAction(nameof(Details), new { id = docGia.MaDocGia });
+
+                TempData["Success"] =
+                    "Cập nhật thông tin độc giả thành công!";
+
+                return RedirectToAction(
+                    nameof(Details),
+                    new { id = docGia.MaDocGia });
             }
 
-            return View(docGia);
+            var docGiaHienTai = await _context.DocGias
+                .Include(d => d.TaiKhoan)
+                .FirstOrDefaultAsync(d => d.MaDocGia == id);
+
+            if (docGiaHienTai == null)
+                return NotFound();
+
+            // Giữ lại dữ liệu người dùng vừa nhập khi form không hợp lệ.
+            input.NgayDangKy = docGiaHienTai.NgayDangKy;
+            input.TrangThai = docGiaHienTai.TrangThai;
+
+            await NapDanhSachTaiKhoan(input.MaTaiKhoan);
+
+            return View(input);
         }
 
-        // POST: DocGia/CapNhatTrangThai Mục 7.1: Cập nhật trạng thái Hoạt động / Khóa
+        // Cập nhật trạng thái độc giả và tài khoản liên kết
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CapNhatTrangThai(int id, string trangThai)
+        public async Task<IActionResult> CapNhatTrangThai(
+            int id,
+            string trangThai)
         {
-            var hopLe = trangThai == "Hoạt động" || trangThai == "Khóa";
-            if (!hopLe)
+            if (trangThai != "Hoạt động" && trangThai != "Khóa")
             {
                 TempData["Error"] = "Trạng thái không hợp lệ.";
                 return RedirectToAction(nameof(Index));
@@ -219,22 +332,47 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
                 .FirstOrDefaultAsync(d => d.MaDocGia == id);
 
             if (docGia == null)
-            {
                 return NotFound();
-            }
 
             docGia.TrangThai = trangThai;
 
-            // Đồng bộ khóa/mở tài khoản đăng nhập tương ứng
             if (docGia.TaiKhoan != null)
             {
-                docGia.TaiKhoan.TrangThai = (trangThai == "Hoạt động");
+                docGia.TaiKhoan.TrangThai = trangThai == "Hoạt động";
             }
 
             await _context.SaveChangesAsync();
-            TempData["Success"] = $"Đã cập nhật trạng thái độc giả thành '{trangThai}'.";
+
+            TempData["Success"] =
+                $"Đã cập nhật trạng thái độc giả thành '{trangThai}'.";
+
             return RedirectToAction(nameof(Details), new { id });
+        }
+
+        // Nạp danh sách tài khoản chưa liên kết với độc giả.
+        private async Task NapDanhSachTaiKhoan(
+            int? taiKhoanDaChon = null)
+        {
+            var taiKhoanDaSuDung = await _context.DocGias
+                .AsNoTracking()
+                .Where(d => d.MaTaiKhoan > 0)
+                .Select(d => d.MaTaiKhoan)
+                .ToListAsync();
+
+            var danhSachTaiKhoan = await _context.TaiKhoans
+                .AsNoTracking()
+                .Where(t =>
+                    !taiKhoanDaSuDung.Contains(t.MaTaiKhoan) ||
+                    (taiKhoanDaChon.HasValue &&
+                     t.MaTaiKhoan == taiKhoanDaChon.Value))
+                .OrderBy(t => t.MaTaiKhoan)
+                .ToListAsync();
+
+            ViewBag.MaTaiKhoan = new SelectList(
+                danhSachTaiKhoan,
+                "MaTaiKhoan",
+                "MaTaiKhoan",
+                taiKhoanDaChon);
         }
     }
 }
-

@@ -1,8 +1,7 @@
-
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using QuanLyThuVien_UNETI04_TI17A1HN.Models;
 using QuanLyThuVien_UNETI04_TI17A1HN.Data;
+using QuanLyThuVien_UNETI04_TI17A1HN.Models;
 
 namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
 {
@@ -18,7 +17,9 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
         // GET: TheLoai
         public async Task<IActionResult> Index()
         {
-            return View(await _context.TheLoais.ToListAsync());
+            return View(await _context.TheLoais
+                .OrderBy(t => t.TenTheLoai)
+                .ToListAsync());
         }
 
         // GET: TheLoai/Details/5
@@ -30,7 +31,7 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
             }
 
             var theloai = await _context.TheLoais
-                .FirstOrDefaultAsync(m => m.MaTheLoai == matheloai);
+                .FirstOrDefaultAsync(t => t.MaTheLoai == matheloai);
 
             if (theloai == null)
             {
@@ -55,7 +56,8 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
             theloai.TenTheLoai = theloai.TenTheLoai?.Trim() ?? string.Empty;
 
             bool trungTen = await _context.TheLoais
-                .AnyAsync(t => t.TenTheLoai.ToLower() == theloai.TenTheLoai.ToLower());
+                .AnyAsync(t =>
+                    t.TenTheLoai.ToLower() == theloai.TenTheLoai.ToLower());
 
             if (trungTen)
             {
@@ -66,9 +68,10 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
 
             if (ModelState.IsValid)
             {
-                _context.Add(theloai);
+                _context.TheLoais.Add(theloai);
                 await _context.SaveChangesAsync();
 
+                TempData["Success"] = "Thêm thể loại thành công.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -100,7 +103,7 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
             int? matheloai,
             [Bind("MaTheLoai,TenTheLoai,MoTa,TrangThai")] TheLoai theloai)
         {
-            if (matheloai != theloai.MaTheLoai)
+            if (matheloai == null || matheloai != theloai.MaTheLoai)
             {
                 return NotFound();
             }
@@ -133,6 +136,7 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
 
                 await _context.SaveChangesAsync();
 
+                TempData["Success"] = "Cập nhật thể loại thành công.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -148,7 +152,7 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
             }
 
             var theloai = await _context.TheLoais
-                .FirstOrDefaultAsync(m => m.MaTheLoai == matheloai);
+                .FirstOrDefaultAsync(t => t.MaTheLoai == matheloai);
 
             if (theloai == null)
             {
@@ -181,7 +185,8 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
             if (coSach)
             {
                 TempData["Loi"] =
-                    "Không thể xóa thể loại đang có sách. Vui lòng chuyển sách sang thể loại khác trước.";
+                    "Không thể xóa thể loại đang có sách. " +
+                    "Vui lòng chuyển sách sang thể loại khác trước.";
 
                 return RedirectToAction(nameof(Index));
             }
@@ -189,12 +194,14 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
             _context.TheLoais.Remove(theloai);
             await _context.SaveChangesAsync();
 
+            TempData["Success"] = "Xóa thể loại thành công.";
             return RedirectToAction(nameof(Index));
         }
 
         private bool TheLoaiExists(int matheloai)
         {
-            return _context.TheLoais.Any(e => e.MaTheLoai == matheloai);
+            return _context.TheLoais
+                .Any(t => t.MaTheLoai == matheloai);
         }
     }
 }

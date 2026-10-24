@@ -1,3 +1,4 @@
+
 using Microsoft.EntityFrameworkCore;
 using QuanLyThuVien_UNETI04_TI17A1HN.Data;
 
@@ -16,11 +17,7 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN
 
             builder.Services.AddControllersWithViews();
 
-<<<<<<< HEAD
-            builder.Services.AddDistributedMemoryCache();
-            builder.Services.AddSession();
-=======
-            // Session dùng chung: Module 1 lưu MaTaiKhoan, HoTen, VaiTro; Module 3 đọc để phân quyền độc giả.
+            // Session dùng chung cho Module 1 và Module 3
             builder.Services.AddDistributedMemoryCache();
             builder.Services.AddSession(options =>
             {
@@ -28,20 +25,18 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN
                 options.Cookie.HttpOnly = true;
                 options.Cookie.IsEssential = true;
             });
->>>>>>> origin/module3
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");
             }
 
             app.UseRouting();
-            app.UseSession();
 
             app.UseSession();
+
             app.UseAuthorization();
 
             app.MapStaticAssets();
