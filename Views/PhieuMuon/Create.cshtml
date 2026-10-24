@@ -1,0 +1,67 @@
+@model QuanLyThuVien_UNETI04_TI17A1HN.Models.PhieuMuon
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create</h1>
+
+<h4>Phiếu mượn</h4>
+<hr />
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="form-group mb-3">
+                <label asp-for="MaDocGia" class="control-label">Độc giả</label>
+                <select asp-for="MaDocGia" class="form-control" asp-items="ViewBag.MaDocGia"></select>
+                <span asp-validation-for="MaDocGia" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="NgayMuon" class="control-label"></label>
+                <input asp-for="NgayMuon" type="date" class="form-control" />
+                <span asp-validation-for="NgayMuon" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="HanTra" class="control-label"></label>
+                <input asp-for="HanTra" type="date" class="form-control" />
+                <span asp-validation-for="HanTra" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="TrangThai" class="control-label"></label>
+                <select asp-for="TrangThai" class="form-control">
+                    <option value="Chờ xác nhận">Chờ xác nhận</option>
+                    <option value="Đang mượn">Đang mượn</option>
+                    <option value="Đã trả">Đã trả</option>
+                    <option value="Đã hủy">Đã hủy</option>
+                </select>
+                <span asp-validation-for="TrangThai" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label class="control-label">Sách mượn (Mục 7.3)</label>
+                <select name="maSach" class="form-control" asp-items="ViewBag.MaSach"></select>
+                <span class="text-danger">@Html.ValidationMessage("maSach")</span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label class="control-label">Số lượng mượn</label>
+                <input type="number" name="soLuongMuon" value="@(ViewBag.SoLuongMuon ?? 1)" min="1" max="5" class="form-control" />
+                <span class="text-danger">@Html.ValidationMessage("soLuongMuon")</span>
+            </div>
+
+            <div class="form-group mb-3">
+                <input type="submit" value="Create" class="btn btn-primary" />
+                <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

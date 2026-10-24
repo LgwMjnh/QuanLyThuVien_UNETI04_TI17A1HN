@@ -7,74 +7,130 @@
 <h1>Details</h1>
 
 <div>
-    <h4>DocGia</h4>
+    <h4>Độc giả: @Model.HoTen</h4>
     <hr />
     <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.MaTaiKhoan)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.MaTaiKhoan)
-        </dd>
-    </dl>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.HoTen)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.HoTen)
         </dd>
-    </dl>
-        <dt class = "col-sm-2">
+
+        <dt class="col-sm-2">
+            Tên đăng nhập
+        </dt>
+        <dd class="col-sm-10">
+            @(Model.TaiKhoan?.TenDangNhap ?? "-")
+        </dd>
+
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.NgaySinh)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.NgaySinh)
+        <dd class="col-sm-10">
+            @(Model.NgaySinh?.ToString("dd/MM/yyyy") ?? "-")
         </dd>
-    </dl>
-        <dt class = "col-sm-2">
+
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.GioiTinh)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.GioiTinh)
         </dd>
-    </dl>
-        <dt class = "col-sm-2">
+
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.SoDienThoai)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.SoDienThoai)
         </dd>
-    </dl>
-        <dt class = "col-sm-2">
+
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Email)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Email)
         </dd>
-    </dl>
-        <dt class = "col-sm-2">
+
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.DiaChi)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.DiaChi)
         </dd>
-    </dl>
-        <dt class = "col-sm-2">
+
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.NgayDangKy)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.NgayDangKy)
+        <dd class="col-sm-10">
+            @Model.NgayDangKy.ToString("dd/MM/yyyy")
         </dd>
-    </dl>
-        <dt class = "col-sm-2">
+
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.TrangThai)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.TrangThai)
         </dd>
     </dl>
+
+    <!-- Cập nhật trạng thái (Mục 7.1) -->
+    <form asp-action="CapNhatTrangThai" asp-route-id="@Model.MaDocGia" method="post" class="row g-2 align-items-center mb-3">
+        @Html.AntiForgeryToken()
+        <div class="col-auto">
+            <label class="fw-bold">Cập nhật trạng thái:</label>
+        </div>
+        <div class="col-auto">
+            <select name="trangThai" class="form-select form-select-sm">
+                <!option value="Hoạt động" @(Model.TrangThai == "Hoạt động" ? "selected" : "")>Hoạt động</!option>
+                <!option value="Khóa" @(Model.TrangThai == "Khóa" ? "selected" : "")>Khóa</!option>
+            </select>
+        </div>
+        <div class="col-auto">
+            <input type="submit" value="Lưu trạng thái" class="btn btn-sm btn-primary" />
+        </div>
+    </form>
 </div>
+
+<hr />
+<h4>Lịch sử phiếu mượn của độc giả (@Model.PhieuMuons.Count phiếu)</h4>
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Mã phiếu</th>
+            <th>Ngày mượn</th>
+            <th>Hạn trả</th>
+            <th>Sách mượn</th>
+            <th>Trạng thái</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@if (!Model.PhieuMuons.Any())
+{
+        <tr>
+            <td colspan="6" class="text-center text-muted">Độc giả chưa có phiếu mượn nào.</td>
+        </tr>
+}
+@foreach (var p in Model.PhieuMuons)
+{
+        <tr>
+            <td>#@p.MaPhieuMuon</td>
+            <td>@p.NgayMuon.ToString("dd/MM/yyyy")</td>
+            <td>@p.HanTra.ToString("dd/MM/yyyy")</td>
+            <td>
+                @string.Join(", ", p.ChiTietPhieuMuons.Select(ct => (ct.Sach?.TenSach ?? ("#" + ct.MaSach)) + " (SL: " + ct.SoLuongMuon + ")"))
+            </td>
+            <td>@p.TrangThai</td>
+            <td>
+                <a asp-controller="PhieuMuon" asp-action="Details" asp-route-id="@p.MaPhieuMuon">Xem phiếu</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+
 <div>
-    <a asp-action="Edit" asp-route-id="@Model?.MaDocGia">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Edit" asp-route-id="@Model?.MaDocGia" class="btn btn-warning">Sửa</a> |
+    <a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>
 </div>

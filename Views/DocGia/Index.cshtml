@@ -1,81 +1,63 @@
 @model IEnumerable<QuanLyThuVien_UNETI04_TI17A1HN.Models.DocGia>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Quản lý độc giả";
 }
 
-<h1>Index</h1>
+<h1>Quản lý độc giả</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create" class="btn btn-primary">Thêm độc giả mới</a>
 </p>
-<table class="table">
+
+<!-- Form tìm kiếm & lọc đơn giản -->
+<form asp-action="Index" method="get" class="row g-2 mb-3">
+    <div class="col-md-4">
+        <input type="text" name="keyword" value="@ViewBag.Keyword" class="form-control" placeholder="Tìm theo họ tên, SĐT, email..." />
+    </div>
+    <div class="col-md-3">
+        <select name="trangThai" class="form-select">
+            <option value="">-- Tất cả trạng thái --</option>
+            <!option value="Hoạt động" @(ViewBag.TrangThai == "Hoạt động" ? "selected" : "")>Hoạt động</!option>
+            <!option value="Khóa" @(ViewBag.TrangThai == "Khóa" ? "selected" : "")>Khóa</!option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <input type="submit" value="Tìm kiếm" class="btn btn-secondary" />
+        <a asp-action="Index" class="btn btn-link">Xóa lọc</a>
+    </div>
+</form>
+
+<table class="table table-bordered table-striped">
     <thead>
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.MaTaiKhoan)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.HoTen)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.NgaySinh)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.GioiTinh)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.SoDienThoai)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Email)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DiaChi)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.NgayDangKy)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.TrangThai)
-            </th>
-            <th></th>
+            <th>@Html.DisplayNameFor(model => model.HoTen)</th>
+            <th>Tên đăng nhập</th>
+            <th>@Html.DisplayNameFor(model => model.SoDienThoai)</th>
+            <th>@Html.DisplayNameFor(model => model.Email)</th>
+            <th>@Html.DisplayNameFor(model => model.NgayDangKy)</th>
+            <th>@Html.DisplayNameFor(model => model.TrangThai)</th>
+            <th>Hành động</th>
         </tr>
     </thead>
     <tbody>
+@if (!Model.Any())
+{
+        <tr>
+            <td colspan="7" class="text-center text-muted">Chưa có độc giả nào hoặc không tìm thấy kết quả phù hợp.</td>
+        </tr>
+}
 @foreach (var item in Model) {
         <tr>
+            <td>@Html.DisplayFor(modelItem => item.HoTen)</td>
+            <td>@(item.TaiKhoan?.TenDangNhap ?? "-")</td>
+            <td>@Html.DisplayFor(modelItem => item.SoDienThoai)</td>
+            <td>@Html.DisplayFor(modelItem => item.Email)</td>
+            <td>@item.NgayDangKy.ToString("dd/MM/yyyy")</td>
+            <td>@Html.DisplayFor(modelItem => item.TrangThai)</td>
             <td>
-                @Html.DisplayFor(model => item.MaTaiKhoan)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.HoTen)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.NgaySinh)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.GioiTinh)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.SoDienThoai)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.Email)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.DiaChi)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.NgayDangKy)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.TrangThai)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.MaDocGia">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.MaDocGia">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.MaDocGia">Delete</a>
+                <a asp-action="Edit" asp-route-id="@item.MaDocGia" class="btn btn-sm btn-warning">Sửa</a> |
+                <a asp-action="Details" asp-route-id="@item.MaDocGia" class="btn btn-sm btn-info">Chi tiết</a>
             </td>
         </tr>
 }

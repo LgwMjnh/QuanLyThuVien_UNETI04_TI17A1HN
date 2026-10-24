@@ -1,0 +1,79 @@
+@model QuanLyThuVien_UNETI04_TI17A1HN.Models.DocGia
+
+@{
+    ViewData["Title"] = "Thông tin cá nhân";
+}
+
+<h1>Thông tin cá nhân</h1>
+<p class="text-muted">Bạn có thể cập nhật các thông tin được phép. Trạng thái và ngày đăng ký do thư viện quản lý.</p>
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="HoSo" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="mb-3">
+                <label class="form-label">Tên đăng nhập</label>
+                <input class="form-control" value="@(Model.TaiKhoan?.TenDangNhap)" disabled />
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="HoTen" class="form-label"></label>
+                <input asp-for="HoTen" class="form-control" />
+                <span asp-validation-for="HoTen" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="NgaySinh" class="form-label"></label>
+                <input asp-for="NgaySinh" type="date" class="form-control" />
+                <span asp-validation-for="NgaySinh" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="GioiTinh" class="form-label"></label>
+                <select asp-for="GioiTinh" class="form-select">
+                    <option value="">-- Chọn --</option>
+                    <option value="Nam">Nam</option>
+                    <option value="Nữ">Nữ</option>
+                    <option value="Khác">Khác</option>
+                </select>
+                <span asp-validation-for="GioiTinh" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="SoDienThoai" class="form-label"></label>
+                <input asp-for="SoDienThoai" class="form-control" />
+                <span asp-validation-for="SoDienThoai" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label"></label>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="DiaChi" class="form-label"></label>
+                <textarea asp-for="DiaChi" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="DiaChi" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Ngày đăng ký</label>
+                <input class="form-control" value="@Model.NgayDangKy.ToString("dd/MM/yyyy")" disabled />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Trạng thái</label>
+                <input class="form-control" value="@Model.TrangThai" disabled />
+            </div>
+
+            <button type="submit" class="btn btn-primary">Cập nhật</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

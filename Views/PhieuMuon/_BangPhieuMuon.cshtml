@@ -1,0 +1,44 @@
+@model IEnumerable<QuanLyThuVien_UNETI04_TI17A1HN.Models.PhieuMuon>
+
+<table class="table table-bordered table-striped">
+    <thead class="table-light">
+        <tr>
+            <th>Mã phiếu</th>
+            <th>Ngày mượn</th>
+            <th>Hạn trả</th>
+            <th>Sách</th>
+            <th>Trạng thái</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (!Model.Any())
+        {
+            <tr>
+                <td colspan="6" class="text-center text-muted">Không có dữ liệu.</td>
+            </tr>
+        }
+        @foreach (var item in Model)
+        {
+            var quaHan = item.TrangThai == "Đang mượn" && DateTime.Today > item.HanTra.Date;
+            <tr>
+                <td>@item.MaPhieuMuon</td>
+                <td>@item.NgayMuon.ToString("dd/MM/yyyy")</td>
+                <td>
+                    @item.HanTra.ToString("dd/MM/yyyy")
+                    @if (quaHan)
+                    {
+                        <span class="badge bg-danger">Quá hạn</span>
+                    }
+                </td>
+                <td>
+                    @string.Join(", ", item.ChiTietPhieuMuons.Select(ct => ct.Sach?.TenSach ?? ("#" + ct.MaSach)))
+                </td>
+                <td>@item.TrangThai</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@item.MaPhieuMuon" class="btn btn-sm btn-info">Chi tiết</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

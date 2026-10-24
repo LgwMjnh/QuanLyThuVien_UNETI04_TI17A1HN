@@ -14,11 +14,21 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN
                 options.UseSqlServer(
                     builder.Configuration.GetConnectionString("DefaultConnection")));
 
-            // Add services to the container.
             builder.Services.AddControllersWithViews();
 
+<<<<<<< HEAD
             builder.Services.AddDistributedMemoryCache();
             builder.Services.AddSession();
+=======
+            // Session dùng chung: Module 1 lưu MaTaiKhoan, HoTen, VaiTro; Module 3 đọc để phân quyền độc giả.
+            builder.Services.AddDistributedMemoryCache();
+            builder.Services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(30);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+            });
+>>>>>>> origin/module3
 
             var app = builder.Build();
 
@@ -31,6 +41,7 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN
             app.UseRouting();
             app.UseSession();
 
+            app.UseSession();
             app.UseAuthorization();
 
             app.MapStaticAssets();
