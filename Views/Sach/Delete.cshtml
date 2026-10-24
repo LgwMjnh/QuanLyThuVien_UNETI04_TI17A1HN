@@ -1,0 +1,79 @@
+@model QuanLyThuVien_UNETI04_TI17A1HN.Models.Sach
+
+@{
+    ViewData["Title"] = "Xóa sách";
+}
+
+<div class="container-fluid px-4 py-3">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-xl-7">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a asp-action="Index">Quản lý Sách</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Xóa sách</li>
+                </ol>
+            </nav>
+
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-header bg-danger text-white py-3 px-4 d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-exclamation-triangle-fill fs-4"></i>
+                        <div>
+                            <h5 class="mb-0 fw-bold">Xác nhận xóa tài liệu</h5>
+                            <small class="opacity-75">Thao tác này sẽ gỡ bỏ cuốn sách khỏi hệ thống thư viện</small>
+                        </div>
+                    </div>
+                    <span class="badge bg-white text-danger px-3 py-2 fw-semibold">Mã #@Model.MaSach</span>
+                </div>
+
+                <div class="card-body p-4">
+                    <div class="alert alert-warning border-0 d-flex align-items-center gap-3 mb-4 rounded-3">
+                        <i class="bi bi-shield-exclamation text-warning fs-3"></i>
+                        <div class="small">
+                            <strong>Lưu ý:</strong> Vui lòng kiểm tra kỹ các thông tin dưới đây. Nếu sách đang có độc giả mượn chưa trả, việc xóa sách có thể ảnh hưởng đến dữ liệu mượn trả liên quan.
+                        </div>
+                    </div>
+
+                    <div class="bg-light rounded-3 p-3 mb-4">
+                        <h6 class="fw-bold text-dark mb-3">@Model.TenSach</h6>
+                        <dl class="row mb-0 small">
+                            <dt class="col-sm-4 text-muted">Thể loại:</dt>
+                            <dd class="col-sm-8 fw-semibold">@(Model.TheLoai?.TenTheLoai ?? "Chưa phân loại")</dd>
+
+                            <dt class="col-sm-4 text-muted">Tác giả:</dt>
+                            <dd class="col-sm-8">@Model.TacGia</dd>
+
+                            <dt class="col-sm-4 text-muted">Nhà xuất bản:</dt>
+                            <dd class="col-sm-8">@Model.NhaXuatBan (@Model.NamXuatBan)</dd>
+
+                            <dt class="col-sm-4 text-muted">Đơn giá:</dt>
+                            <dd class="col-sm-8 text-danger fw-bold">@Model.GiaSach.ToString("N0") VNĐ</dd>
+
+                            <dt class="col-sm-4 text-muted">Tồn kho:</dt>
+                            <dd class="col-sm-8">
+                                <span class="badge @(Model.SoLuongCon > 0 ? "bg-success" : "bg-danger")">
+                                    Còn @Model.SoLuongCon / @Model.SoLuong cuốn
+                                </span>
+                            </dd>
+
+                            <dt class="col-sm-4 text-muted">Trạng thái:</dt>
+                            <dd class="col-sm-8">
+                                <span class="badge bg-secondary">@Model.TrangThai</span>
+                            </dd>
+                        </dl>
+                    </div>
+
+                    <form asp-action="Delete" method="post" class="d-flex justify-content-end gap-2">
+                        <input type="hidden" asp-for="MaSach" />
+                        <a asp-action="Index" class="btn btn-outline-secondary px-4 rounded-pill">
+                            <i class="bi bi-arrow-left me-1"></i> Hủy bỏ
+                        </a>
+                        <button type="submit" class="btn btn-danger px-4 rounded-pill fw-semibold">
+                            <i class="bi bi-trash3-fill me-1"></i> Xác nhận xóa
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
