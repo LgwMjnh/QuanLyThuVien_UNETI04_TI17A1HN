@@ -39,7 +39,7 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Data
             // Phieu muon - Doc gia
             modelBuilder.Entity<PhieuMuon>()
                 .HasOne(pm => pm.DocGia)
-                .WithMany()
+                .WithMany(dg => dg.PhieuMuons)
                 .HasForeignKey(pm => pm.MaDocGia)
                 .OnDelete(DeleteBehavior.Restrict);
 
