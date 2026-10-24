@@ -34,16 +34,18 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<int>("SoLuongMuon")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("SoLuongMuon");
 
                     b.Property<string>("TinhTrangTra")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("MaPhieuMuon", "MaSach");
 
                     b.HasIndex("MaSach");
 
-                    b.ToTable("ChiTietPhieuMuons");
+                    b.ToTable("ChiTietPhieuMuons", (string)null);
                 });
 
             modelBuilder.Entity("QuanLyThuVien_UNETI04_TI17A1HN.Models.DocGia", b =>
@@ -55,13 +57,15 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaDocGia"));
 
                     b.Property<string>("DiaChi")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
 
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("GioiTinh")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
                     b.Property<string>("HoTen")
                         .IsRequired()
@@ -89,7 +93,7 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Migrations
                     b.HasIndex("MaTaiKhoan")
                         .IsUnique();
 
-                    b.ToTable("DocGias");
+                    b.ToTable("DocGias", (string)null);
                 });
 
             modelBuilder.Entity("QuanLyThuVien_UNETI04_TI17A1HN.Models.PhieuMuon", b =>
@@ -111,13 +115,14 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Migrations
 
                     b.Property<string>("TrangThai")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
 
                     b.HasKey("MaPhieuMuon");
 
                     b.HasIndex("MaDocGia");
 
-                    b.ToTable("PhieuMuons");
+                    b.ToTable("PhieuMuons", (string)null);
                 });
 
             modelBuilder.Entity("QuanLyThuVien_UNETI04_TI17A1HN.Models.Sach", b =>
@@ -170,7 +175,7 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Migrations
 
                     b.HasIndex("MaTheLoai");
 
-                    b.ToTable("Sach");
+                    b.ToTable("Sach", (string)null);
                 });
 
             modelBuilder.Entity("QuanLyThuVien_UNETI04_TI17A1HN.Models.TaiKhoan", b =>
@@ -183,26 +188,33 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Migrations
 
                     b.Property<string>("HoTen")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("MatKhau")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("TenDangNhap")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<bool>("TrangThai")
                         .HasColumnType("bit");
 
                     b.Property<string>("VaiTro")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
 
                     b.HasKey("MaTaiKhoan");
 
-                    b.ToTable("TaiKhoans");
+                    b.HasIndex("TenDangNhap")
+                        .IsUnique();
+
+                    b.ToTable("TaiKhoans", (string)null);
                 });
 
             modelBuilder.Entity("QuanLyThuVien_UNETI04_TI17A1HN.Models.TheLoai", b =>
@@ -226,7 +238,7 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Migrations
 
                     b.HasKey("MaTheLoai");
 
-                    b.ToTable("TheLoais");
+                    b.ToTable("TheLoais", (string)null);
                 });
 
             modelBuilder.Entity("QuanLyThuVien_UNETI04_TI17A1HN.Models.ChiTietPhieuMuon", b =>
@@ -240,7 +252,7 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Migrations
                     b.HasOne("QuanLyThuVien_UNETI04_TI17A1HN.Models.Sach", "Sach")
                         .WithMany()
                         .HasForeignKey("MaSach")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("PhieuMuon");
@@ -262,9 +274,9 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Migrations
             modelBuilder.Entity("QuanLyThuVien_UNETI04_TI17A1HN.Models.PhieuMuon", b =>
                 {
                     b.HasOne("QuanLyThuVien_UNETI04_TI17A1HN.Models.DocGia", "DocGia")
-                        .WithMany()
+                        .WithMany("PhieuMuons")
                         .HasForeignKey("MaDocGia")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("DocGia");
@@ -279,6 +291,11 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Migrations
                         .IsRequired();
 
                     b.Navigation("TheLoai");
+                });
+
+            modelBuilder.Entity("QuanLyThuVien_UNETI04_TI17A1HN.Models.DocGia", b =>
+                {
+                    b.Navigation("PhieuMuons");
                 });
 
             modelBuilder.Entity("QuanLyThuVien_UNETI04_TI17A1HN.Models.PhieuMuon", b =>
