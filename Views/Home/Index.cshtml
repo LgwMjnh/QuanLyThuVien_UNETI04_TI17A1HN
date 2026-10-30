@@ -1,8 +1,127 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Dashboard quản lý thư viện";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container-fluid py-3">
+    <div class="mb-4">
+        <h2 class="fw-bold">Dashboard quản lý thư viện</h2>
+        <p class="text-muted">
+            Tổng quan tình hình mượn, trả sách và các phiếu mượn quá hạn.
+        </p>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-3 col-sm-6">
+            <div class="card shadow-sm h-100 border-0">
+                <div class="card-body">
+                    <p class="text-muted mb-2">Tổng phiếu mượn</p>
+                    <h2 class="fw-bold text-primary">@Model.TongPhieuMuon</h2>
+                    <a href="/MuonTra" class="text-decoration-none">
+                        Xem danh sách phiếu
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 col-sm-6">
+            <div class="card shadow-sm h-100 border-0">
+                <div class="card-body">
+                    <p class="text-muted mb-2">Đang mượn</p>
+                    <h2 class="fw-bold text-info">@Model.DangMuon</h2>
+                    <a href="/MuonTra?trangThai=DangMuon"
+                       class="text-decoration-none">
+                        Xem phiếu đang mượn
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 col-sm-6">
+            <div class="card shadow-sm h-100 border-0">
+                <div class="card-body">
+                    <p class="text-muted mb-2">Đã trả</p>
+                    <h2 class="fw-bold text-success">@Model.DaTra</h2>
+                    <a href="/MuonTra?trangThai=DaTra"
+                       class="text-decoration-none">
+                        Xem phiếu đã trả
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 col-sm-6">
+            <div class="card shadow-sm h-100 border-0">
+                <div class="card-body">
+                    <p class="text-muted mb-2">Phiếu quá hạn</p>
+                    <h2 class="fw-bold text-danger">@Model.QuaHan</h2>
+                    <a href="/MuonTra?trangThai=QuaHan"
+                       class="text-decoration-none">
+                        Xem phiếu quá hạn
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white py-3">
+            <h5 class="mb-0 fw-bold text-danger">
+                Danh sách phiếu mượn quá hạn
+            </h5>
+        </div>
+
+        <div class="card-body">
+            @if (Model.PhieuMuonQuaHan == null ||
+                 !Model.PhieuMuonQuaHan.Any())
+            {
+                <div class="alert alert-success mb-0">
+                    Hiện không có phiếu mượn nào quá hạn.
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Mã phiếu</th>
+                                <th>Mã độc giả</th>
+                                <th>Ngày mượn</th>
+                                <th>Hạn trả</th>
+                                <th>Số ngày quá hạn</th>
+                                <th>Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var phieu in Model.PhieuMuonQuaHan)
+                            {
+                                <tr>
+                                    <td>@phieu.MaPhieuMuon</td>
+                                    <td>@phieu.MaDocGia</td>
+                                    <td>@phieu.NgayMuon.ToString("dd/MM/yyyy")</td>
+                                    <td>@phieu.HanTra.ToString("dd/MM/yyyy")</td>
+                                    <td>
+                                        <span class="badge bg-danger">
+                                            @((DateTime.Today - phieu.HanTra.Date).Days) ngày
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-warning text-dark">
+                                            @phieu.TrangThai
+                                        </span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+
+            <div class="mt-3">
+                <a href="/MuonTra" class="btn btn-primary">
+                    Quản lý mượn trả
+                </a>
+            </div>
+        </div>
+    </div>
 </div>
