@@ -1,65 +1,107 @@
+
 @model IEnumerable<QuanLyThuVien_UNETI04_TI17A1HN.Models.PhieuMuon>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Quản lý phiếu mượn";
 }
 
-<h1>Index</h1>
+<h1>Quản lý phiếu mượn</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create" class="btn btn-primary">Thêm phiếu mượn</a>
 </p>
-<table class="table">
+
+<div class="mb-3">
+    <a asp-action="Index"
+       class="btn btn-sm @(string.IsNullOrEmpty(ViewBag.TrangThai as string) ? "btn-primary" : "btn-outline-primary")">
+        Tất cả (@ViewBag.TongSo)
+    </a>
+
+    <a asp-action="Index" asp-route-trangThai="Chờ xác nhận"
+       class="btn btn-sm @(ViewBag.TrangThai as string == "Chờ xác nhận" ? "btn-warning" : "btn-outline-warning")">
+        Chờ xác nhận (@ViewBag.SoChoXacNhan)
+    </a>
+
+    <a asp-action="Index" asp-route-trangThai="Đang mượn"
+       class="btn btn-sm @(ViewBag.TrangThai as string == "Đang mượn" ? "btn-primary" : "btn-outline-primary")">
+        Đang mượn (@ViewBag.SoDangMuon)
+    </a>
+
+    <a asp-action="Index" asp-route-trangThai="Đã trả"
+       class="btn btn-sm @(ViewBag.TrangThai as string == "Đã trả" ? "btn-success" : "btn-outline-success")">
+        Đã trả (@ViewBag.SoDaTra)
+    </a>
+
+    <a asp-action="Index" asp-route-trangThai="Đã hủy"
+       class="btn btn-sm @(ViewBag.TrangThai as string == "Đã hủy" ? "btn-secondary" : "btn-outline-secondary")">
+        Đã hủy (@ViewBag.SoDaHuy)
+    </a>
+</div>
+
+<table class="table table-bordered table-striped">
     <thead>
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.MaDocGia)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.NgayMuon)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.HanTra)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.TrangThai)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DocGia)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ChiTietPhieuMuons)
-            </th>
-            <th></th>
+            <th>Mã phiếu</th>
+            <th>Độc giả</th>
+            <th>Ngày mượn</th>
+            <th>Hạn trả</th>
+            <th>Sách mượn</th>
+            <th>Trạng thái</th>
+            <th>Hành động</th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(model => item.MaDocGia)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.NgayMuon)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.HanTra)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.TrangThai)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.DocGia)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.ChiTietPhieuMuons)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.MaPhieuMuon">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.MaPhieuMuon">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.MaPhieuMuon">Delete</a>
-            </td>
-        </tr>
-}
+        @if (Model == null || !Model.Any())
+        {
+            <tr>
+                <td colspan="7" class="text-center text-muted">
+                    Không có phiếu mượn nào trong mục này.
+                </td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var item in Model)
+            {
+                var quaHan = item.TrangThai == "Đang mượn"
+                    && DateTime.Today > item.HanTra.Date;
+
+                <tr>
+                    <td>#@item.MaPhieuMuon</td>
+                    <td>
+                        @(item.DocGia?.HoTen ?? ("Độc giả #" + item.MaDocGia))
+                    </td>
+                    <td>@item.NgayMuon.ToString("dd/MM/yyyy")</td>
+                    <td>
+                        @item.HanTra.ToString("dd/MM/yyyy")
+                        @if (quaHan)
+                        {
+                            <span class="badge bg-danger ms-1">Quá hạn</span>
+                        }
+                    </td>
+                    <td>
+                        @if (item.ChiTietPhieuMuons != null && item.ChiTietPhieuMuons.Any())
+                        {
+                            @string.Join(", ",
+                                item.ChiTietPhieuMuons.Select(ct =>
+                                    (ct.Sach?.TenSach ?? ("#" + ct.MaSach))
+                                    + " (" + ct.SoLuongMuon + " quyển)"))
+                        }
+                        else
+                        {
+                            <span class="text-muted">Chưa có chi tiết sách</span>
+                        }
+                    </td>
+                    <td>@item.TrangThai</td>
+                    <td>
+                        <a asp-action="Details"
+                           asp-route-id="@item.MaPhieuMuon"
+                           class="btn btn-sm btn-info">
+                            Chi tiết
+                        </a>
+                    </td>
+                </tr>
+            }
+        }
     </tbody>
 </table>

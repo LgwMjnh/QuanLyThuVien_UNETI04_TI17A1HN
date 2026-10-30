@@ -1,37 +1,636 @@
-﻿@model IEnumerable<QuanLyThuVien_UNETI04_TI17A1HN.Models.Sach>
+@model IEnumerable<QuanLyThuVien_UNETI04_TI17A1HN.Models.Sach>
 
 @{
-    ViewData["Title"] = "Quản lý Sách";
+    ViewData["Title"] = "Quản lý & Tra cứu Sách";
+    var danhSachSach = Model?.ToList()
+        ?? new List<QuanLyThuVien_UNETI04_TI17A1HN.Models.Sach>();
 }
 
-<h1>Danh sách Sách</h1>
+<style>
+    .split-view-list {
+        max-height: 720px;
+        overflow-y: auto;
+    }
 
-<p>
-    <a asp-action="Create" class="btn btn-primary">Thêm Sách mới</a>
-</p>
-<table class="table table-bordered table-striped">
-    <thead>
-        <tr>
-            <th>@Html.DisplayNameFor(model => model.TenSach)</th>
-            <th>@Html.DisplayNameFor(model => model.TacGia)</th>
-            <th>Thể loại</th>
-            <th>Số lượng</th>
-            <th>Hành động</th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>@Html.DisplayFor(modelItem => item.TenSach)</td>
-            <td>@Html.DisplayFor(modelItem => item.TacGia)</td>
-            <td>@Html.DisplayFor(modelItem => item.TheLoai.TenTheLoai)</td>
-            <td>@Html.DisplayFor(modelItem => item.SoLuongCon) / @Html.DisplayFor(modelItem => item.SoLuong)</td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.MaSach" class="btn btn-sm btn-warning">Sửa</a> |
-                <a asp-action="Details" asp-route-id="@item.MaSach" class="btn btn-sm btn-info">Chi tiết</a> |
-                <a asp-action="Delete" asp-route-id="@item.MaSach" class="btn btn-sm btn-danger">Xóa</a>
-            </td>
-        </tr>
+    .split-view-list::-webkit-scrollbar {
+        width: 5px;
+    }
+
+    .split-view-list::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+    }
+
+    .book-item-card {
+        cursor: pointer;
+        transition: all .15s ease-in-out;
+        border: 1px solid #e2e8f0;
+        background: #fff;
+    }
+
+    .book-item-card:hover {
+        border-color: #93c5fd;
+        background: #f8fafc;
+    }
+
+    .book-item-card.active-card {
+        border-color: #3b82f6 !important;
+        background: #eff6ff !important;
+        box-shadow: 0 1px 3px rgba(59, 130, 246, .15);
+    }
+
+    .detail-sticky-pane {
+        position: sticky;
+        top: 20px;
+        max-height: 720px;
+        overflow-y: auto;
+    }
+
+    .book-description {
+        max-height: 140px;
+        overflow-y: auto;
+        white-space: pre-line;
+        overflow-wrap: anywhere;
+    }
+</style>
+
+<div class="container-fluid px-3 py-3">
+
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3 pb-2 border-bottom">
+        <div>
+            <h3 class="fw-bold text-dark mb-0">Quản lý & Tra cứu Sách</h3>
+            <small class="text-muted">
+                Hệ thống thư viện UNETI • Phân hệ Quản lý Sách
+            </small>
+        </div>
+
+        <a asp-controller="Sach" asp-action="Create"
+           class="btn btn-primary btn-sm px-3 shadow-sm">
+            <i class="bi bi-plus-circle me-1"></i> Thêm sách mới
+        </a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"
+                    aria-label="Đóng"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"
+                    aria-label="Đóng"></button>
+        </div>
+    }
+
+    @if (danhSachSach.Count == 0)
+    {
+        <div class="card text-center p-5 border-0 shadow-sm bg-light">
+            <div class="mb-3">
+                <i class="bi bi-journal-x display-3 text-secondary"></i>
+            </div>
+            <h5 class="fw-bold text-secondary">
+                Chưa có cuốn sách nào trong thư viện
+            </h5>
+            <p class="text-muted small">
+                Hãy thêm đầu sách mới để bắt đầu quản lý.
+            </p>
+            <div>
+                <a asp-controller="Sach" asp-action="Create"
+                   class="btn btn-primary px-4">
+                    <i class="bi bi-plus-circle me-1"></i> Thêm sách đầu tiên
+                </a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row g-3 align-items-start">
+
+            <div class="col-lg-7">
+                <div class="card shadow-sm border-0">
+
+                    <div class="card-header bg-light border-bottom p-3">
+                        <div class="row g-2">
+                            <div class="col-12">
+                                <label for="liveSearchInput"
+                                       class="form-label small fw-semibold mb-1">
+                                    Tìm kiếm sách
+                                </label>
+                                <input type="text"
+                                       id="liveSearchInput"
+                                       class="form-control form-control-sm"
+                                       placeholder="Tên sách, tác giả, nhà xuất bản, mã sách..."
+                                       autocomplete="off" />
+                            </div>
+
+                            <div class="col-12 col-md-4">
+                                <label for="liveCategoryFilter"
+                                       class="form-label small fw-semibold mb-1">
+                                    Thể loại
+                                </label>
+                                <select id="liveCategoryFilter"
+                                        class="form-select form-select-sm">
+                                    <option value="">Tất cả thể loại</option>
+                                    @foreach (var cat in danhSachSach
+                                        .Select(s => s.TheLoai?.TenTheLoai)
+                                        .Where(t => !string.IsNullOrWhiteSpace(t))
+                                        .Distinct()
+                                        .OrderBy(t => t))
+                                    {
+                                        <option value="@cat">@cat</option>
+                                    }
+                                </select>
+                            </div>
+
+                            <div class="col-12 col-md-4">
+                                <label for="liveStatusFilter"
+                                       class="form-label small fw-semibold mb-1">
+                                    Trạng thái
+                                </label>
+                                <select id="liveStatusFilter"
+                                        class="form-select form-select-sm">
+                                    <option value="">Tất cả trạng thái</option>
+                                    <option value="Đang phục vụ">Đang phục vụ</option>
+                                    <option value="Tạm ngừng">Tạm ngừng</option>
+                                    <option value="Ngừng phục vụ">Ngừng phục vụ</option>
+                                </select>
+                            </div>
+
+                            <div class="col-12 col-md-4">
+                                <label for="liveSortSelect"
+                                       class="form-label small fw-semibold mb-1">
+                                    Sắp xếp
+                                </label>
+                                <select id="liveSortSelect"
+                                        class="form-select form-select-sm">
+                                    <option value="name_asc">Tên: A → Z</option>
+                                    <option value="name_desc">Tên: Z → A</option>
+                                    <option value="price_asc">Giá: thấp → cao</option>
+                                    <option value="price_desc">Giá: cao → thấp</option>
+                                    <option value="year_desc">Năm XB: mới nhất</option>
+                                    <option value="stock_desc">Tồn kho: nhiều → ít</option>
+                                    <option value="stock_asc">Tồn kho: ít → nhiều</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="text-end mt-2">
+                            <button type="button" id="resetFilters"
+                                    class="btn btn-outline-secondary btn-sm">
+                                <i class="bi bi-arrow-counterclockwise me-1"></i>
+                                Xóa bộ lọc
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card-body p-2 split-view-list" id="bookCardList">
+                        @foreach (var item in danhSachSach)
+                        {
+                            var phanTram = item.SoLuong > 0
+                                ? Math.Clamp(
+                                    (int)Math.Round(
+                                        (double)item.SoLuongCon / item.SoLuong * 100),
+                                    0, 100)
+                                : 0;
+
+                            var tenTheLoai = item.TheLoai?.TenTheLoai
+                                ?? "Chưa phân loại";
+
+                            var trangThai = item.TrangThai ?? "Chưa xác định";
+
+                            var badgeClass = trangThai == "Đang phục vụ"
+                                ? "bg-success"
+                                : trangThai == "Tạm ngừng"
+                                    ? "bg-warning text-dark"
+                                    : "bg-secondary";
+
+                            <div class="p-3 mb-2 rounded-3 book-item-card"
+                                 id="card-@item.MaSach"
+                                 role="button"
+                                 tabindex="0"
+                                 aria-label="Xem thông tin sách @item.TenSach"
+                                 data-id="@item.MaSach"
+                                 data-title="@item.TenSach"
+                                 data-author="@item.TacGia"
+                                 data-category="@tenTheLoai"
+                                 data-publisher="@item.NhaXuatBan"
+                                 data-year="@item.NamXuatBan"
+                                 data-price="@item.GiaSach.ToString(
+                                     System.Globalization.CultureInfo.InvariantCulture)"
+                                 data-total="@item.SoLuong"
+                                 data-remaining="@item.SoLuongCon"
+                                 data-status="@trangThai"
+                                 data-desc="@(string.IsNullOrWhiteSpace(item.MoTa)
+                                     ? "Chưa có mô tả cho sách này."
+                                     : item.MoTa)"
+                                 data-edit-url="@Url.Action("Edit", "Sach", new { id = item.MaSach })"
+                                 data-delete-url="@Url.Action("Delete", "Sach", new { id = item.MaSach })">
+
+                                <div class="d-flex justify-content-between align-items-start gap-2">
+                                    <div class="flex-grow-1 overflow-hidden">
+                                        <div class="d-flex align-items-center flex-wrap gap-1 mb-1">
+                                            <span class="badge bg-light text-secondary border">
+                                                #@item.MaSach
+                                            </span>
+                                            <span class="badge bg-primary-subtle text-primary">
+                                                @tenTheLoai
+                                            </span>
+                                            <span class="badge @badgeClass ms-auto">
+                                                @trangThai
+                                            </span>
+                                        </div>
+
+                                        <h6 class="fw-bold text-dark text-break mb-1">
+                                            @item.TenSach
+                                        </h6>
+
+                                        <small class="text-muted d-block text-break">
+                                            Tác giả:
+                                            <strong>@(item.TacGia ?? "Chưa cập nhật")</strong>
+                                        </small>
+                                    </div>
+
+                                    <div class="text-end flex-shrink-0">
+                                        <span class="fw-bold text-success d-block">
+                                            @item.GiaSach.ToString("N0") VNĐ
+                                        </span>
+                                        <small class="@(item.SoLuongCon <= 0
+                                            ? "text-danger fw-bold"
+                                            : "text-muted")">
+                                            @(item.SoLuongCon <= 0
+                                                ? "Hết sách"
+                                                : $"Còn {item.SoLuongCon}/{item.SoLuong} cuốn")
+                                        </small>
+                                    </div>
+                                </div>
+
+                                <div class="progress mt-2" style="height: 4px;">
+                                    <div class="progress-bar @(phanTram <= 20
+                                        ? "bg-warning"
+                                        : "bg-success")"
+                                         style="width: @phanTram%"
+                                         role="progressbar"
+                                         aria-valuenow="@phanTram"
+                                         aria-valuemin="0"
+                                         aria-valuemax="100">
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="card-footer bg-light p-2 px-3">
+                        <small class="text-muted" id="filterCountStatus">
+                            Tổng số: @danhSachSach.Count đầu sách
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="card shadow-sm border-0 detail-sticky-pane"
+                     id="bookDetailPanel">
+
+                    <div class="card-header bg-white border-bottom p-3
+                                d-flex justify-content-between align-items-center gap-2">
+                        <span class="fw-semibold">
+                            <i class="bi bi-info-circle me-1"></i> Chi tiết sách
+                        </span>
+                        <span class="badge bg-secondary" id="dStatusBadge">
+                            Chưa chọn
+                        </span>
+                    </div>
+
+                    <div class="card-body p-4">
+                        <div id="bookDetailEmpty" class="text-center text-muted py-4">
+                            <i class="bi bi-book display-4"></i>
+                            <p class="mt-2 mb-0">Chọn một cuốn sách để xem thông tin.</p>
+                        </div>
+
+                        <div id="bookDetailContent" class="d-none">
+                            <div class="mb-3">
+                                <span class="badge bg-primary-subtle text-primary mb-2"
+                                      id="dCategory">
+                                    Thể loại
+                                </span>
+                                <h5 class="fw-bold text-dark mb-1" id="dTitle"></h5>
+                                <p class="text-muted small mb-0">
+                                    Tác giả: <strong class="text-dark" id="dAuthor"></strong>
+                                </p>
+                            </div>
+
+                            <div class="p-3 bg-light rounded-3 border mb-3">
+                                <div class="d-flex justify-content-between align-items-center small mb-1">
+                                    <span class="fw-medium text-secondary">Tình trạng tồn kho</span>
+                                    <strong id="dStockFraction">0 / 0</strong>
+                                </div>
+
+                                <div class="progress" style="height: 8px;">
+                                    <div id="dProgressBar"
+                                         class="progress-bar bg-success"
+                                         role="progressbar"
+                                         style="width: 0%"
+                                         aria-valuenow="0"
+                                         aria-valuemin="0"
+                                         aria-valuemax="100">
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-between text-muted mt-2"
+                                     style="font-size: .8rem;">
+                                    <span>Còn: <b id="dRemaining">0</b></span>
+                                    <span>Tổng: <b id="dTotal">0</b></span>
+                                </div>
+                            </div>
+
+                            <div class="row g-2 mb-3 text-center">
+                                <div class="col-6">
+                                    <div class="p-2 border rounded-2 bg-light h-100">
+                                        <small class="text-muted d-block">Mã sách</small>
+                                        <strong class="font-monospace" id="dId">—</strong>
+                                    </div>
+                                </div>
+
+                                <div class="col-6">
+                                    <div class="p-2 border rounded-2 bg-light h-100">
+                                        <small class="text-muted d-block">Giá bìa</small>
+                                        <strong class="text-success" id="dPrice">0 VNĐ</strong>
+                                    </div>
+                                </div>
+
+                                <div class="col-6">
+                                    <div class="p-2 border rounded-2 bg-light h-100">
+                                        <small class="text-muted d-block">Năm xuất bản</small>
+                                        <strong id="dYear">—</strong>
+                                    </div>
+                                </div>
+
+                                <div class="col-6">
+                                    <div class="p-2 border rounded-2 bg-light h-100">
+                                        <small class="text-muted d-block">Nhà xuất bản</small>
+                                        <strong id="dPublisher" class="text-break">—</strong>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <small class="text-uppercase fw-bold text-muted d-block mb-1">
+                                    Mô tả sách
+                                </small>
+                                <div class="p-3 bg-light rounded-3 border text-secondary small book-description"
+                                     id="dDesc">
+                                </div>
+                            </div>
+
+                            <div class="d-flex gap-2 pt-3 border-top">
+                                <a id="btnEditLink" href="#"
+                                   class="btn btn-warning flex-grow-1 btn-sm fw-bold">
+                                    <i class="bi bi-pencil me-1"></i> Sửa sách
+                                </a>
+
+                                <a id="btnDeleteLink" href="#"
+                                   class="btn btn-outline-danger btn-sm px-3">
+                                    <i class="bi bi-trash me-1"></i> Xóa
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const searchInput = document.getElementById("liveSearchInput");
+            const categoryFilter = document.getElementById("liveCategoryFilter");
+            const statusFilter = document.getElementById("liveStatusFilter");
+            const sortSelect = document.getElementById("liveSortSelect");
+            const resetButton = document.getElementById("resetFilters");
+            const listContainer = document.getElementById("bookCardList");
+
+            if (!listContainer) return;
+
+            const countLabel = document.getElementById("filterCountStatus");
+            let currentSelectedBookId = null;
+
+            const getCards = () =>
+                Array.from(listContainer.querySelectorAll(".book-item-card"));
+
+            function setText(id, value) {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.textContent = value ?? "—";
+                }
+            }
+
+            function clearDetails(message) {
+                currentSelectedBookId = null;
+
+                getCards().forEach(card => card.classList.remove("active-card"));
+
+                document.getElementById("bookDetailContent")?.classList.add("d-none");
+                document.getElementById("bookDetailEmpty")?.classList.remove("d-none");
+
+                setText("dTitle", message || "Chọn một cuốn sách để xem thông tin.");
+                setText("dAuthor", "—");
+                setText("dCategory", "Thể loại");
+                setText("dPublisher", "—");
+                setText("dYear", "—");
+                setText("dId", "—");
+                setText("dPrice", "0 VNĐ");
+                setText("dDesc", "");
+                setText("dRemaining", "0");
+                setText("dTotal", "0");
+                setText("dStockFraction", "0 / 0");
+
+                const progress = document.getElementById("dProgressBar");
+                progress.style.width = "0%";
+                progress.className = "progress-bar bg-secondary";
+                progress.setAttribute("aria-valuenow", "0");
+
+                const badge = document.getElementById("dStatusBadge");
+                badge.textContent = "Chưa chọn";
+                badge.className = "badge bg-secondary";
+
+                document.getElementById("btnEditLink").href = "#";
+                document.getElementById("btnDeleteLink").href = "#";
+            }
+
+            function selectBook(id) {
+                const card = getCards().find(
+                    item => item.dataset.id === String(id)
+                );
+
+                if (!card || card.style.display === "none") return;
+
+                currentSelectedBookId = card.dataset.id;
+
+                getCards().forEach(item => item.classList.remove("active-card"));
+                card.classList.add("active-card");
+
+                document.getElementById("bookDetailEmpty").classList.add("d-none");
+                document.getElementById("bookDetailContent").classList.remove("d-none");
+
+                const total = Math.max(0, Number(card.dataset.total) || 0);
+                const remaining = Math.max(0, Number(card.dataset.remaining) || 0);
+                const percentage = total > 0
+                    ? Math.min(100, Math.round(remaining / total * 100))
+                    : 0;
+
+                setText("dId", "#" + card.dataset.id);
+                setText("dTitle", card.dataset.title);
+                setText("dAuthor", card.dataset.author || "Chưa cập nhật");
+                setText("dCategory", card.dataset.category || "Chưa phân loại");
+                setText("dPublisher", card.dataset.publisher || "Chưa cập nhật");
+                setText("dYear", card.dataset.year || "Chưa cập nhật");
+                setText("dPrice",
+                    (Number(card.dataset.price) || 0).toLocaleString("vi-VN") + " VNĐ");
+                setText("dDesc", card.dataset.desc || "Chưa có mô tả.");
+                setText("dRemaining", remaining);
+                setText("dTotal", total);
+                setText("dStockFraction", remaining + " / " + total + " (" + percentage + "%)");
+
+                const progress = document.getElementById("dProgressBar");
+                progress.style.width = percentage + "%";
+                progress.className = "progress-bar " +
+                    (remaining <= 0 ? "bg-danger" :
+                    percentage <= 20 ? "bg-warning" : "bg-success");
+                progress.setAttribute("aria-valuenow", String(percentage));
+
+                const status = card.dataset.status || "Chưa xác định";
+                const badge = document.getElementById("dStatusBadge");
+                badge.textContent = status;
+                badge.className = "badge " +
+                    (status === "Đang phục vụ" ? "bg-success" :
+                    status === "Tạm ngừng" ? "bg-warning text-dark" : "bg-secondary");
+
+                document.getElementById("btnEditLink").href =
+                    card.dataset.editUrl || "#";
+                document.getElementById("btnDeleteLink").href =
+                    card.dataset.deleteUrl || "#";
+            }
+
+            function applyFilters() {
+                const query = (searchInput.value || "").trim().toLocaleLowerCase("vi");
+                const category = categoryFilter.value;
+                const status = statusFilter.value;
+                const sort = sortSelect.value;
+                const cards = getCards();
+
+                const visibleCards = [];
+
+                cards.forEach(card => {
+                    const searchText = [
+                        card.dataset.id,
+                        card.dataset.title,
+                        card.dataset.author,
+                        card.dataset.publisher
+                    ].join(" ").toLocaleLowerCase("vi");
+
+                    const matchSearch = searchText.includes(query);
+                    const matchCategory = !category || card.dataset.category === category;
+                    const matchStatus = !status || card.dataset.status === status;
+
+                    const matched = matchSearch && matchCategory && matchStatus;
+
+                    card.style.display = matched ? "" : "none";
+
+                    if (matched) {
+                        visibleCards.push(card);
+                    }
+                });
+
+                visibleCards.sort((a, b) => {
+                    const nameA = (a.dataset.title || "").toLocaleLowerCase("vi");
+                    const nameB = (b.dataset.title || "").toLocaleLowerCase("vi");
+                    const priceA = Number(a.dataset.price) || 0;
+                    const priceB = Number(b.dataset.price) || 0;
+                    const yearA = Number(a.dataset.year) || 0;
+                    const yearB = Number(b.dataset.year) || 0;
+                    const stockA = Number(a.dataset.remaining) || 0;
+                    const stockB = Number(b.dataset.remaining) || 0;
+
+                    switch (sort) {
+                        case "name_desc":
+                            return nameB.localeCompare(nameA, "vi");
+                        case "price_asc":
+                            return priceA - priceB;
+                        case "price_desc":
+                            return priceB - priceA;
+                        case "year_desc":
+                            return yearB - yearA;
+                        case "stock_desc":
+                            return stockB - stockA;
+                        case "stock_asc":
+                            return stockA - stockB;
+                        default:
+                            return nameA.localeCompare(nameB, "vi");
+                    }
+                });
+
+                visibleCards.forEach(card => listContainer.appendChild(card));
+
+                countLabel.textContent =
+                    "Hiển thị " + visibleCards.length + " / " + cards.length + " đầu sách";
+
+                if (visibleCards.length === 0) {
+                    clearDetails("Không tìm thấy sách phù hợp.");
+                    return;
+                }
+
+                const selectedStillVisible = visibleCards.some(
+                    card => card.dataset.id === currentSelectedBookId
+                );
+
+                if (!selectedStillVisible) {
+                    selectBook(visibleCards[0].dataset.id);
+                }
+            }
+
+            searchInput.addEventListener("input", applyFilters);
+            categoryFilter.addEventListener("change", applyFilters);
+            statusFilter.addEventListener("change", applyFilters);
+            sortSelect.addEventListener("change", applyFilters);
+
+            resetButton.addEventListener("click", function () {
+                searchInput.value = "";
+                categoryFilter.value = "";
+                statusFilter.value = "";
+                sortSelect.value = "name_asc";
+                applyFilters();
+            });
+
+            getCards().forEach(card => {
+                card.addEventListener("click", function (event) {
+                    if (event.target.closest("a, button")) return;
+                    selectBook(this.dataset.id);
+                });
+
+                card.addEventListener("keydown", function (event) {
+                    if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        selectBook(this.dataset.id);
+                    }
+                });
+            });
+
+            document.querySelectorAll(".view-book").forEach(button => {
+                button.addEventListener("click", function () {
+                    selectBook(this.dataset.id);
+                });
+            });
+
+            applyFilters();
+        });
+    </script>
 }
-    </tbody>
-</table>

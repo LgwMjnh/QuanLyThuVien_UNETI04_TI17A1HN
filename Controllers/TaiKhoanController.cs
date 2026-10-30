@@ -1,8 +1,8 @@
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using QuanLyThuVien_UNETI04_TI17A1HN.Models;
 using QuanLyThuVien_UNETI04_TI17A1HN.Data;
+using QuanLyThuVien_UNETI04_TI17A1HN.Models;
 
 public class TaiKhoanController : Controller
 {
@@ -13,13 +13,13 @@ public class TaiKhoanController : Controller
         _context = context;
     }
 
-    // GET: TAIKHOANS
+    // GET: TaiKhoans
     public async Task<IActionResult> Index()
     {
         return View(await _context.TaiKhoans.ToListAsync());
     }
 
-    // GET: TAIKHOANS/Details/5
+    // GET: TaiKhoans/Details/5
     public async Task<IActionResult> Details(int? mataikhoan)
     {
         if (mataikhoan == null)
@@ -28,7 +28,8 @@ public class TaiKhoanController : Controller
         }
 
         var taikhoan = await _context.TaiKhoans
-            .FirstOrDefaultAsync(m => m.MaTaiKhoan == mataikhoan);
+            .FirstOrDefaultAsync(tk => tk.MaTaiKhoan == mataikhoan);
+
         if (taikhoan == null)
         {
             return NotFound();
@@ -37,29 +38,44 @@ public class TaiKhoanController : Controller
         return View(taikhoan);
     }
 
-    // GET: TAIKHOANS/Create
+    // GET: TaiKhoans/Create
     public IActionResult Create()
     {
         return View();
     }
 
-    // POST: TAIKHOANS/Create
-    // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+    // POST: TaiKhoans/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("MaTaiKhoan,TenDangNhap,MatKhau,HoTen,VaiTro,TrangThai")] TaiKhoan taikhoan)
+    public async Task<IActionResult> Create(
+        [Bind("MaTaiKhoan,TenDangNhap,MatKhau,HoTen,VaiTro")] TaiKhoan taikhoan)
     {
+        // Kiểm tra tên đăng nhập đã tồn tại hay chưa.
+        bool tenDangNhapDaTonTai = await _context.TaiKhoans
+            .AnyAsync(tk => tk.TenDangNhap == taikhoan.TenDangNhap);
+
+        if (tenDangNhapDaTonTai)
+        {
+            ModelState.AddModelError(
+                nameof(taikhoan.TenDangNhap),
+                "Tên đăng nhập này đã tồn tại.");
+        }
+
+        // Tài khoản mới mặc định được kích hoạt.
+        taikhoan.TrangThai = true;
+
         if (ModelState.IsValid)
         {
-            _context.Add(taikhoan);
+            _context.TaiKhoans.Add(taikhoan);
             await _context.SaveChangesAsync();
+
             return RedirectToAction(nameof(Index));
         }
+
         return View(taikhoan);
     }
 
-    // GET: TAIKHOANS/Edit/5
+    // GET: TaiKhoans/Edit/5
     public async Task<IActionResult> Edit(int? mataikhoan)
     {
         if (mataikhoan == null)
@@ -68,23 +84,38 @@ public class TaiKhoanController : Controller
         }
 
         var taikhoan = await _context.TaiKhoans.FindAsync(mataikhoan);
+
         if (taikhoan == null)
         {
             return NotFound();
         }
+
         return View(taikhoan);
     }
 
-    // POST: TAIKHOANS/Edit/5
-    // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+    // POST: TaiKhoans/Edit/5
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int? mataikhoan, [Bind("MaTaiKhoan,TenDangNhap,MatKhau,HoTen,VaiTro,TrangThai")] TaiKhoan taikhoan)
+    public async Task<IActionResult> Edit(
+        int? mataikhoan,
+        [Bind("MaTaiKhoan,TenDangNhap,MatKhau,HoTen,VaiTro,TrangThai")] TaiKhoan taikhoan)
     {
-        if (mataikhoan != taikhoan.MaTaiKhoan)
+        if (mataikhoan == null || mataikhoan != taikhoan.MaTaiKhoan)
         {
             return NotFound();
+        }
+
+        // Không cho phép trùng tên đăng nhập với tài khoản khác.
+        bool tenDangNhapDaTonTai = await _context.TaiKhoans
+            .AnyAsync(tk =>
+                tk.TenDangNhap == taikhoan.TenDangNhap &&
+                tk.MaTaiKhoan != taikhoan.MaTaiKhoan);
+
+        if (tenDangNhapDaTonTai)
+        {
+            ModelState.AddModelError(
+                nameof(taikhoan.TenDangNhap),
+                "Tên đăng nhập này đã tồn tại.");
         }
 
         if (ModelState.IsValid)
@@ -100,17 +131,17 @@ public class TaiKhoanController : Controller
                 {
                     return NotFound();
                 }
-                else
-                {
-                    throw;
-                }
+
+                throw;
             }
+
             return RedirectToAction(nameof(Index));
         }
+
         return View(taikhoan);
     }
 
-    // GET: TAIKHOANS/Delete/5
+    // GET: TaiKhoans/Delete/5
     public async Task<IActionResult> Delete(int? mataikhoan)
     {
         if (mataikhoan == null)
@@ -119,7 +150,8 @@ public class TaiKhoanController : Controller
         }
 
         var taikhoan = await _context.TaiKhoans
-            .FirstOrDefaultAsync(m => m.MaTaiKhoan == mataikhoan);
+            .FirstOrDefaultAsync(tk => tk.MaTaiKhoan == mataikhoan);
+
         if (taikhoan == null)
         {
             return NotFound();
@@ -128,23 +160,31 @@ public class TaiKhoanController : Controller
         return View(taikhoan);
     }
 
-    // POST: TAIKHOANS/Delete/5
+    // POST: TaiKhoans/Delete/5
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int? mataikhoan)
     {
-        var taikhoan = await _context.TaiKhoans.FindAsync(mataikhoan);
-        if (taikhoan != null)
+        if (mataikhoan == null)
         {
-            _context.TaiKhoans.Remove(taikhoan);
+            return NotFound();
         }
 
+        var taikhoan = await _context.TaiKhoans.FindAsync(mataikhoan);
+
+        if (taikhoan == null)
+        {
+            return NotFound();
+        }
+
+        _context.TaiKhoans.Remove(taikhoan);
         await _context.SaveChangesAsync();
+
         return RedirectToAction(nameof(Index));
     }
 
-    private bool TaiKhoanExists(int? mataikhoan)
+    private bool TaiKhoanExists(int mataikhoan)
     {
-        return _context.TaiKhoans.Any(e => e.MaTaiKhoan == mataikhoan);
+        return _context.TaiKhoans.Any(tk => tk.MaTaiKhoan == mataikhoan);
     }
 }

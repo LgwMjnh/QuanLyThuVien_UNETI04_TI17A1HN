@@ -1,0 +1,127 @@
+@model QuanLyThuVien_UNETI04_TI17A1HN.Models.Sach
+
+@{
+    ViewData["Title"] = "Cập nhật Sách";
+}
+
+<div class="container-fluid px-4">
+    <h2 class="mt-4">Cập nhật thông tin Sách</h2>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-action="Index">Quản lý Sách</a></li>
+        <li class="breadcrumb-item active">Chỉnh sửa</li>
+    </ol>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="m-0 font-weight-bold text-primary">Sửa sách: @Model.TenSach</h5>
+        </div>
+        <div class="card-body">
+            <form asp-action="Edit">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                <input type="hidden" asp-for="MaSach" />
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="TenSach" class="form-label"></label>
+                        <input asp-for="TenSach" class="form-control" />
+                        <span asp-validation-for="TenSach" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Thể loại <span class="text-danger">*</span></label>
+                        <input type="text" 
+                               name="tenTheLoai" 
+                               id="tenTheLoaiInput"
+                               list="theLoaiList" 
+                               class="form-control" 
+                               placeholder="Chọn từ gợi ý hoặc tự gõ thể loại mới..." 
+                               value="@ViewBag.TenTheLoaiHienTai" 
+                               autocomplete="off" 
+                               required />
+                        <datalist id="theLoaiList">
+                            @if (ViewBag.DanhSachTheLoai != null)
+                            {
+                                foreach (var cat in (List<string>)ViewBag.DanhSachTheLoai)
+                                {
+                                    <option value="@cat"></option>
+                                }
+                            }
+                        </datalist>
+                        <span class="text-danger">@Html.ValidationMessage("TenTheLoai")</span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="TacGia" class="form-label"></label>
+                        <input asp-for="TacGia" class="form-control" />
+                        <span asp-validation-for="TacGia" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="NhaXuatBan" class="form-label"></label>
+                        <input asp-for="NhaXuatBan" class="form-control" />
+                        <span asp-validation-for="NhaXuatBan" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <label asp-for="NamXuatBan" class="form-label"></label>
+                        <input asp-for="NamXuatBan" class="form-control" type="number" min="1000" max="@DateTime.Now.Year" />
+                        <span asp-validation-for="NamXuatBan" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+                        <label asp-for="GiaSach" class="form-label"></label>
+                        <input asp-for="GiaSach" class="form-control" type="number" step="1000" min="0" />
+                        <span asp-validation-for="GiaSach" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+                        <label asp-for="SoLuong" class="form-label"></label>
+                        <input asp-for="SoLuong" class="form-control" type="number" min="0" />
+                        <span asp-validation-for="SoLuong" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+                        <label asp-for="SoLuongCon" class="form-label"></label>
+                        <input asp-for="SoLuongCon" class="form-control" type="number" min="0" />
+                        <span asp-validation-for="SoLuongCon" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="TrangThai" class="form-label"></label>
+                        <select asp-for="TrangThai" class="form-select">
+                            <option value="Đang phục vụ">Đang phục vụ</option>
+                            <option value="Tạm ngừng">Tạm ngừng</option>
+                            <option value="Ngừng phục vụ">Ngừng phục vụ</option>
+                        </select>
+                        <span asp-validation-for="TrangThai" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="MoTa" class="form-label"></label>
+                        <textarea asp-for="MoTa" class="form-control" rows="3"></textarea>
+                        <span asp-validation-for="MoTa" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="mt-3">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save"></i> Lưu thay đổi
+                    </button>
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Quay lại danh sách
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

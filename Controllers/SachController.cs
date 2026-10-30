@@ -1,154 +1,276 @@
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using QuanLyThuVien_UNETI04_TI17A1HN.Models;
 using QuanLyThuVien_UNETI04_TI17A1HN.Data;
+using QuanLyThuVien_UNETI04_TI17A1HN.Models;
 
-public class SachController : Controller
+namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
 {
-    private readonly ApplicationDbContext _context;
-
-    public SachController(ApplicationDbContext context)
+    public class SachController : Controller
     {
-        _context = context;
-    }
+        private readonly ApplicationDbContext _context;
 
-    // GET: SACHS
-    public async Task<IActionResult> Index()
-    {
-        var sachs = _context.Set<Sach>().Include(s => s.TheLoai);
-        return View(await sachs.ToListAsync());
-    }
-
-    // GET: SACHS/Details/5
-    public async Task<IActionResult> Details(int? masach)
-    {
-        if (masach == null)
+        public SachController(ApplicationDbContext context)
         {
-            return NotFound();
+            _context = context;
         }
 
-        var sach = await _context.Set<Sach>()
-            .Include(s => s.TheLoai)
-            .FirstOrDefaultAsync(m => m.MaSach == masach);
-
-        if (sach == null)
+        // GET: Sach
+        public async Task<IActionResult> Index()
         {
-            return NotFound();
+            var sachs = _context.Sachs
+                .Include(s => s.TheLoai);
+
+            return View(await sachs.ToListAsync());
         }
 
-        return View(sach);
-    }
-
-    // GET: SACHS/Create
-    public IActionResult Create()
-    {
-        ViewData["MaTheLoai"] = new SelectList(_context.TheLoais, "MaTheLoai", "TenTheLoai");
-        return View();
-    }
-
-    // POST: SACHS/Create
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("MaSach,TenSach,MaTheLoai,TacGia,NhaXuatBan,NamXuatBan,SoLuong,SoLuongCon,GiaSach,MoTa,TrangThai")] Sach sach)
-    {
-        if (ModelState.IsValid)
+        // GET: Sach/Details/5
+        public async Task<IActionResult> Details(int? id)
         {
-            _context.Set<Sach>().Add(sach);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-        ViewData["MaTheLoai"] = new SelectList(_context.TheLoais, "MaTheLoai", "TenTheLoai", sach.MaTheLoai);
-        return View(sach);
-    }
-
-    // GET: SACHS/Edit/5
-    public async Task<IActionResult> Edit(int? masach)
-    {
-        if (masach == null)
-        {
-            return NotFound();
-        }
-
-        var sach = await _context.Set<Sach>().FindAsync(masach);
-        if (sach == null)
-        {
-            return NotFound();
-        }
-        ViewData["MaTheLoai"] = new SelectList(_context.TheLoais, "MaTheLoai", "TenTheLoai", sach.MaTheLoai);
-        return View(sach);
-    }
-
-    // POST: SACHS/Edit/5
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int masach, [Bind("MaSach,TenSach,MaTheLoai,TacGia,NhaXuatBan,NamXuatBan,SoLuong,SoLuongCon,GiaSach,MoTa,TrangThai")] Sach sach)
-    {
-        if (masach != sach.MaSach)
-        {
-            return NotFound();
-        }
-
-        if (ModelState.IsValid)
-        {
-            try
+            if (id == null)
             {
-                _context.Set<Sach>().Update(sach);
+                return NotFound();
+            }
+
+            var sach = await _context.Sachs
+                .Include(s => s.TheLoai)
+                .FirstOrDefaultAsync(s => s.MaSach == id);
+
+            if (sach == null)
+            {
+                return NotFound();
+            }
+
+            return View(sach);
+        }
+
+        // GET: Sach/Create
+        public async Task<IActionResult> Create()
+        {
+            await NapDanhSachTheLoaiAsync();
+            return View();
+        }
+
+        // POST: Sach/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(
+            [Bind("MaSach,TenSach,TacGia,NhaXuatBan,NamXuatBan,SoLuong,SoLuongCon,GiaSach,MoTa,TrangThai")] Sach sach,
+            string? tenTheLoai)
+        {
+            await GanTheLoaiAsync(sach, tenTheLoai);
+            await KiemTraDuLieuSachAsync(sach);
+
+            ModelState.Remove(nameof(Sach.TheLoai));
+            ModelState.Remove(nameof(Sach.MaTheLoai));
+
+            if (ModelState.IsValid)
+            {
+                _context.Sachs.Add(sach);
+                await _context.SaveChangesAsync();
+
+                TempData["Success"] = "Thêm sách thành công.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            await NapDanhSachTheLoaiAsync();
+            ViewBag.TenTheLoaiHienTai = tenTheLoai?.Trim();
+
+            return View(sach);
+        }
+
+        // GET: Sach/Edit/5
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var sach = await _context.Sachs
+                .Include(s => s.TheLoai)
+                .FirstOrDefaultAsync(s => s.MaSach == id);
+
+            if (sach == null)
+            {
+                return NotFound();
+            }
+
+            await NapDanhSachTheLoaiAsync();
+            ViewBag.TenTheLoaiHienTai = sach.TheLoai?.TenTheLoai ?? string.Empty;
+
+            return View(sach);
+        }
+
+        // POST: Sach/Edit/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(
+            int id,
+            [Bind("MaSach,TenSach,TacGia,NhaXuatBan,NamXuatBan,SoLuong,SoLuongCon,GiaSach,MoTa,TrangThai")] Sach sach,
+            string? tenTheLoai)
+        {
+            if (id != sach.MaSach)
+            {
+                return NotFound();
+            }
+
+            var sachTrongDb = await _context.Sachs
+                .FirstOrDefaultAsync(s => s.MaSach == id);
+
+            if (sachTrongDb == null)
+            {
+                return NotFound();
+            }
+
+            await GanTheLoaiAsync(sach, tenTheLoai);
+            await KiemTraDuLieuSachAsync(sach);
+
+            ModelState.Remove(nameof(Sach.TheLoai));
+            ModelState.Remove(nameof(Sach.MaTheLoai));
+
+            if (ModelState.IsValid)
+            {
+                // Cập nhật các trường được phép, không ghi đè dữ liệu
+                // không có trong biểu mẫu.
+                sachTrongDb.TenSach = sach.TenSach;
+                sachTrongDb.TacGia = sach.TacGia;
+                sachTrongDb.NhaXuatBan = sach.NhaXuatBan;
+                sachTrongDb.NamXuatBan = sach.NamXuatBan;
+                sachTrongDb.SoLuong = sach.SoLuong;
+                sachTrongDb.SoLuongCon = sach.SoLuongCon;
+                sachTrongDb.GiaSach = sach.GiaSach;
+                sachTrongDb.MoTa = sach.MoTa;
+                sachTrongDb.TrangThai = sach.TrangThai;
+                sachTrongDb.MaTheLoai = sach.MaTheLoai;
+
+                await _context.SaveChangesAsync();
+
+                TempData["Success"] = "Cập nhật sách thành công.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            await NapDanhSachTheLoaiAsync();
+            ViewBag.TenTheLoaiHienTai = tenTheLoai?.Trim();
+
+            return View(sach);
+        }
+
+        // GET: Sach/Delete/5
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var sach = await _context.Sachs
+                .Include(s => s.TheLoai)
+                .FirstOrDefaultAsync(s => s.MaSach == id);
+
+            if (sach == null)
+            {
+                return NotFound();
+            }
+
+            return View(sach);
+        }
+
+        // POST: Sach/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var sach = await _context.Sachs.FindAsync(id);
+
+            if (sach != null)
+            {
+                _context.Sachs.Remove(sach);
                 await _context.SaveChangesAsync();
             }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!SachExists(sach.MaSach))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+
+            TempData["Success"] = "Xóa sách thành công.";
             return RedirectToAction(nameof(Index));
         }
-        ViewData["MaTheLoai"] = new SelectList(_context.TheLoais, "MaTheLoai", "TenTheLoai", sach.MaTheLoai);
-        return View(sach);
-    }
 
-    // GET: SACHS/Delete/5
-    public async Task<IActionResult> Delete(int? masach)
-    {
-        if (masach == null)
+        private async Task GanTheLoaiAsync(Sach sach, string? tenTheLoai)
         {
-            return NotFound();
+            if (string.IsNullOrWhiteSpace(tenTheLoai))
+            {
+                ModelState.AddModelError(
+                    "TenTheLoai",
+                    "Vui lòng nhập hoặc chọn thể loại.");
+                return;
+            }
+
+            var tenChuanHoa = tenTheLoai.Trim();
+
+            var theLoai = await _context.TheLoais
+                .FirstOrDefaultAsync(t =>
+                    t.TenTheLoai.ToLower() == tenChuanHoa.ToLower());
+
+            if (theLoai == null)
+            {
+                theLoai = new TheLoai
+                {
+                    TenTheLoai = tenChuanHoa,
+                    TrangThai = true
+                };
+
+                _context.TheLoais.Add(theLoai);
+                await _context.SaveChangesAsync();
+            }
+
+            sach.MaTheLoai = theLoai.MaTheLoai;
         }
 
-        var sach = await _context.Set<Sach>()
-            .Include(s => s.TheLoai)
-            .FirstOrDefaultAsync(m => m.MaSach == masach);
-
-        if (sach == null)
+        private async Task KiemTraDuLieuSachAsync(Sach sach)
         {
-            return NotFound();
+            if (sach.SoLuong < 0)
+            {
+                ModelState.AddModelError(
+                    nameof(Sach.SoLuong),
+                    "Số lượng tổng không được âm.");
+            }
+
+            if (sach.SoLuongCon < 0 || sach.SoLuongCon > sach.SoLuong)
+            {
+                ModelState.AddModelError(
+                    nameof(Sach.SoLuongCon),
+                    "Số lượng còn phải từ 0 đến số lượng tổng.");
+            }
+
+            if (sach.GiaSach <= 0)
+            {
+                ModelState.AddModelError(
+                    nameof(Sach.GiaSach),
+                    "Giá sách phải lớn hơn 0.");
+            }
+
+            if (sach.NamXuatBan > DateTime.Now.Year || sach.NamXuatBan < 1000)
+            {
+                ModelState.AddModelError(
+                    nameof(Sach.NamXuatBan),
+                    "Năm xuất bản không hợp lệ.");
+            }
+
+            await Task.CompletedTask;
         }
 
-        return View(sach);
-    }
-
-    // POST: SACHS/Delete/5
-    [HttpPost, ActionName("Delete")]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> DeleteConfirmed(int masach)
-    {
-        var sach = await _context.Set<Sach>().FindAsync(masach);
-        if (sach != null)
+        private async Task NapDanhSachTheLoaiAsync()
         {
-            _context.Set<Sach>().Remove(sach);
-            await _context.SaveChangesAsync();
+            ViewBag.DanhSachTheLoai = await _context.TheLoais
+                .Select(t => t.TenTheLoai)
+                .Distinct()
+                .OrderBy(t => t)
+                .ToListAsync();
         }
-        return RedirectToAction(nameof(Index));
-    }
 
-    private bool SachExists(int id)
-    {
-        return _context.Set<Sach>().Any(e => e.MaSach == id);
+        private bool SachExists(int id)
+        {
+            return _context.Sachs.Any(s => s.MaSach == id);
+        }
     }
 }

@@ -1,3 +1,4 @@
+
 using Microsoft.EntityFrameworkCore;
 using QuanLyThuVien_UNETI04_TI17A1HN.Data;
 
@@ -14,18 +15,27 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN
                 options.UseSqlServer(
                     builder.Configuration.GetConnectionString("DefaultConnection")));
 
-            // Add services to the container.
             builder.Services.AddControllersWithViews();
+
+            // Session dùng chung cho Module 1 và Module 3
+            builder.Services.AddDistributedMemoryCache();
+            builder.Services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(30);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+            });
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");
             }
 
             app.UseRouting();
+
+            app.UseSession();
 
             app.UseAuthorization();
 

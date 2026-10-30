@@ -1,83 +1,153 @@
+
 @model IEnumerable<QuanLyThuVien_UNETI04_TI17A1HN.Models.DocGia>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Quản lý độc giả";
+    var danhSach = Model ?? Enumerable.Empty<QuanLyThuVien_UNETI04_TI17A1HN.Models.DocGia>();
 }
 
-<h1>Index</h1>
+<div class="container-fluid py-3">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-primary">QUẢN LÝ ĐỘC GIẢ</h2>
+            <p class="text-muted mb-0">Danh sách và thông tin độc giả thư viện</p>
+        </div>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.MaTaiKhoan)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.HoTen)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.NgaySinh)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.GioiTinh)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.SoDienThoai)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Email)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DiaChi)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.NgayDangKy)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.TrangThai)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(model => item.MaTaiKhoan)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.HoTen)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.NgaySinh)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.GioiTinh)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.SoDienThoai)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.Email)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.DiaChi)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.NgayDangKy)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.TrangThai)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.MaDocGia">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.MaDocGia">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.MaDocGia">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Thêm độc giả
+        </a>
+    </div>
+
+    <!-- Tìm kiếm và lọc trạng thái từ Module 3 -->
+    <form asp-action="Index" method="get" class="row g-2 mb-3">
+        <div class="col-md-5">
+            <input type="text"
+                   name="keyword"
+                   value="@ViewBag.Keyword"
+                   class="form-control"
+                   placeholder="Tìm theo họ tên, SĐT, email..." />
+        </div>
+
+        <div class="col-md-3">
+            <select name="trangThai" class="form-select">
+                <option value="">-- Tất cả trạng thái --</option>
+                @if ((string?)ViewBag.TrangThai == "Hoạt động")
+                {
+                    <option value="Hoạt động" selected>Hoạt động</option>
+                }
+                else
+                {
+                    <option value="Hoạt động">Hoạt động</option>
+                }
+
+                @if ((string?)ViewBag.TrangThai == "Khóa")
+                {
+                    <option value="Khóa" selected>Khóa</option>
+                }
+                else
+                {
+                    <option value="Khóa">Khóa</option>
+                }
+
+                @if ((string?)ViewBag.TrangThai == "Tạm khóa")
+                {
+                    <option value="Tạm khóa" selected>Tạm khóa</option>
+                }
+                else
+                {
+                    <option value="Tạm khóa">Tạm khóa</option>
+                }
+            </select>
+        </div>
+
+        <div class="col-md-4">
+            <button type="submit" class="btn btn-secondary">Tìm kiếm</button>
+            <a asp-action="Index" class="btn btn-outline-secondary">Xóa lọc</a>
+        </div>
+    </form>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover align-middle">
+                    <thead class="table-primary">
+                        <tr>
+                            <th>Mã độc giả</th>
+                            <th>Tài khoản</th>
+                            <th>Họ và tên</th>
+                            <th>Ngày sinh</th>
+                            <th>Giới tính</th>
+                            <th>Số điện thoại</th>
+                            <th>Email</th>
+                            <th>Địa chỉ</th>
+                            <th>Ngày đăng ký</th>
+                            <th>Trạng thái</th>
+                            <th style="min-width: 160px;">Thao tác</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @if (danhSach.Any())
+                        {
+                            @foreach (var item in danhSach)
+                            {
+                                <tr>
+                                    <td>@item.MaDocGia</td>
+                                    <td>@(item.TaiKhoan?.TenDangNhap ?? "-")</td>
+                                    <td>@item.HoTen</td>
+                                    <td>
+                                        @(item.NgaySinh.HasValue
+                                            ? item.NgaySinh.Value.ToString("dd/MM/yyyy")
+                                            : "")
+                                    </td>
+                                    <td>@item.GioiTinh</td>
+                                    <td>@item.SoDienThoai</td>
+                                    <td>@item.Email</td>
+                                    <td>@item.DiaChi</td>
+                                    <td>@item.NgayDangKy.ToString("dd/MM/yyyy")</td>
+                                    <td>
+                                        @if (item.TrangThai == "Hoạt động")
+                                        {
+                                            <span class="badge bg-success">Hoạt động</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">@item.TrangThai</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="d-flex gap-1">
+                                            <a asp-action="Details"
+                                               asp-route-id="@item.MaDocGia"
+                                               class="btn btn-sm btn-info text-white">
+                                                Chi tiết
+                                            </a>
+
+                                            <a asp-action="Edit"
+                                               asp-route-id="@item.MaDocGia"
+                                               class="btn btn-sm btn-warning">
+                                                Sửa
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="11" class="text-center py-4 text-muted">
+                                    Không có độc giả hoặc không tìm thấy kết quả phù hợp.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="text-muted mt-2">
+                Tổng số độc giả: <strong>@danhSach.Count()</strong>
+            </div>
+        </div>
+    </div>
+</div>

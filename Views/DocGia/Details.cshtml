@@ -1,80 +1,206 @@
+
 @model QuanLyThuVien_UNETI04_TI17A1HN.Models.DocGia
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Chi tiết độc giả";
 }
 
-<h1>Details</h1>
+<div class="container-fluid py-3">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-primary">CHI TIẾT ĐỘC GIẢ</h2>
+            <p class="text-muted mb-0">Thông tin độc giả và lịch sử mượn sách</p>
+        </div>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            Quay lại danh sách
+        </a>
+    </div>
 
-<div>
-    <h4>DocGia</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.MaTaiKhoan)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.MaTaiKhoan)
-        </dd>
-    </dl>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.HoTen)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.HoTen)
-        </dd>
-    </dl>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.NgaySinh)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.NgaySinh)
-        </dd>
-    </dl>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.GioiTinh)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.GioiTinh)
-        </dd>
-    </dl>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.SoDienThoai)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.SoDienThoai)
-        </dd>
-    </dl>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Email)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Email)
-        </dd>
-    </dl>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.DiaChi)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.DiaChi)
-        </dd>
-    </dl>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.NgayDangKy)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.NgayDangKy)
-        </dd>
-    </dl>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TrangThai)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TrangThai)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.MaDocGia">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Thông tin cá nhân</h5>
+        </div>
+
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">Mã độc giả</dt>
+                <dd class="col-sm-9">@Model.MaDocGia</dd>
+
+                <dt class="col-sm-3">Mã tài khoản</dt>
+                <dd class="col-sm-9">@Model.MaTaiKhoan</dd>
+
+                <dt class="col-sm-3">Tên đăng nhập</dt>
+                <dd class="col-sm-9">@(Model.TaiKhoan?.TenDangNhap ?? "-")</dd>
+
+                <dt class="col-sm-3">Họ và tên</dt>
+                <dd class="col-sm-9">@Model.HoTen</dd>
+
+                <dt class="col-sm-3">Ngày sinh</dt>
+                <dd class="col-sm-9">
+                    @(Model.NgaySinh?.ToString("dd/MM/yyyy") ?? "-")
+                </dd>
+
+                <dt class="col-sm-3">Giới tính</dt>
+                <dd class="col-sm-9">@(Model.GioiTinh ?? "-")</dd>
+
+                <dt class="col-sm-3">Số điện thoại</dt>
+                <dd class="col-sm-9">@(Model.SoDienThoai ?? "-")</dd>
+
+                <dt class="col-sm-3">Email</dt>
+                <dd class="col-sm-9">@(Model.Email ?? "-")</dd>
+
+                <dt class="col-sm-3">Địa chỉ</dt>
+                <dd class="col-sm-9">@(Model.DiaChi ?? "-")</dd>
+
+                <dt class="col-sm-3">Ngày đăng ký</dt>
+                <dd class="col-sm-9">@Model.NgayDangKy.ToString("dd/MM/yyyy")</dd>
+
+                <dt class="col-sm-3">Trạng thái hiện tại</dt>
+                <dd class="col-sm-9">
+                    @if (Model.TrangThai == "Hoạt động")
+                    {
+                        <span class="badge bg-success">Hoạt động</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">@Model.TrangThai</span>
+                    }
+                </dd>
+            </dl>
+
+            <hr />
+
+            <form asp-action="CapNhatTrangThai"
+                  asp-route-id="@Model.MaDocGia"
+                  method="post"
+                  class="row g-2 align-items-center">
+                @Html.AntiForgeryToken()
+
+                <div class="col-auto">
+                    <label for="trangThai" class="form-label mb-0 fw-bold">
+                        Cập nhật trạng thái:
+                    </label>
+                </div>
+
+                <div class="col-auto">
+                    <select id="trangThai" name="trangThai" class="form-select">
+                        @if (Model.TrangThai == "Hoạt động")
+                        {
+                            <option value="Hoạt động" selected>Hoạt động</option>
+                        }
+                        else
+                        {
+                            <option value="Hoạt động">Hoạt động</option>
+                        }
+
+                        @if (Model.TrangThai == "Khóa")
+                        {
+                            <option value="Khóa" selected>Khóa</option>
+                        }
+                        else
+                        {
+                            <option value="Khóa">Khóa</option>
+                        }
+
+                        @if (Model.TrangThai == "Tạm khóa")
+                        {
+                            <option value="Tạm khóa" selected>Tạm khóa</option>
+                        }
+                        else
+                        {
+                            <option value="Tạm khóa">Tạm khóa</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-primary">
+                        Lưu trạng thái
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Lịch sử phiếu mượn: giữ chức năng Module 3 -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">
+                Lịch sử phiếu mượn (@(Model.PhieuMuons?.Count ?? 0) phiếu)
+            </h5>
+        </div>
+
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover align-middle">
+                    <thead class="table-primary">
+                        <tr>
+                            <th>Mã phiếu</th>
+                            <th>Ngày mượn</th>
+                            <th>Hạn trả</th>
+                            <th>Sách mượn</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @if (Model.PhieuMuons == null || !Model.PhieuMuons.Any())
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-3">
+                                    Độc giả chưa có phiếu mượn nào.
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var p in Model.PhieuMuons)
+                            {
+                                <tr>
+                                    <td>#@p.MaPhieuMuon</td>
+                                    <td>@p.NgayMuon.ToString("dd/MM/yyyy")</td>
+                                    <td>@p.HanTra.ToString("dd/MM/yyyy")</td>
+                                    <td>
+                                        @if (p.ChiTietPhieuMuons != null &&
+                                             p.ChiTietPhieuMuons.Any())
+                                        {
+                                            @string.Join(", ",
+                                                p.ChiTietPhieuMuons.Select(ct =>
+                                                    (ct.Sach?.TenSach ?? ("#" + ct.MaSach))
+                                                    + " (SL: " + ct.SoLuongMuon + ")"))
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Chưa có chi tiết sách</span>
+                                        }
+                                    </td>
+                                    <td>@p.TrangThai</td>
+                                    <td>
+                                        <a asp-controller="PhieuMuon"
+                                           asp-action="Details"
+                                           asp-route-id="@p.MaPhieuMuon"
+                                           class="btn btn-sm btn-info text-white">
+                                            Xem phiếu
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <a asp-action="Edit"
+       asp-route-id="@Model.MaDocGia"
+       class="btn btn-warning">
+        Sửa thông tin
+    </a>
+
+    <a asp-action="Index"
+       class="btn btn-secondary">
+        Quay lại danh sách
+    </a>
 </div>
