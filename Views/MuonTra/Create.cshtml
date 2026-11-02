@@ -1,31 +1,78 @@
-﻿@{
+﻿
+@model IEnumerable<QuanLyThuVien_UNETI04_TI17A1HN.Models.Sach>
+
+@using Microsoft.AspNetCore.Mvc.Rendering
+@using QuanLyThuVien_UNETI04_TI17A1HN.Models
+
+@{
     ViewData["Title"] = "Lập phiếu mượn";
-    var danhSachSach = ViewBag.Sach as List<QuanLyThuVien_UNETI04_TI17A1HN.Models.Sach>;
+
+    var docGias = ViewBag.DocGias as SelectList;
+
+    var theLoais = ViewBag.TheLoais as IEnumerable<TheLoai>
+        ?? Enumerable.Empty<TheLoai>();
+
+    var sachList = Model
+        ?? Enumerable.Empty<Sach>();
+
+    int maDocGiaDaChon = ViewBag.MaDocGia == null
+        ? 0 : (int)ViewBag.MaDocGia;
+
+    int maTheLoaiDaChon = ViewBag.MaTheLoai == null
+        ? 0 : (int)ViewBag.MaTheLoai;
+
+    int maSachDaChon = ViewBag.MaSach == null
+        ? 0 : (int)ViewBag.MaSach;
+
+    int soLuongDaChon = ViewBag.SoLuong == null
+        ? 1 : (int)ViewBag.SoLuong;
+
+    var ngayMuon = ViewBag.NgayMuon is DateTime nm
+        && nm != DateTime.MinValue
+        ? nm.ToString("yyyy-MM-dd")
+        : DateTime.Today.ToString("yyyy-MM-dd");
+
+    var hanTra = ViewBag.HanTra is DateTime ht
+        && ht != DateTime.MinValue
+        ? ht.ToString("yyyy-MM-dd")
+        : DateTime.Today.AddDays(14).ToString("yyyy-MM-dd");
 }
 
-<div class="container py-4">
+<div class="container mt-4">
 
-    <div class="mb-4">
-        <h2 class="fw-bold">LẬP PHIẾU MƯỢN SÁCH</h2>
-        <p class="text-muted">
-            Chọn độc giả, sách và số lượng cần mượn.
-        </p>
+    <!-- TIÊU ĐỀ -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold">Lập phiếu mượn</h2>
+            <p class="text-muted mb-0">
+                Nhập thông tin để tạo phiếu mượn sách
+            </p>
+        </div>
+
+        <a asp-controller="MuonTra"
+           asp-action="Index"
+           class="btn btn-secondary">
+            <i class="bi bi-arrow-left me-1"></i>
+            Quay lại
+        </a>
     </div>
 
+    <!-- THÔNG BÁO LỖI -->
     @if (TempData["Loi"] != null)
     {
-        <div class="alert alert-danger">
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
             @TempData["Loi"]
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert">
+            </button>
         </div>
     }
 
     <div class="card shadow-sm border-0">
-
-        <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">Thông tin phiếu mượn</h5>
-        </div>
-
-        <div class="card-body">
+        <div class="card-body p-4">
 
             <form asp-controller="MuonTra"
                   asp-action="Create"
@@ -33,10 +80,11 @@
 
                 @Html.AntiForgeryToken()
 
-                <!-- ĐỘC GIẢ -->
+                <!-- CHỌN ĐỘC GIẢ -->
                 <div class="mb-3">
 
-                    <label class="form-label fw-semibold">
+                    <label class="form-label fw-bold">
+                        <i class="bi bi-person me-1"></i>
                         Độc giả
                     </label>
 
@@ -48,58 +96,101 @@
                             -- Chọn độc giả --
                         </option>
 
-                        @foreach (var docGia in (SelectList)ViewBag.DocGias)
+                        @if (docGias != null)
                         {
-                            <option value="@docGia.Value">
-                                @docGia.Text
+                            foreach (var docGia in docGias)
+                            {
+                                <option value="@docGia.Value"
+                                        selected="@(docGia.Value == maDocGiaDaChon.ToString() ? "selected" : null)">
+                                    @docGia.Text
+                                </option>
+                            }
+                        }
+
+                    </select>
+                </div>
+
+                <!-- CHỌN THỂ LOẠI -->
+                <div class="mb-3">
+
+                    <label class="form-label fw-bold">
+                        <i class="bi bi-bookmark-fill me-1"></i>
+                        Loại sách
+                    </label>
+
+                    <select name="MaTheLoai"
+                            id="MaTheLoai"
+                            class="form-select"
+                            required
+                            onchange="locSachTheoTheLoai()">
+
+                        <option value="">
+                            -- Chọn loại sách --
+                        </option>
+
+                        @foreach (var theLoai in theLoais)
+                        {
+                            <option value="@theLoai.MaTheLoai"
+                                    selected="@(theLoai.MaTheLoai == maTheLoaiDaChon ? "selected" : null)">
+                                @theLoai.TenTheLoai
                             </option>
                         }
 
                     </select>
 
+                    @if (!theLoais.Any())
+                    {
+                        <small class="text-danger">
+                            Hiện chưa có thể loại sách đang hoạt động.
+                        </small>
+                    }
+
                 </div>
 
-
-                <!-- SÁCH -->
+                <!-- CHỌN SÁCH -->
                 <div class="mb-3">
 
-                    <label class="form-label fw-semibold">
-                        Sách
+                    <label class="form-label fw-bold">
+                        <i class="bi bi-book me-1"></i>
+                        Tên sách
                     </label>
 
                     <select name="MaSach"
                             id="MaSach"
                             class="form-select"
                             required
+                            disabled
                             onchange="capNhatSoLuong()">
 
                         <option value="">
-                            -- Chọn sách --
+                            -- Vui lòng chọn loại sách trước --
                         </option>
 
-                        @if (danhSachSach != null)
+                        @foreach (var sach in sachList)
                         {
-                            foreach (var sach in danhSachSach)
-                            {
-                                <option value="@sach.MaSach"
-                                        data-soluong="@sach.SoLuongCon">
+                            <option value="@sach.MaSach"
+                                    data-theloai="@sach.MaTheLoai"
+                                    data-soluong="@sach.SoLuongCon"
+                                    selected="@(sach.MaSach == maSachDaChon ? "selected" : null)">
 
-                                    @sach.TenSach
-                                    - Còn @sach.SoLuongCon cuốn
+                                @sach.TenSach
+                                (Còn @sach.SoLuongCon cuốn)
 
-                                </option>
-                            }
+                            </option>
                         }
 
                     </select>
 
-                </div>
+                    <small class="text-muted" id="thongTinSach">
+                        Vui lòng chọn loại sách để hiển thị danh sách sách.
+                    </small>
 
+                </div>
 
                 <!-- SỐ LƯỢNG -->
                 <div class="mb-3">
 
-                    <label class="form-label fw-semibold">
+                    <label class="form-label fw-bold">
                         Số lượng mượn
                     </label>
 
@@ -107,40 +198,89 @@
                            name="SoLuong"
                            id="SoLuong"
                            class="form-control"
-                           value="1"
                            min="1"
+                           value="@soLuongDaChon"
                            required />
 
-                    <small id="thongBaoSoLuong"
-                           class="text-muted">
-                        Vui lòng chọn sách.
+                    <small class="text-muted"
+                           id="thongTinSoLuong">
+                        Vui lòng chọn sách trước.
                     </small>
 
                 </div>
 
+                <hr class="my-4" />
 
-                <!-- THỜI HẠN -->
-                <div class="alert alert-info">
+                <!-- THỜI GIAN MƯỢN -->
+                <h5 class="fw-bold mb-3">
+                    <i class="bi bi-calendar-event me-2"></i>
+                    Thời gian mượn sách
+                </h5>
 
-                    <strong>Thời hạn mượn:</strong>
+                <div class="row">
 
-                    14 ngày kể từ ngày lập phiếu.
+                    <div class="col-md-6 mb-3">
+
+                        <label class="form-label fw-bold">
+                            Ngày mượn
+                        </label>
+
+                        <input type="date"
+                               name="NgayMuon"
+                               id="NgayMuon"
+                               class="form-control"
+                               value="@ngayMuon"
+                               required
+                               onchange="capNhatHanTra()" />
+
+                        <small class="text-muted">
+                            Có thể chọn ngày trong quá khứ.
+                        </small>
+
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+
+                        <label class="form-label fw-bold">
+                            Ngày trả dự kiến
+                        </label>
+
+                        <input type="date"
+                               name="HanTra"
+                               id="HanTra"
+                               class="form-control"
+                               value="@hanTra"
+                               min="@ngayMuon"
+                               required />
+
+                        <small class="text-muted">
+                            Mặc định là 14 ngày sau ngày mượn.
+                            Bạn có thể chọn ngày khác.
+                        </small>
+
+                    </div>
 
                 </div>
 
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Ngày trả dự kiến là hạn phải trả sách,
+                    không phải ngày trả thực tế.
+                </div>
 
-                <!-- NÚT -->
-                <div class="d-flex gap-2">
+                <!-- NÚT THAO TÁC -->
+                <div class="d-flex gap-2 mt-3">
 
                     <button type="submit"
                             class="btn btn-primary">
+                        <i class="bi bi-plus-circle me-1"></i>
                         Lập phiếu mượn
                     </button>
 
                     <a asp-controller="MuonTra"
                        asp-action="Index"
-                       class="btn btn-secondary">
-                        Quay lại
+                       class="btn btn-outline-secondary">
+                        Hủy
                     </a>
 
                 </div>
@@ -148,53 +288,186 @@
             </form>
 
         </div>
-
     </div>
 
 </div>
 
-
 <script>
 
-    function capNhatSoLuong() {
+    // ==========================================
+    // LỌC SÁCH THEO THỂ LOẠI
+    // ==========================================
 
-        var select = document.getElementById("MaSach");
+    function locSachTheoTheLoai() {
 
-        var option =
-            select.options[select.selectedIndex];
+        const theLoai = document.getElementById("MaTheLoai");
+        const sach = document.getElementById("MaSach");
+        const thongTin = document.getElementById("thongTinSach");
 
-        var soLuong =
-            option.getAttribute("data-soluong");
+        const maTheLoai = theLoai.value;
 
-        var input =
-            document.getElementById("SoLuong");
+        // Xóa lựa chọn sách cũ
+        sach.value = "";
 
-        var thongBao =
-            document.getElementById("thongBaoSoLuong");
+        // Nếu chưa chọn thể loại
+        if (!maTheLoai) {
 
-        if (!soLuong) {
+            sach.disabled = true;
 
-            input.max = "";
-            input.value = 1;
+            sach.options[0].text =
+                "-- Vui lòng chọn loại sách trước --";
 
-            thongBao.innerText =
-                "Vui lòng chọn sách.";
+            for (let i = 1; i < sach.options.length; i++) {
+                sach.options[i].hidden = true;
+            }
+
+            thongTin.textContent =
+                "Vui lòng chọn loại sách để hiển thị danh sách sách.";
+
+            capNhatSoLuong();
 
             return;
         }
 
-        input.max = soLuong;
+        let soSach = 0;
 
-        if (parseInt(input.value) > parseInt(soLuong)) {
+        // Lọc các sách thuộc thể loại đã chọn
+        for (let i = 1; i < sach.options.length; i++) {
 
-            input.value = soLuong;
+            const option = sach.options[i];
+
+            const cungTheLoai =
+                option.dataset.theloai === maTheLoai;
+
+            option.hidden = !cungTheLoai;
+
+            if (cungTheLoai) {
+                soSach++;
+            }
         }
 
-        thongBao.innerText =
-            "Sách hiện còn " +
-            soLuong +
-            " cuốn.";
+        if (soSach > 0) {
 
+            sach.disabled = false;
+
+            sach.options[0].text = "-- Chọn sách --";
+
+            thongTin.textContent =
+                "Có " + soSach +
+                " đầu sách thuộc thể loại này.";
+
+        } else {
+
+            sach.disabled = true;
+
+            sach.options[0].text =
+                "-- Thể loại này hiện không có sách còn hàng --";
+
+            thongTin.textContent =
+                "Không có sách đang phục vụ và còn hàng thuộc thể loại này.";
+        }
+
+        capNhatSoLuong();
     }
+
+
+    // ==========================================
+    // CẬP NHẬT SỐ LƯỢNG SÁCH
+    // ==========================================
+
+    function capNhatSoLuong() {
+
+        const sach = document.getElementById("MaSach");
+        const soLuong = document.getElementById("SoLuong");
+        const thongTin = document.getElementById("thongTinSoLuong");
+
+        const option = sach.options[sach.selectedIndex];
+
+        if (!option || !option.value || sach.disabled) {
+
+            soLuong.max = "";
+
+            thongTin.textContent =
+                "Vui lòng chọn sách trước.";
+
+            return;
+        }
+
+        const tonKho =
+            parseInt(option.dataset.soluong || "0");
+
+        soLuong.max = tonKho;
+
+        if (parseInt(soLuong.value) > tonKho) {
+            soLuong.value = tonKho;
+        }
+
+        if (parseInt(soLuong.value) < 1 ||
+            isNaN(parseInt(soLuong.value))) {
+            soLuong.value = 1;
+        }
+
+        thongTin.textContent =
+            "Số lượng sách hiện còn: " + tonKho + " cuốn.";
+    }
+
+
+    // ==========================================
+    // CẬP NHẬT HẠN TRẢ THEO NGÀY MƯỢN
+    // ==========================================
+
+    function capNhatHanTra() {
+
+        const ngayMuonInput =
+            document.getElementById("NgayMuon");
+
+        const hanTraInput =
+            document.getElementById("HanTra");
+
+        if (!ngayMuonInput.value) {
+            return;
+        }
+
+        const ngayMuon =
+            new Date(ngayMuonInput.value + "T00:00:00");
+
+        ngayMuon.setDate(ngayMuon.getDate() + 14);
+
+        const nam = ngayMuon.getFullYear();
+
+        const thang =
+            String(ngayMuon.getMonth() + 1).padStart(2, "0");
+
+        const ngay =
+            String(ngayMuon.getDate()).padStart(2, "0");
+
+        const ngayMacDinh =
+            `${nam}-${thang}-${ngay}`;
+
+        hanTraInput.min = ngayMuonInput.value;
+
+        hanTraInput.value = ngayMacDinh;
+    }
+
+
+    // ==========================================
+    // KHỞI TẠO KHI MỞ TRANG
+    // ==========================================
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        locSachTheoTheLoai();
+
+        capNhatSoLuong();
+
+        const ngayMuon =
+            document.getElementById("NgayMuon");
+
+        const hanTra =
+            document.getElementById("HanTra");
+
+        hanTra.min = ngayMuon.value;
+
+    });
 
 </script>
