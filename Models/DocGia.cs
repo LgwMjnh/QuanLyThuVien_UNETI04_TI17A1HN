@@ -1,4 +1,3 @@
-
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
@@ -10,6 +9,10 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Models
         [Key]
         [Display(Name = "Mã độc giả")]
         public int MaDocGia { get; set; }
+
+        [NotMapped]
+        [Display(Name = "Mã độc giả")]
+        public string MaHienThi => $"DG{MaDocGia:D3}";
 
         [Display(Name = "Mã tài khoản")]
         public int MaTaiKhoan { get; set; }
