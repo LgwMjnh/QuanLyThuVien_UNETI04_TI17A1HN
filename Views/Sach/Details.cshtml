@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Chi tiết Sách";
+    var anhBia = string.IsNullOrWhiteSpace(Model.HinhAnh) ? "/images/books/default-cover.svg" : Model.HinhAnh;
 }
 
 <div class="container-fluid px-4">
@@ -11,9 +12,9 @@
         <li class="breadcrumb-item active">Chi tiết</li>
     </ol>
 
-    <div class="card mb-4">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="m-0 font-weight-bold text-primary">@Model.TenSach</h5>
+    <div class="card mb-4 shadow-sm border-0">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+            <h5 class="m-0 fw-bold text-primary">@Model.TenSach</h5>
             <div>
                 <a asp-action="Edit" asp-route-id="@Model.MaSach" class="btn btn-warning btn-sm">
                     <i class="bi bi-pencil"></i> Chỉnh sửa
@@ -24,62 +25,81 @@
             </div>
         </div>
         <div class="card-body">
-            <dl class="row">
-                <dt class="col-sm-3">Mã sách</dt>
-                <dd class="col-sm-9">@Model.MaSach</dd>
+            <div class="row g-4">
+                <div class="col-md-3 text-center">
+                    <img src="@anhBia"
+                         onerror="this.src='/images/books/default-cover.svg'"
+                         alt="@Model.TenSach"
+                         class="img-thumbnail shadow-sm mb-2"
+                         style="width: 210px; height: 290px; object-fit: cover; border-radius: 10px;" />
+                    <div class="mt-2">
+                        <span class="badge bg-primary-subtle text-primary font-monospace fs-6">
+                            #@Model.MaDinhDanh
+                        </span>
+                        <small class="text-muted d-block font-monospace mt-1">
+                            (@Model.MaTienTo + @Model.MaHauTo)
+                        </small>
+                    </div>
+                </div>
 
-                <dt class="col-sm-3">Tên sách</dt>
-                <dd class="col-sm-9 font-weight-bold">@Model.TenSach</dd>
+                <div class="col-md-9">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-3">Mã định danh sách</dt>
+                        <dd class="col-sm-9 font-monospace fw-bold text-primary">
+                            @Model.MaDinhDanh <span class="text-muted fw-normal">(@Model.MaTienTo + @Model.MaHauTo)</span>
+                        </dd>
 
-                <dt class="col-sm-3">Thể loại</dt>
-                <dd class="col-sm-9">@(Model.TheLoai?.TenTheLoai ?? "Chưa phân loại")</dd>
+                        <dt class="col-sm-3">Tên sách</dt>
+                        <dd class="col-sm-9 fw-bold">@Model.TenSach</dd>
 
-                <dt class="col-sm-3">Tác giả</dt>
-                <dd class="col-sm-9">@Model.TacGia</dd>
+                        <dt class="col-sm-3">Thể loại</dt>
+                        <dd class="col-sm-9">@(Model.TheLoai?.TenTheLoai ?? "Chưa phân loại")</dd>
 
-                <dt class="col-sm-3">Nhà xuất bản</dt>
-                <dd class="col-sm-9">@Model.NhaXuatBan</dd>
+                        <dt class="col-sm-3">Tác giả</dt>
+                        <dd class="col-sm-9">@Model.TacGia</dd>
 
-                <dt class="col-sm-3">Năm xuất bản</dt>
-                <dd class="col-sm-9">@Model.NamXuatBan</dd>
+                        <dt class="col-sm-3">Nhà xuất bản</dt>
+                        <dd class="col-sm-9">@Model.NhaXuatBan</dd>
 
-                <dt class="col-sm-3">Giá sách</dt>
-                <dd class="col-sm-9 text-danger font-weight-bold">@Model.GiaSach.ToString("N0") VNĐ</dd>
+                        <dt class="col-sm-3">Năm xuất bản</dt>
+                        <dd class="col-sm-9">@Model.NamXuatBan</dd>
 
-                <dt class="col-sm-3">Số lượng tổng</dt>
-                <dd class="col-sm-9">@Model.SoLuong</dd>
+                        <dt class="col-sm-3">Giá sách</dt>
+                        <dd class="col-sm-9 text-danger fw-bold">@Model.GiaSach.ToString("N0") VNĐ</dd>
 
-                <dt class="col-sm-3">Số lượng còn</dt>
-                <dd class="col-sm-9">
-                    @if (Model.SoLuongCon > 0)
-                    {
-                        <span class="badge bg-success">@Model.SoLuongCon cuốn</span>
-                    }
-                    else
-                    {
-                        <span class="badge bg-danger">Hết sách</span>
-                    }
-                </dd>
+                        <dt class="col-sm-3">Số lượng còn</dt>
+                        <dd class="col-sm-9">
+                            @if (Model.SoLuongCon > 0)
+                            {
+                                <span class="badge bg-success">@Model.SoLuongCon cuốn</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">Hết sách</span>
+                            }
+                        </dd>
 
-                <dt class="col-sm-3">Trạng thái</dt>
-                <dd class="col-sm-9">
-                    @if (Model.TrangThai == "Đang phục vụ")
-                    {
-                        <span class="badge bg-success">@Model.TrangThai</span>
-                    }
-                    else if (Model.TrangThai == "Tạm ngừng")
-                    {
-                        <span class="badge bg-warning text-dark">@Model.TrangThai</span>
-                    }
-                    else
-                    {
-                        <span class="badge bg-secondary">@Model.TrangThai</span>
-                    }
-                </dd>
+                        <dt class="col-sm-3">Trạng thái</dt>
+                        <dd class="col-sm-9">
+                            @if (Model.TrangThai == "Đang phục vụ")
+                            {
+                                <span class="badge bg-success">@Model.TrangThai</span>
+                            }
+                            else if (Model.TrangThai == "Tạm ngừng")
+                            {
+                                <span class="badge bg-warning text-dark">@Model.TrangThai</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">@Model.TrangThai</span>
+                            }
+                        </dd>
 
-                <dt class="col-sm-3">Mô tả nội dung</dt>
-                <dd class="col-sm-9">@(string.IsNullOrEmpty(Model.MoTa) ? "Chưa có mô tả" : Model.MoTa)</dd>
-            </dl>
+                        <dt class="col-sm-3">Mô tả nội dung</dt>
+                        <dd class="col-sm-9">@(string.IsNullOrEmpty(Model.MoTa) ? "Chưa có mô tả" : Model.MoTa)</dd>
+                    </dl>
+                </div>
+            </div>
         </div>
     </div>
 </div>

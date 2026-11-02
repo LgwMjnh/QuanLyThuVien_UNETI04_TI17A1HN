@@ -1,0 +1,139 @@
+@model QuanLyThuVien_UNETI04_TI17A1HN.Models.SachFilterViewModel
+
+@if (Model.DanhSachSach.Count == 0)
+{
+    <div class="card text-center p-4 border-0 bg-light">
+        <div class="mb-2">
+            <i class="bi bi-search display-6 text-muted"></i>
+        </div>
+        <h6 class="fw-bold text-secondary">Không tìm thấy sách phù hợp</h6>
+        <p class="text-muted small mb-0">Thử thay đổi từ khóa hoặc điều kiện lọc.</p>
+    </div>
+}
+else
+{
+    <div class="split-view-list" id="bookCardList">
+        @foreach (var item in Model.DanhSachSach)
+        {
+            var tenTheLoai = item.TheLoai?.TenTheLoai ?? "Chưa phân loại";
+            var trangThai = item.TrangThai ?? "Chưa xác định";
+            var anhBia = string.IsNullOrWhiteSpace(item.HinhAnh) ? "/images/books/default-cover.svg" : item.HinhAnh;
+
+            var badgeClass = trangThai == "Đang phục vụ"
+                ? "bg-success"
+                : trangThai == "Tạm ngừng"
+                    ? "bg-warning text-dark"
+                    : "bg-secondary";
+
+            <div class="p-3 mb-2 rounded-3 book-item-card"
+                 id="card-@item.MaSach"
+                 role="button"
+                 tabindex="0"
+                 onclick="selectBook(@item.MaSach)"
+                 data-id="@item.MaSach"
+                 data-code="@item.MaDinhDanh"
+                 data-prefix="@item.MaTienTo"
+                 data-suffix="@item.MaHauTo"
+                 data-cover="@anhBia"
+                 data-title="@item.TenSach"
+                 data-author="@item.TacGia"
+                 data-category="@tenTheLoai"
+                 data-publisher="@item.NhaXuatBan"
+                 data-year="@item.NamXuatBan"
+                 data-price="@item.GiaSach.ToString("N0")"
+                 data-rawprice="@item.GiaSach.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                 data-total="@item.SoLuong"
+                 data-remaining="@item.SoLuongCon"
+                 data-status="@trangThai"
+                 data-desc="@(string.IsNullOrWhiteSpace(item.MoTa) ? "Chưa có mô tả cho sách này." : item.MoTa)"
+                 data-edit-url="@Url.Action("Edit", "Sach", new { id = item.MaSach })"
+                 data-delete-url="@Url.Action("Delete", "Sach", new { id = item.MaSach })">
+
+                <div class="d-flex justify-content-between align-items-start gap-3">
+                    <div class="flex-shrink-0">
+                        <img src="@anhBia"
+                             onerror="this.src='/images/books/default-cover.svg'"
+                             alt="@item.TenSach"
+                             class="rounded-2 border shadow-sm"
+                             style="width: 56px; height: 78px; object-fit: cover;" />
+                    </div>
+
+                    <div class="flex-grow-1 overflow-hidden">
+                        <div class="d-flex align-items-center flex-wrap gap-1 mb-1">
+                            <span class="badge bg-light text-dark border font-monospace card-book-code">
+                                #@item.MaDinhDanh
+                            </span>
+                            <span class="badge bg-primary-subtle text-primary">@tenTheLoai</span>
+                            <span class="badge @badgeClass ms-auto">@trangThai</span>
+                        </div>
+
+                        <h6 class="fw-bold text-dark text-break mb-1 card-book-title">@item.TenSach</h6>
+                        <small class="text-muted d-block text-truncate">
+                            Tác giả: <strong class="text-dark card-book-author">@item.TacGia</strong>
+                        </small>
+                        <small class="text-muted d-block text-truncate">
+                            NXB: @item.NhaXuatBan • Năm: @item.NamXuatBan
+                        </small>
+                    </div>
+
+                    <div class="text-end flex-shrink-0">
+                        <span class="fw-bold text-success d-block">@item.GiaSach.ToString("N0") VNĐ</span>
+                        <small class="@(item.SoLuongCon == 0 ? "text-danger fw-bold" : "text-muted")">
+                            @(item.SoLuongCon == 0 ? "Hết sách" : $"Còn {item.SoLuongCon} cuốn")
+                        </small>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2 pt-3 border-top mt-2">
+        <small class="text-muted" id="filterCountStatus">
+            Hiển thị <strong>@Model.DanhSachSach.Count</strong> / <strong>@Model.TotalItems</strong> đầu sách (Trang @Model.PageIndex / @Model.TotalPages)
+        </small>
+
+        @if (Model.TotalPages > 1)
+        {
+            <nav aria-label="Phân trang sách">
+                <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item @(!Model.HasPreviousPage ? "disabled" : "")">
+                        <button type="button" class="page-link" onclick="goToPage(1)" aria-label="Trang đầu">
+                            &laquo;
+                        </button>
+                    </li>
+                    <li class="page-item @(!Model.HasPreviousPage ? "disabled" : "")">
+                        <button type="button" class="page-link" onclick="goToPage(@(Model.PageIndex - 1))">
+                            Trước
+                        </button>
+                    </li>
+
+                    @{
+                        int startPage = Math.Max(1, Model.PageIndex - 2);
+                        int endPage = Math.Min(Model.TotalPages, Model.PageIndex + 2);
+                    }
+
+                    @for (int p = startPage; p <= endPage; p++)
+                    {
+                        var currentPageNumber = p;
+                        <li class="page-item @(p == Model.PageIndex ? "active" : "")">
+                            <button type="button" class="page-link" onclick="goToPage(@currentPageNumber)">
+                                @p
+                            </button>
+                        </li>
+                    }
+
+                    <li class="page-item @(!Model.HasNextPage ? "disabled" : "")">
+                        <button type="button" class="page-link" onclick="goToPage(@(Model.PageIndex + 1))">
+                            Sau
+                        </button>
+                    </li>
+                    <li class="page-item @(!Model.HasNextPage ? "disabled" : "")">
+                        <button type="button" class="page-link" onclick="goToPage(@Model.TotalPages)" aria-label="Trang cuối">
+                            &raquo;
+                        </button>
+                    </li>
+                </ul>
+            </nav>
+        }
+    </div>
+}
