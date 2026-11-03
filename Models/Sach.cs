@@ -1,5 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace QuanLyThuVien_UNETI04_TI17A1HN.Models
 {
@@ -57,9 +58,28 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Models
         [Display(Name = "Trạng thái")]
         public string TrangThai { get; set; } = "Đang phục vụ";
 
-
-        // Navigation property
         [ForeignKey("MaTheLoai")]
+        [ValidateNever]
         public virtual TheLoai? TheLoai { get; set; }
+
+        [NotMapped]
+        [ValidateNever]
+        [Display(Name = "Mã tiền tố")]
+        public string? MaTienTo { get; set; } = "T9LS5";
+
+        [NotMapped]
+        [ValidateNever]
+        [Display(Name = "Mã hậu tố")]
+        public string MaHauTo => MaSach > 0 ? MaSach.ToString("D5") : "00001";
+
+        [NotMapped]
+        [ValidateNever]
+        [Display(Name = "Mã sách định danh")]
+        public string MaDinhDanh => $"{MaTienTo ?? "T9LS5"}{MaHauTo}";
+
+        [NotMapped]
+        [ValidateNever]
+        [Display(Name = "Ảnh bìa")]
+        public string? HinhAnh { get; set; } = "/images/books/default-cover.svg";
     }
 }

@@ -1,8 +1,9 @@
-
 @model QuanLyThuVien_UNETI04_TI17A1HN.Models.Sach
 
 @{
     ViewData["Title"] = "Thêm sách mới";
+    var maTienTo = ViewBag.MaTienToHienTai as string ?? "T9LS5";
+    var maHauTo = ViewBag.MaHauToTiepTheo as string ?? "00021";
 }
 
 <div class="container-fluid px-4">
@@ -15,128 +16,207 @@
         <li class="breadcrumb-item active">Thêm mới</li>
     </ol>
 
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5 class="m-0 font-weight-bold text-primary">Thông tin sách</h5>
+    <div class="card mb-4 shadow-sm border-0">
+        <div class="card-header bg-light">
+            <h5 class="m-0 fw-bold text-primary">Thông tin sách & Ảnh bìa</h5>
         </div>
 
         <div class="card-body">
-            <form asp-action="Create" method="post">
+            <form asp-action="Create" method="post" enctype="multipart/form-data">
                 @Html.AntiForgeryToken()
 
                 <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label asp-for="TenSach" class="form-label"></label>
-                        <input asp-for="TenSach" class="form-control"
-                               placeholder="Nhập tên sách..." />
-                        <span asp-validation-for="TenSach" class="text-danger"></span>
+                <div class="row g-4">
+                    <div class="col-lg-8">
+                        <div class="p-3 mb-3 rounded-3 bg-light border">
+                            <label class="form-label fw-bold text-primary mb-2">
+                                <i class="bi bi-upc-scan me-1"></i> Mã định danh sách tự động 
+                            </label>
+                            <div class="row g-2 align-items-center">
+                                <div class="col-sm-4">
+                                    <small class="text-muted d-block mb-1">Nửa 1 (Mã 5 ký tự)</small>
+                                    <div class="input-group input-group-sm">
+                                        <input type="text"
+                                               name="maTienTo"
+                                               id="maTienToInput"
+                                               maxlength="5"
+                                               value="@maTienTo"
+                                               class="form-control fw-bold font-monospace text-uppercase"
+                                               required />
+                                        <button type="button" class="btn btn-outline-primary" id="btnRandomPrefix" title="Đổi mã ngẫu nhiên">
+                                            <i class="bi bi-shuffle"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-1 text-center pt-3">
+                                    <strong class="fs-5 text-secondary">+</strong>
+                                </div>
+
+                                <div class="col-sm-3">
+                                    <small class="text-muted d-block mb-1">Nửa 2 (Số tự động)</small>
+                                    <input type="text"
+                                           id="maHauToInput"
+                                           value="@maHauTo"
+                                           class="form-control form-control-sm fw-bold font-monospace bg-white"
+                                           readonly />
+                                </div>
+
+                                <div class="col-sm-1 text-center pt-3">
+                                    <strong class="fs-5 text-secondary">=</strong>
+                                </div>
+
+                                <div class="col-sm-3">
+                                    <small class="text-muted d-block mb-1">Mã sách ghép hoàn chỉnh</small>
+                                    <input type="text"
+                                           id="maGhepPreview"
+                                           value="@($"{maTienTo}{maHauTo}")"
+                                           class="form-control form-control-sm fw-bold font-monospace text-primary border-primary bg-primary-subtle"
+                                           readonly />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="TenSach" class="form-label fw-semibold"></label>
+                                <input asp-for="TenSach" class="form-control"
+                                       placeholder="Nhập tên sách..." />
+                                <span asp-validation-for="TenSach" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">
+                                    Thể loại <span class="text-danger">*</span>
+                                </label>
+
+                                <input type="text"
+                                       name="tenTheLoai"
+                                       id="tenTheLoaiInput"
+                                       list="theLoaiList"
+                                       class="form-control"
+                                       placeholder="Chọn thể loại hoặc nhập thể loại mới..."
+                                       value="@ViewBag.TenTheLoaiHienTai"
+                                       autocomplete="off"
+                                       required />
+
+                                <datalist id="theLoaiList">
+                                    @if (ViewBag.DanhSachTheLoai != null)
+                                    {
+                                        foreach (var cat in (List<string>)ViewBag.DanhSachTheLoai)
+                                        {
+                                            <option value="@cat"></option>
+                                        }
+                                    }
+                                </datalist>
+
+                                <span class="text-danger">
+                                    @Html.ValidationMessage("TenTheLoai")
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="TacGia" class="form-label fw-semibold"></label>
+                                <input asp-for="TacGia" class="form-control"
+                                       placeholder="Nhập tên tác giả..." />
+                                <span asp-validation-for="TacGia" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="NhaXuatBan" class="form-label fw-semibold"></label>
+                                <input asp-for="NhaXuatBan" class="form-control"
+                                       placeholder="Nhập nhà xuất bản..." />
+                                <span asp-validation-for="NhaXuatBan" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="NamXuatBan" class="form-label fw-semibold"></label>
+                                <input asp-for="NamXuatBan" class="form-control"
+                                       type="number" min="1000" max="@DateTime.Now.Year" value="@DateTime.Now.Year" />
+                                <span asp-validation-for="NamXuatBan" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="GiaSach" class="form-label fw-semibold"></label>
+                                <input asp-for="GiaSach" class="form-control"
+                                       type="number" step="any" min="0" />
+                                <span asp-validation-for="GiaSach" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="SoLuongCon" class="form-label fw-semibold">Số lượng</label>
+                                <input asp-for="SoLuongCon" class="form-control"
+                                       type="number" min="1" value="1" />
+                                <span asp-validation-for="SoLuongCon" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="TrangThai" class="form-label fw-semibold"></label>
+                                <select asp-for="TrangThai" class="form-select">
+                                    <option value="Đang phục vụ">Đang phục vụ</option>
+                                    <option value="Tạm ngừng">Tạm ngừng</option>
+                                    <option value="Ngừng phục vụ">Ngừng phục vụ</option>
+                                </select>
+                                <span asp-validation-for="TrangThai" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="MoTa" class="form-label fw-semibold"></label>
+                                <textarea asp-for="MoTa" class="form-control" rows="3"
+                                          placeholder="Nhập mô tả sách..."></textarea>
+                                <span asp-validation-for="MoTa" class="text-danger"></span>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">
-                            Thể loại <span class="text-danger">*</span>
-                        </label>
+                    <div class="col-lg-4">
+                        <div class="card border bg-light h-100">
+                            <div class="card-body text-center d-flex flex-column justify-content-between">
+                                <div>
+                                    <label class="form-label fw-bold text-dark d-block mb-2">
+                                        Ảnh bìa sách
+                                    </label>
+                                    <div class="mb-3 d-flex justify-content-center">
+                                        <img id="coverPreviewImg"
+                                             src="/images/books/default-cover.svg"
+                                             alt="Ảnh bìa sách"
+                                             class="img-thumbnail shadow-sm"
+                                             style="width: 200px; height: 275px; object-fit: cover; border-radius: 10px;" />
+                                    </div>
+                                    <small class="text-muted d-block mb-3" id="coverStatusText">
+                                        Đang dùng ảnh mặc định (Chưa cập nhật ảnh bìa)
+                                    </small>
+                                </div>
 
-                        <input type="text"
-                               name="tenTheLoai"
-                               id="tenTheLoaiInput"
-                               list="theLoaiList"
-                               class="form-control"
-                               placeholder="Chọn thể loại hoặc nhập thể loại mới..."
-                               value="@ViewBag.TenTheLoaiHienTai"
-                               autocomplete="off"
-                               required />
-
-                        <datalist id="theLoaiList">
-                            @if (ViewBag.DanhSachTheLoai != null)
-                            {
-                                foreach (var cat in (List<string>)ViewBag.DanhSachTheLoai)
-                                {
-                                    <option value="@cat"></option>
-                                }
-                            }
-                        </datalist>
-
-                        <span class="text-danger">
-                            @Html.ValidationMessage("TenTheLoai")
-                        </span>
+                                <div>
+                                    <input type="file"
+                                           name="anhBiaFile"
+                                           id="anhBiaInput"
+                                           accept="image/*"
+                                           class="form-control form-control-sm mb-2" />
+                                    <button type="button" id="btnResetCover" class="btn btn-outline-secondary btn-sm w-100">
+                                        Dùng ảnh mặc định
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label asp-for="TacGia" class="form-label"></label>
-                        <input asp-for="TacGia" class="form-control"
-                               placeholder="Nhập tên tác giả..." />
-                        <span asp-validation-for="TacGia" class="text-danger"></span>
-                    </div>
-
-                    <div class="col-md-6 mb-3">
-                        <label asp-for="NhaXuatBan" class="form-label"></label>
-                        <input asp-for="NhaXuatBan" class="form-control"
-                               placeholder="Nhập nhà xuất bản..." />
-                        <span asp-validation-for="NhaXuatBan" class="text-danger"></span>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-3 mb-3">
-                        <label asp-for="NamXuatBan" class="form-label"></label>
-                        <input asp-for="NamXuatBan" class="form-control"
-                               type="number" min="1000" max="@DateTime.Now.Year" />
-                        <span asp-validation-for="NamXuatBan" class="text-danger"></span>
-                    </div>
-
-                    <div class="col-md-3 mb-3">
-                        <label asp-for="GiaSach" class="form-label"></label>
-                        <input asp-for="GiaSach" class="form-control"
-                               type="number" step="1000" min="0" />
-                        <span asp-validation-for="GiaSach" class="text-danger"></span>
-                    </div>
-
-                    <div class="col-md-3 mb-3">
-                        <label asp-for="SoLuong" class="form-label"></label>
-                        <input asp-for="SoLuong" class="form-control"
-                               type="number" min="0" />
-                        <span asp-validation-for="SoLuong" class="text-danger"></span>
-                    </div>
-
-                    <div class="col-md-3 mb-3">
-                        <label asp-for="SoLuongCon" class="form-label"></label>
-                        <input asp-for="SoLuongCon" class="form-control"
-                               type="number" min="0" />
-                        <span asp-validation-for="SoLuongCon" class="text-danger"></span>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label asp-for="TrangThai" class="form-label"></label>
-                        <select asp-for="TrangThai" class="form-select">
-                            <option value="Đang phục vụ">Đang phục vụ</option>
-                            <option value="Tạm ngừng">Tạm ngừng</option>
-                            <option value="Ngừng phục vụ">Ngừng phục vụ</option>
-                        </select>
-                        <span asp-validation-for="TrangThai" class="text-danger"></span>
-                    </div>
-
-                    <div class="col-md-6 mb-3">
-                        <label asp-for="MoTa" class="form-label"></label>
-                        <textarea asp-for="MoTa" class="form-control" rows="3"
-                                  placeholder="Nhập mô tả sách..."></textarea>
-                        <span asp-validation-for="MoTa" class="text-danger"></span>
-                    </div>
-                </div>
-
-                <div class="mt-3">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-save"></i> Thêm mới
+                <div class="mt-4 pt-3 border-top">
+                    <button type="submit" class="btn btn-primary px-4">
+                        <i class="bi bi-save me-1"></i> Thêm mới
                     </button>
 
-                    <a asp-action="Index" class="btn btn-secondary">
-                        <i class="bi bi-arrow-left"></i> Quay lại danh sách
+                    <a asp-action="Index" class="btn btn-secondary px-3">
+                        <i class="bi bi-arrow-left me-1"></i> Quay lại danh sách
                     </a>
                 </div>
             </form>
@@ -148,4 +228,57 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+    <script>
+        const prefixInput = document.getElementById("maTienToInput");
+        const suffixInput = document.getElementById("maHauToInput");
+        const previewInput = document.getElementById("maGhepPreview");
+        const btnRandom = document.getElementById("btnRandomPrefix");
+
+        function updateCombinedCode() {
+            let p = (prefixInput.value || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+            prefixInput.value = p;
+            const padded = p.padEnd(5, "0").substring(0, 5);
+            previewInput.value = padded + suffixInput.value;
+        }
+
+        prefixInput.addEventListener("input", updateCombinedCode);
+
+        btnRandom.addEventListener("click", function() {
+            const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+            const nums = "23456789";
+            const c1 = chars[Math.floor(Math.random() * chars.length)];
+            const n1 = nums[Math.floor(Math.random() * nums.length)];
+            const c2 = chars[Math.floor(Math.random() * chars.length)];
+            const c3 = chars[Math.floor(Math.random() * chars.length)];
+            const n2 = nums[Math.floor(Math.random() * nums.length)];
+            prefixInput.value = `${c1}${n1}${c2}${c3}${n2}`;
+            updateCombinedCode();
+        });
+
+        const fileInput = document.getElementById("anhBiaInput");
+        const previewImg = document.getElementById("coverPreviewImg");
+        const statusText = document.getElementById("coverStatusText");
+        const btnResetCover = document.getElementById("btnResetCover");
+        const defaultCover = "/images/books/default-cover.svg";
+
+        fileInput.addEventListener("change", function() {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    statusText.textContent = "Đã chọn ảnh bìa: " + fileInput.files[0].name;
+                };
+                reader.readAsDataURL(this.files[0]);
+            } else {
+                previewImg.src = defaultCover;
+                statusText.textContent = "Đang dùng ảnh mặc định (Chưa cập nhật ảnh bìa)";
+            }
+        });
+
+        btnResetCover.addEventListener("click", function() {
+            fileInput.value = "";
+            previewImg.src = defaultCover;
+            statusText.textContent = "Đang dùng ảnh mặc định (Chưa cập nhật ảnh bìa)";
+        });
+    </script>
 }
