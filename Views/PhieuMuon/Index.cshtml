@@ -1,24 +1,46 @@
-
+@using QuanLyThuVien_UNETI04_TI17A1HN.Helpers
 @model IEnumerable<QuanLyThuVien_UNETI04_TI17A1HN.Models.PhieuMuon>
 
 @{
-    ViewData["Title"] = "Quản lý phiếu mượn";
+    var laDocGia = QuyenTruyCap.LaDocGia(Context);
+    ViewData["Title"] = laDocGia ? "Phiếu mượn của tôi" : "Quản lý phiếu mượn";
 }
 
-<h1>Quản lý phiếu mượn</h1>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold text-primary mb-1">
+            @(laDocGia ? "PHIẾU MƯỢN CỦA TÔI" : "QUẢN LÝ PHIẾU MƯỢN")
+        </h2>
+        <p class="text-muted mb-0">
+            @(laDocGia
+                ? "Theo dõi yêu cầu chờ duyệt, sách đang mượn, hạn trả và lịch sử mượn trả của bạn"
+                : "Quản lý vòng đời phiếu mượn theo các trạng thái và nhận diện quá hạn")
+        </p>
+    </div>
 
-<p>
-    <a asp-action="Create" class="btn btn-primary">Thêm phiếu mượn</a>
-</p>
+    @if (laDocGia)
+    {
+        <a asp-action="DangKy" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i> Đăng ký mượn sách mới
+        </a>
+    }
+    else
+    {
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i> Thêm phiếu mượn
+        </a>
+    }
+</div>
 
-<div class="mb-3">
+<!-- Bộ lọc trạng thái phiếu mượn -->
+<div class="mb-3 d-flex flex-wrap gap-2">
     <a asp-action="Index"
        class="btn btn-sm @(string.IsNullOrEmpty(ViewBag.TrangThai as string) ? "btn-primary" : "btn-outline-primary")">
         Tất cả (@ViewBag.TongSo)
     </a>
 
     <a asp-action="Index" asp-route-trangThai="Chờ xác nhận"
-       class="btn btn-sm @(ViewBag.TrangThai as string == "Chờ xác nhận" ? "btn-warning" : "btn-outline-warning")">
+       class="btn btn-sm @(ViewBag.TrangThai as string == "Chờ xác nhận" ? "btn-warning text-dark fw-bold" : "btn-outline-warning")">
         Chờ xác nhận (@ViewBag.SoChoXacNhan)
     </a>
 
@@ -38,70 +60,103 @@
     </a>
 </div>
 
-<table class="table table-bordered table-striped">
-    <thead>
-        <tr>
-            <th>Mã phiếu</th>
-            <th>Độc giả</th>
-            <th>Ngày mượn</th>
-            <th>Hạn trả</th>
-            <th>Sách mượn</th>
-            <th>Trạng thái</th>
-            <th>Hành động</th>
-        </tr>
-    </thead>
-    <tbody>
-        @if (Model == null || !Model.Any())
-        {
-            <tr>
-                <td colspan="7" class="text-center text-muted">
-                    Không có phiếu mượn nào trong mục này.
-                </td>
-            </tr>
-        }
-        else
-        {
-            @foreach (var item in Model)
-            {
-                var quaHan = item.TrangThai == "Đang mượn"
-                    && DateTime.Today > item.HanTra.Date;
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover align-middle mb-0">
+                <thead class="table-primary">
+                    <tr>
+                        <th style="width: 100px;">Mã phiếu</th>
+                        @if (!laDocGia)
+                        {
+                            <th>Độc giả</th>
+                        }
+                        <th>Ngày mượn</th>
+                        <th>Hạn trả</th>
+                        <th>Sách mượn</th>
+                        <th>Trạng thái</th>
+                        <th style="width: 120px;" class="text-center">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model == null || !Model.Any())
+                    {
+                        <tr>
+                            <td colspan="@(laDocGia ? 6 : 7)" class="text-center text-muted py-4">
+                                Không có phiếu mượn nào trong mục này.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var item in Model)
+                        {
+                            var quaHan = item.TrangThai == "Đang mượn"
+                                && DateTime.Today > item.HanTra.Date;
 
-                <tr>
-                    <td>#@item.MaPhieuMuon</td>
-                    <td>
-                        @(item.DocGia?.HoTen ?? ("Độc giả #" + item.MaDocGia))
-                    </td>
-                    <td>@item.NgayMuon.ToString("dd/MM/yyyy")</td>
-                    <td>
-                        @item.HanTra.ToString("dd/MM/yyyy")
-                        @if (quaHan)
-                        {
-                            <span class="badge bg-danger ms-1">Quá hạn</span>
+                            <tr>
+                                <td class="fw-bold">#@item.MaPhieuMuon</td>
+                                @if (!laDocGia)
+                                {
+                                    <td>
+                                        @(item.DocGia?.HoTen ?? ("Độc giả #" + item.MaDocGia))
+                                        @if (item.DocGia != null)
+                                        {
+                                            <span class="badge bg-light text-dark border ms-1">@item.DocGia.MaHienThi</span>
+                                        }
+                                    </td>
+                                }
+                                <td>@item.NgayMuon.ToString("dd/MM/yyyy")</td>
+                                <td>
+                                    @item.HanTra.ToString("dd/MM/yyyy")
+                                    @if (quaHan)
+                                    {
+                                        <span class="badge bg-danger ms-1">Quá hạn</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.ChiTietPhieuMuons != null && item.ChiTietPhieuMuons.Any())
+                                    {
+                                        @string.Join(", ",
+                                            item.ChiTietPhieuMuons.Select(ct =>
+                                                (ct.Sach?.TenSach ?? ("#" + ct.MaSach))
+                                                + " (" + ct.SoLuongMuon + " quyển)"))
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Chưa có chi tiết sách</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.TrangThai == "Chờ xác nhận")
+                                    {
+                                        <span class="badge bg-warning text-dark">Chờ xác nhận</span>
+                                    }
+                                    else if (item.TrangThai == "Đang mượn")
+                                    {
+                                        <span class="badge bg-primary">Đang mượn</span>
+                                    }
+                                    else if (item.TrangThai == "Đã trả")
+                                    {
+                                        <span class="badge bg-success">Đã trả</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">@item.TrangThai</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    <a asp-action="Details"
+                                       asp-route-id="@item.MaPhieuMuon"
+                                       class="btn btn-sm btn-info text-white">
+                                        Chi tiết
+                                    </a>
+                                </td>
+                            </tr>
                         }
-                    </td>
-                    <td>
-                        @if (item.ChiTietPhieuMuons != null && item.ChiTietPhieuMuons.Any())
-                        {
-                            @string.Join(", ",
-                                item.ChiTietPhieuMuons.Select(ct =>
-                                    (ct.Sach?.TenSach ?? ("#" + ct.MaSach))
-                                    + " (" + ct.SoLuongMuon + " quyển)"))
-                        }
-                        else
-                        {
-                            <span class="text-muted">Chưa có chi tiết sách</span>
-                        }
-                    </td>
-                    <td>@item.TrangThai</td>
-                    <td>
-                        <a asp-action="Details"
-                           asp-route-id="@item.MaPhieuMuon"
-                           class="btn btn-sm btn-info">
-                            Chi tiết
-                        </a>
-                    </td>
-                </tr>
-            }
-        }
-    </tbody>
-</table>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

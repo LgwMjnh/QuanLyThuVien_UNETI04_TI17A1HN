@@ -113,6 +113,9 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Migrations
                     b.Property<DateTime>("NgayMuon")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime?>("NgayTra")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("TrangThai")
                         .IsRequired()
                         .HasMaxLength(30)
