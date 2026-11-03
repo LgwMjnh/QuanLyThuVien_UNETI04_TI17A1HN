@@ -1,0 +1,453 @@
+﻿
+@model QuanLyThuVien_UNETI04_TI17A1HN.Models.TraCuuDocGiaViewModel
+
+@{
+    ViewData["Title"] = "Tra cứu lịch sử độc giả";
+
+    // Loại bỏ các phiếu hủy cũ khỏi danh sách tra cứu.
+    var lichSuHienThi = Model.LichSu
+        .Where(p => p.TrangThai != "Đã hủy")
+        .ToList();
+}
+
+<style>
+    /* Thu gọn các ô thống kê */
+    .stat-card {
+        height: 100%;
+        min-height: 105px;
+        border-radius: 10px;
+        transition: transform 0.2s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-2px);
+    }
+
+    .stat-card .card-body {
+        padding: 14px 16px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        min-width: 0;
+    }
+
+    .stat-label {
+        font-size: 13px;
+        line-height: 1.35;
+        color: #6c757d;
+        margin-bottom: 7px;
+        overflow-wrap: break-word;
+    }
+
+    .stat-number {
+        font-size: 25px;
+        line-height: 1.2;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .stat-note {
+        font-size: 11px;
+        line-height: 1.3;
+        margin-top: 5px;
+        overflow-wrap: break-word;
+    }
+
+    @@media (max-width: 576px) {
+        .stat-card {
+            min-height: 95px;
+        }
+
+        .stat-card .card-body {
+            padding: 11px 12px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+        }
+
+        .stat-number {
+            font-size: 22px;
+        }
+    }
+</style>
+
+<div class="container-fluid py-4">
+
+    <!-- TIÊU ĐỀ -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">TRA CỨU ĐỘC GIẢ</h2>
+            <p class="text-muted mb-0">
+                Tra cứu thông tin và toàn bộ lịch sử mượn trả theo mã độc giả.
+            </p>
+        </div>
+
+        <a asp-controller="MuonTra"
+           asp-action="Index"
+           class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>
+            Quay lại quản lý mượn trả
+        </a>
+    </div>
+
+    <!-- FORM TÌM KIẾM -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+
+            <h5 class="fw-bold mb-3">
+                <i class="bi bi-search me-2"></i>
+                Tìm kiếm theo mã độc giả
+            </h5>
+
+            <form asp-controller="MuonTra"
+                  asp-action="TraCuuDocGia"
+                  method="get">
+
+                <div class="row g-3 align-items-end">
+
+                    <div class="col-md-8 col-lg-9">
+                        <label class="form-label fw-semibold">
+                            Mã độc giả
+                        </label>
+
+                        <input type="number"
+                               name="maDocGia"
+                               value="@Model.MaDocGia"
+                               min="1"
+                               step="1"
+                               class="form-control"
+                               placeholder="Nhập mã độc giả, ví dụ: 1, 2, 3..."
+                               required />
+                    </div>
+
+                    <div class="col-md-4 col-lg-3">
+                        <button type="submit"
+                                class="btn btn-primary w-100">
+                            <i class="bi bi-search me-1"></i>
+                            Tra cứu
+                        </button>
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+    <!-- THÔNG BÁO KHÔNG TÌM THẤY -->
+    @if (Model.DaTimKiem && Model.DocGia == null)
+    {
+        <div class="alert alert-warning">
+            <i class="bi bi-exclamation-circle me-2"></i>
+            @Model.ThongBao
+        </div>
+    }
+
+    @if (Model.DocGia != null)
+    {
+        <!-- THÔNG TIN ĐỘC GIẢ -->
+        <div class="card border-0 shadow-sm mb-4">
+
+            <div class="card-header bg-white py-3">
+                <h5 class="fw-bold mb-0">
+                    <i class="bi bi-person-vcard me-2"></i>
+                    Thông tin độc giả
+                </h5>
+            </div>
+
+            <div class="card-body">
+
+                <div class="row g-4">
+
+                    <div class="col-md-3">
+                        <div class="text-muted small">Mã độc giả</div>
+                        <div class="fw-bold fs-5 text-primary">
+                            #@Model.DocGia.MaDocGia
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="text-muted small">Họ và tên</div>
+                        <div class="fw-semibold">
+                            @Model.DocGia.HoTen
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="text-muted small">Số điện thoại</div>
+                        <div class="fw-semibold">
+                            @(Model.DocGia.SoDienThoai ?? "Chưa cập nhật")
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="text-muted small">Email</div>
+                        <div class="fw-semibold">
+                            @(Model.DocGia.Email ?? "Chưa cập nhật")
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+        <!-- THỐNG KÊ PHIẾU MƯỢN -->
+        <h5 class="fw-bold mb-3">
+            <i class="bi bi-bar-chart-line me-2"></i>
+            Tổng quan lịch sử mượn trả
+        </h5>
+
+        <div class="row g-3 mb-4">
+
+            <div class="col-xl-3 col-md-4 col-6">
+                <div class="card stat-card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="stat-label">Tổng số phiếu</div>
+                        <h3 class="stat-number text-primary">
+                            @lichSuHienThi.Count
+                        </h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-4 col-6">
+                <div class="card stat-card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="stat-label">Số lần mượn thực tế</div>
+                        <h3 class="stat-number text-info">
+                            @Model.SoLanMuon
+                        </h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-4 col-6">
+                <div class="card stat-card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="stat-label">Tổng số sách đã mượn</div>
+                        <h3 class="stat-number text-primary">
+                            @Model.TongSoSachDaMuon
+                        </h3>
+                        <div class="stat-note text-muted">Cuốn sách</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-4 col-6">
+                <div class="card stat-card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="stat-label">Số sách đã trả</div>
+                        <h3 class="stat-number text-success">
+                            @Model.SoSachDaTra
+                        </h3>
+                        <div class="stat-note text-muted">Cuốn sách</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-4 col-6">
+                <div class="card stat-card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="stat-label">Phiếu chờ xác nhận</div>
+                        <h3 class="stat-number text-warning">
+                            @Model.SoPhieuChoXacNhan
+                        </h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-4 col-6">
+                <div class="card stat-card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="stat-label">Đang trong hạn</div>
+                        <h3 class="stat-number text-info">
+                            @Model.SoPhieuDangMuon
+                        </h3>
+                        <div class="stat-note text-muted">
+                            @Model.SoSachDangMuon cuốn chưa trả
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-4 col-6">
+                <div class="card stat-card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="stat-label">Phiếu quá hạn</div>
+                        <h3 class="stat-number text-danger">
+                            @Model.SoPhieuQuaHan
+                        </h3>
+                        <div class="stat-note text-muted">
+                            @Model.SoSachQuaHan cuốn chưa trả
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-4 col-6">
+                <div class="card stat-card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="stat-label">Phiếu đã trả</div>
+                        <h3 class="stat-number text-success">
+                            @Model.SoPhieuDaTra
+                        </h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-4 col-6">
+                <div class="card stat-card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="stat-label">Phiếu từ chối</div>
+                        <h3 class="stat-number text-secondary">
+                            @Model.SoPhieuTuChoi
+                        </h3>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- LỊCH SỬ MƯỢN TRẢ -->
+        <div class="card border-0 shadow-sm">
+
+            <div class="card-header bg-white py-3">
+                <h5 class="fw-bold mb-0">
+                    <i class="bi bi-journal-text me-2"></i>
+                    Lịch sử mượn trả của độc giả
+                </h5>
+            </div>
+
+            <div class="card-body p-0">
+
+                <div class="table-responsive">
+
+                    <table class="table table-hover align-middle mb-0">
+
+                        <thead class="table-light">
+                            <tr>
+                                <th class="text-center">Mã phiếu</th>
+                                <th>Sách đã đăng ký</th>
+                                <th class="text-center">Số lượng</th>
+                                <th class="text-center">Ngày mượn</th>
+                                <th class="text-center">Hạn trả</th>
+                                <th class="text-center">Ngày trả thực tế</th>
+                                <th class="text-center">Trạng thái</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            @if (lichSuHienThi.Any())
+                            {
+                                foreach (var phieu in lichSuHienThi)
+                                {
+                                    string trangThaiHienThi = phieu.TrangThai;
+
+                                    if (phieu.TrangThai == "Đang mượn" &&
+                                        phieu.NgayTra == null &&
+                                        phieu.HanTra.Date < DateTime.Today)
+                                    {
+                                        trangThaiHienThi = "Quá hạn";
+                                    }
+
+                                    string badgeClass = trangThaiHienThi switch
+                                    {
+                                        "Chờ xác nhận" => "bg-warning text-dark",
+                                        "Đang mượn" => "bg-info text-dark",
+                                        "Quá hạn" => "bg-danger",
+                                        "Đã trả" => "bg-success",
+                                        "Từ chối" => "bg-secondary",
+                                        _ => "bg-secondary"
+                                    };
+
+                                    <tr>
+
+                                        <td class="text-center fw-bold">
+                                            #@phieu.MaPhieuMuon
+                                        </td>
+
+                                        <td>
+                                            @if (phieu.ChiTietPhieuMuons != null &&
+                                                 phieu.ChiTietPhieuMuons.Any())
+                                            {
+                                                foreach (var ct in phieu.ChiTietPhieuMuons)
+                                                {
+                                                    <div class="mb-1">
+                                                        <i class="bi bi-book me-1"></i>
+                                                        @(ct.Sach?.TenSach ?? "Sách không tồn tại")
+                                                    </div>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">
+                                                    Không có thông tin sách
+                                                </span>
+                                            }
+                                        </td>
+
+                                        <td class="text-center">
+                                            @(phieu.ChiTietPhieuMuons?.Sum(ct => ct.SoLuongMuon) ?? 0)
+                                        </td>
+
+                                        <td class="text-center">
+                                            @phieu.NgayMuon.ToString("dd/MM/yyyy")
+                                        </td>
+
+                                        <td class="text-center">
+                                            @phieu.HanTra.ToString("dd/MM/yyyy")
+                                        </td>
+
+                                        <td class="text-center">
+                                            @if (phieu.NgayTra.HasValue)
+                                            {
+                                                @phieu.NgayTra.Value.ToString("dd/MM/yyyy")
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">Chưa trả</span>
+                                            }
+                                        </td>
+
+                                        <td class="text-center">
+                                            <span class="badge @badgeClass">
+                                                @trangThaiHienThi
+                                            </span>
+                                        </td>
+
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="7"
+                                        class="text-center py-5 text-muted">
+
+                                        <i class="bi bi-inbox fs-1"></i>
+
+                                        <p class="mb-0 mt-2">
+                                            Độc giả chưa có lịch sử mượn sách.
+                                        </p>
+
+                                    </td>
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+    }
+
+</div>
+```

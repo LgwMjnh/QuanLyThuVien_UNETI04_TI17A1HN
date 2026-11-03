@@ -4,407 +4,496 @@
 @{
     ViewData["Title"] = "Quản lý mượn trả";
 
-    var trangThaiLoc = ViewBag.TrangThaiLoc as string;
-    var tuKhoa = ViewBag.TuKhoa as string ?? "";
-    var ngayTu = ViewBag.NgayTu as DateTime?;
-    var ngayDen = ViewBag.NgayDen as DateTime?;
+    string? trangThaiLoc = ViewBag.TrangThaiLoc as string;
+    string tuKhoa = ViewBag.TuKhoa as string ?? "";
 
-    var tongSoTrang = ViewBag.TongSoTrang is int ts ? ts : 0;
-    var trangHienTai = ViewBag.TrangHienTai is int th ? th : 1;
+    DateTime? ngayTu = ViewBag.NgayTu == null ? null : (DateTime?)ViewBag.NgayTu;
+    DateTime? ngayDen = ViewBag.NgayDen == null ? null : (DateTime?)ViewBag.NgayDen;
+
+    int trangHienTai = ViewBag.TrangHienTai ?? 1;
+    int tongSoTrang = ViewBag.TongSoTrang ?? 0;
+
+    int tongPhieu = ViewBag.TongPhieu ?? 0;
+    int choXacNhan = ViewBag.ChoXacNhan ?? 0;
+    int dangMuon = ViewBag.DangMuon ?? 0;
+    int quaHan = ViewBag.QuaHan ?? 0;
+    int daTra = ViewBag.DaTra ?? 0;
+    int tuChoi = ViewBag.TuChoi ?? 0;
+
+    string ngayTuText = ngayTu?.ToString("yyyy-MM-dd") ?? "";
+    string ngayDenText = ngayDen?.ToString("yyyy-MM-dd") ?? "";
+
+    int soThuTu = (trangHienTai - 1) * 10 + 1;
 }
 
 <div class="container-fluid py-4">
+
+    <!-- TIÊU ĐỀ VÀ CÁC NÚT ĐIỀU HƯỚNG -->
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
         <div>
-            <h2 class="fw-bold mb-1">QUẢN LÝ MƯỢN TRẢ SÁCH</h2>
+            <h2 class="fw-bold mb-1">QUẢN LÝ MƯỢN TRẢ</h2>
             <p class="text-muted mb-0">
-                Quản lý yêu cầu mượn, xác nhận mượn, trả sách và theo dõi quá hạn.
+                Theo dõi và quản lý các phiếu mượn, trả sách.
             </p>
         </div>
 
-        <a asp-controller="MuonTra" asp-action="Create" class="btn btn-primary">
-            <i class="bi bi-plus-circle me-1"></i> Lập phiếu mượn
-        </a>
+        <div class="d-flex gap-2 flex-wrap">
+
+            <a asp-controller="MuonTra"
+               asp-action="Create"
+               class="btn btn-primary">
+                <i class="bi bi-plus-circle me-1"></i>
+                Lập phiếu mượn
+            </a>
+
+            <a asp-controller="MuonTra"
+               asp-action="TraCuuDocGia"
+               class="btn btn-primary">
+                <i class="bi bi-person-search me-1"></i>
+                Tìm kiếm độc giả
+            </a>
+
+            <a asp-controller="ThongKe"
+               asp-action="Index"
+               class="btn btn-primary">
+                <i class="bi bi-bar-chart-fill me-1"></i>
+                Thống kê thư viện
+            </a>
+
+        </div>
     </div>
 
+    <!-- THÔNG BÁO THÀNH CÔNG -->
     @if (TempData["ThongBao"] != null)
     {
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <div class="alert alert-success alert-dismissible fade show">
+            <i class="bi bi-check-circle-fill me-2"></i>
             @TempData["ThongBao"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"></button>
         </div>
     }
 
+    <!-- THÔNG BÁO LỖI -->
     @if (TempData["Loi"] != null)
     {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
             @TempData["Loi"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"></button>
         </div>
     }
 
-    <!-- Thống kê -->
+    <!-- 6 THẺ THỐNG KÊ TỔNG QUAN -->
     <div class="row g-3 mb-4">
-        <div class="col-6 col-lg">
-            <div class="card shadow-sm border-0 h-100">
+
+        <div class="col-xl-2 col-md-4 col-6">
+            <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
-                    <div class="text-muted mb-2">Tổng phiếu</div>
-                    <h3 class="fw-bold mb-0">@ViewBag.TongPhieu</h3>
+                    <div class="text-muted small">Tổng phiếu mượn</div>
+                    <h3 class="fw-bold text-primary mb-0">@tongPhieu</h3>
                 </div>
             </div>
         </div>
 
-        <div class="col-6 col-lg">
-            <div class="card shadow-sm border-0 h-100">
+        <div class="col-xl-2 col-md-4 col-6">
+            <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
-                    <div class="text-muted mb-2">Chờ xác nhận</div>
-                    <h3 class="fw-bold text-warning mb-0">@ViewBag.ChoXacNhan</h3>
+                    <div class="text-muted small">Chờ xác nhận</div>
+                    <h3 class="fw-bold text-warning mb-0">@choXacNhan</h3>
                 </div>
             </div>
         </div>
 
-        <div class="col-6 col-lg">
-            <div class="card shadow-sm border-0 h-100">
+        <div class="col-xl-2 col-md-4 col-6">
+            <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
-                    <div class="text-muted mb-2">Đang mượn</div>
-                    <h3 class="fw-bold text-primary mb-0">@ViewBag.DangMuon</h3>
+                    <div class="text-muted small">Đang mượn</div>
+                    <h3 class="fw-bold text-info mb-0">@dangMuon</h3>
                 </div>
             </div>
         </div>
 
-        <div class="col-6 col-lg">
-            <div class="card shadow-sm border-0 h-100">
+        <div class="col-xl-2 col-md-4 col-6">
+            <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
-                    <div class="text-muted mb-2">Quá hạn</div>
-                    <h3 class="fw-bold text-danger mb-0">@ViewBag.QuaHan</h3>
+                    <div class="text-muted small">Quá hạn</div>
+                    <h3 class="fw-bold text-danger mb-0">@quaHan</h3>
                 </div>
             </div>
         </div>
 
-        <div class="col-6 col-lg">
-            <div class="card shadow-sm border-0 h-100">
+        <div class="col-xl-2 col-md-4 col-6">
+            <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
-                    <div class="text-muted mb-2">Đã trả</div>
-                    <h3 class="fw-bold text-success mb-0">@ViewBag.DaTra</h3>
+                    <div class="text-muted small">Đã trả</div>
+                    <h3 class="fw-bold text-success mb-0">@daTra</h3>
                 </div>
             </div>
+        </div>
+
+        <div class="col-xl-2 col-md-4 col-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small">Từ chối</div>
+                    <h3 class="fw-bold text-secondary mb-0">@tuChoi</h3>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- BỘ LỌC TRẠNG THÁI PHIẾU MƯỢN -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+
+            <h5 class="fw-bold mb-3">Lọc phiếu mượn</h5>
+
+            <div class="d-flex flex-wrap gap-2">
+
+                <a asp-action="Index"
+                   class="btn btn-sm @(string.IsNullOrEmpty(trangThaiLoc) ? "btn-primary" : "btn-outline-primary")">
+                    Tất cả
+                </a>
+
+                <a asp-action="Index"
+                   asp-route-trangThai="ChoXacNhan"
+                   class="btn btn-sm @(trangThaiLoc == "ChoXacNhan" ? "btn-warning" : "btn-outline-warning")">
+                    Chờ xác nhận
+                </a>
+
+                <a asp-action="Index"
+                   asp-route-trangThai="DangMuon"
+                   class="btn btn-sm @(trangThaiLoc == "DangMuon" ? "btn-info" : "btn-outline-info")">
+                    Đang mượn
+                </a>
+
+                <a asp-action="Index"
+                   asp-route-trangThai="QuaHan"
+                   class="btn btn-sm @(trangThaiLoc == "QuaHan" ? "btn-danger" : "btn-outline-danger")">
+                    Quá hạn
+                </a>
+
+                <a asp-action="Index"
+                   asp-route-trangThai="DaTra"
+                   class="btn btn-sm @(trangThaiLoc == "DaTra" ? "btn-success" : "btn-outline-success")">
+                    Đã trả
+                </a>
+
+                <a asp-action="Index"
+                   asp-route-trangThai="TuChoi"
+                   class="btn btn-sm @(trangThaiLoc == "TuChoi" ? "btn-secondary" : "btn-outline-secondary")">
+                    Từ chối
+                </a>
+
+            </div>
+
         </div>
     </div>
 
-    <!-- Lọc trạng thái -->
-    <div class="card shadow-sm border-0 mb-4">
-        <div class="card-body d-flex flex-wrap align-items-center gap-2">
-            <span class="fw-semibold me-2">Trạng thái:</span>
+    <!-- DANH SÁCH PHIẾU MƯỢN -->
+    <div class="card border-0 shadow-sm">
 
-            <a asp-action="Index"
-               asp-route-tuKhoa="@tuKhoa"
-               asp-route-ngayTu="@ngayTu?.ToString("yyyy-MM-dd")"
-               asp-route-ngayDen="@ngayDen?.ToString("yyyy-MM-dd")"
-               class="btn @(string.IsNullOrEmpty(trangThaiLoc) ? "btn-secondary" : "btn-outline-secondary")">
-                Tất cả
-            </a>
-
-            <a asp-action="Index" asp-route-trangThai="ChoXacNhan"
-               asp-route-tuKhoa="@tuKhoa"
-               asp-route-ngayTu="@ngayTu?.ToString("yyyy-MM-dd")"
-               asp-route-ngayDen="@ngayDen?.ToString("yyyy-MM-dd")"
-               class="btn @(trangThaiLoc == "ChoXacNhan" ? "btn-warning" : "btn-outline-warning")">
-                Chờ xác nhận
-            </a>
-
-            <a asp-action="Index" asp-route-trangThai="DangMuon"
-               asp-route-tuKhoa="@tuKhoa"
-               asp-route-ngayTu="@ngayTu?.ToString("yyyy-MM-dd")"
-               asp-route-ngayDen="@ngayDen?.ToString("yyyy-MM-dd")"
-               class="btn @(trangThaiLoc == "DangMuon" ? "btn-primary" : "btn-outline-primary")">
-                Đang mượn
-            </a>
-
-            <a asp-action="Index" asp-route-trangThai="QuaHan"
-               asp-route-tuKhoa="@tuKhoa"
-               asp-route-ngayTu="@ngayTu?.ToString("yyyy-MM-dd")"
-               asp-route-ngayDen="@ngayDen?.ToString("yyyy-MM-dd")"
-               class="btn @(trangThaiLoc == "QuaHan" ? "btn-danger" : "btn-outline-danger")">
-                Quá hạn
-            </a>
-
-            <a asp-action="Index" asp-route-trangThai="DaTra"
-               asp-route-tuKhoa="@tuKhoa"
-               asp-route-ngayTu="@ngayTu?.ToString("yyyy-MM-dd")"
-               asp-route-ngayDen="@ngayDen?.ToString("yyyy-MM-dd")"
-               class="btn @(trangThaiLoc == "DaTra" ? "btn-success" : "btn-outline-success")">
-                Đã trả
-            </a>
-
-            <a asp-action="Index" asp-route-trangThai="DaHuy"
-               asp-route-tuKhoa="@tuKhoa"
-               asp-route-ngayTu="@ngayTu?.ToString("yyyy-MM-dd")"
-               asp-route-ngayDen="@ngayDen?.ToString("yyyy-MM-dd")"
-               class="btn @(trangThaiLoc == "DaHuy" ? "btn-dark" : "btn-outline-dark")">
-                Đã hủy
-            </a>
-        </div>
-    </div>
-
-    <!-- Tìm kiếm -->
-    <div class="card shadow-sm border-0 mb-4">
         <div class="card-header bg-white py-3">
-            <h5 class="fw-bold mb-0">Tìm kiếm và lọc phiếu</h5>
+            <h5 class="fw-bold mb-0">
+                <i class="bi bi-journal-text me-2"></i>
+                Danh sách phiếu mượn
+            </h5>
         </div>
 
-        <div class="card-body">
-            <form asp-controller="MuonTra" asp-action="Index" method="get">
-                <input type="hidden" name="trangThai" value="@trangThaiLoc" />
+        <div class="card-body p-0">
 
-                <div class="row g-3 align-items-end">
-                    <div class="col-md-4">
-                        <label for="tuKhoa" class="form-label">Tên độc giả</label>
-                        <input type="text" id="tuKhoa" name="tuKhoa"
-                               value="@tuKhoa" class="form-control"
-                               placeholder="Nhập tên độc giả..." />
-                    </div>
-
-                    <div class="col-md-3">
-                        <label for="ngayTu" class="form-label">Ngày mượn từ</label>
-                        <input type="date" id="ngayTu" name="ngayTu"
-                               value="@ngayTu?.ToString("yyyy-MM-dd")"
-                               class="form-control" />
-                    </div>
-
-                    <div class="col-md-3">
-                        <label for="ngayDen" class="form-label">Ngày mượn đến</label>
-                        <input type="date" id="ngayDen" name="ngayDen"
-                               value="@ngayDen?.ToString("yyyy-MM-dd")"
-                               class="form-control" />
-                    </div>
-
-                    <div class="col-md-2 d-flex gap-2">
-                        <button type="submit" class="btn btn-primary">Tìm</button>
-                        <a asp-action="Index" class="btn btn-outline-secondary">Xóa</a>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Danh sách phiếu -->
-    <div class="card shadow-sm border-0">
-        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
-            <h5 class="fw-bold mb-0">Danh sách phiếu mượn</h5>
-            <span class="text-muted small">
-                Trang @trangHienTai
-                @if (tongSoTrang > 0)
-                {
-                    <text>/ @tongSoTrang</text>
-                }
-            </span>
-        </div>
-
-        <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-bordered table-hover align-middle">
-                    <thead class="table-dark">
+
+                <table class="table table-hover align-middle mb-0">
+
+                    <thead class="table-light">
                         <tr>
-                            <th>Mã phiếu</th>
+                            <th class="text-center">Mã phiếu</th>
                             <th>Độc giả</th>
-                            <th>Sách mượn</th>
-                            <th>Ngày mượn</th>
-                            <th>Hạn trả</th>
-                            <th>Ngày trả</th>
-                            <th>Trạng thái</th>
-                            <th style="min-width: 150px;">Thao tác</th>
+                            <th>Sách</th>
+                            <th class="text-center">Số lượng</th>
+                            <th class="text-center">Ngày mượn</th>
+                            <th class="text-center">Hạn trả</th>
+                            <th class="text-center">Trạng thái</th>
+                            <th class="text-center">Thao tác</th>
                         </tr>
                     </thead>
 
                     <tbody>
+
                         @if (Model != null && Model.Any())
                         {
-                            @foreach (var p in Model)
+                            foreach (var phieu in Model)
                             {
-                                var chiTiet = p.ChiTietPhieuMuons ?? new List<QuanLyThuVien_UNETI04_TI17A1HN.Models.ChiTietPhieuMuon>();
-                                var daTraHet = chiTiet.Any() && chiTiet.All(ct => ct.NgayTra != null);
-                                var quaHan = p.TrangThai == "Đang mượn"
-                                    && !daTraHet
-                                    && p.HanTra.Date < DateTime.Today;
+                                string badgeClass = phieu.TrangThai switch
+                                {
+                                    "Chờ xác nhận" => "bg-warning text-dark",
+
+                                    "Đang mượn" when phieu.NgayTra == null &&
+                                        phieu.HanTra.Date < DateTime.Today => "bg-danger",
+
+                                    "Đang mượn" => "bg-info text-dark",
+
+                                    "Đã trả" => "bg-success",
+
+                                    "Từ chối" => "bg-secondary",
+
+                                    "Đã hủy" => "bg-secondary",
+
+                                    _ => "bg-secondary"
+                                };
 
                                 <tr>
-                                    <td class="fw-semibold">#@p.MaPhieuMuon</td>
-                                    <td>@(p.DocGia?.HoTen ?? "Không có thông tin")</td>
+
+                                    <td class="text-center fw-bold">
+                                        #@soThuTu
+                                    </td>
+
                                     <td>
-                                        @if (chiTiet.Any())
+                                        @(phieu.DocGia?.HoTen ?? "Chưa có thông tin")
+                                    </td>
+
+                                    <td>
+                                        @if (phieu.ChiTietPhieuMuons != null &&
+                                             phieu.ChiTietPhieuMuons.Any())
                                         {
-                                            @foreach (var ct in chiTiet)
+                                            foreach (var ct in phieu.ChiTietPhieuMuons)
                                             {
                                                 <div class="mb-1">
-                                                    @(ct.Sach?.TenSach ?? $"Mã sách {ct.MaSach}")
-                                                    <span class="badge bg-light text-dark">
-                                                        SL: @ct.SoLuongMuon
-                                                    </span>
+                                                    <i class="bi bi-book me-1"></i>
+                                                    @(ct.Sach?.TenSach ?? "Sách không tồn tại")
                                                 </div>
                                             }
                                         }
                                         else
                                         {
-                                            <span class="text-muted">Chưa có chi tiết sách</span>
-                                        }
-                                    </td>
-                                    <td>@p.NgayMuon.ToString("dd/MM/yyyy")</td>
-                                    <td>
-                                        @if (quaHan)
-                                        {
-                                            <span class="text-danger fw-semibold">
-                                                @p.HanTra.ToString("dd/MM/yyyy")
+                                            <span class="text-muted">
+                                                Chưa có sách
                                             </span>
                                         }
-                                        else
-                                        {
-                                            @p.HanTra.ToString("dd/MM/yyyy")
-                                        }
                                     </td>
-                                    <td>
-                                        @if (chiTiet.Any())
-                                        {
-                                            var ngayTraGanNhat = chiTiet
-                                                .Where(ct => ct.NgayTra.HasValue)
-                                                .Select(ct => ct.NgayTra)
-                                                .Max();
 
-                                            @(ngayTraGanNhat?.ToString("dd/MM/yyyy") ?? "Chưa trả")
-                                        }
-                                        else
-                                        {
-                                            <span class="text-muted">Chưa trả</span>
-                                        }
+                                    <td class="text-center">
+                                        @(phieu.ChiTietPhieuMuons?.Sum(ct => ct.SoLuongMuon) ?? 0)
                                     </td>
-                                    <td>
-                                        @if (p.TrangThai == "Chờ xác nhận")
-                                        {
-                                            <span class="badge bg-warning text-dark">Chờ xác nhận</span>
-                                        }
-                                        else if (p.TrangThai == "Đã hủy")
-                                        {
-                                            <span class="badge bg-dark">Đã hủy</span>
-                                        }
-                                        else if (p.TrangThai == "Đã trả" || daTraHet)
-                                        {
-                                            <span class="badge bg-success">Đã trả</span>
-                                        }
-                                        else if (quaHan)
-                                        {
-                                            <span class="badge bg-danger">Quá hạn</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge bg-primary">@p.TrangThai</span>
-                                        }
+
+                                    <td class="text-center">
+                                        @phieu.NgayMuon.ToString("dd/MM/yyyy")
                                     </td>
-                                    <td>
-                                        @if (p.TrangThai == "Chờ xác nhận")
-                                        {
-                                            <div class="d-flex flex-column gap-2">
-                                                <form asp-controller="MuonTra" asp-action="XacNhan"
+
+                                    <td class="text-center">
+                                        @phieu.HanTra.ToString("dd/MM/yyyy")
+                                    </td>
+
+                                    <td class="text-center">
+                                        <span class="badge @badgeClass">
+                                            @phieu.TrangThai
+                                        </span>
+                                    </td>
+
+                                    <td class="text-center">
+
+                                        <div class="d-flex justify-content-center flex-wrap gap-1">
+
+                                            @if (phieu.TrangThai == "Chờ xác nhận")
+                                            {
+                                                <form asp-controller="MuonTra"
+                                                      asp-action="XacNhan"
                                                       method="post"
-                                                      onsubmit="return confirm('Xác nhận phiếu mượn này?');">
+                                                      onsubmit="return confirm('Bạn có chắc chắn muốn xác nhận phiếu này?');">
+
                                                     @Html.AntiForgeryToken()
-                                                    <input type="hidden" name="id" value="@p.MaPhieuMuon" />
-                                                    <button type="submit" class="btn btn-sm btn-primary w-100">
-                                                        Xác nhận
+
+                                                    <input type="hidden"
+                                                           name="id"
+                                                           value="@phieu.MaPhieuMuon" />
+
+                                                    <button type="submit"
+                                                            class="btn btn-sm btn-success"
+                                                            title="Xác nhận">
+                                                        <i class="bi bi-check-lg"></i>
                                                     </button>
                                                 </form>
 
-                                                <form asp-controller="MuonTra" asp-action="Huy"
+                                                <form asp-controller="MuonTra"
+                                                      asp-action="TuChoi"
                                                       method="post"
-                                                      onsubmit="return confirm('Bạn có chắc muốn hủy phiếu này?');">
+                                                      onsubmit="return confirm('Bạn có chắc chắn muốn từ chối phiếu này không?');">
+
                                                     @Html.AntiForgeryToken()
-                                                    <input type="hidden" name="id" value="@p.MaPhieuMuon" />
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger w-100">
-                                                        Hủy phiếu
+
+                                                    <input type="hidden"
+                                                           name="id"
+                                                           value="@phieu.MaPhieuMuon" />
+
+                                                    <button type="submit"
+                                                            class="btn btn-sm btn-outline-danger"
+                                                            title="Từ chối phiếu">
+                                                        <i class="bi bi-x-lg"></i>
+                                                        Từ chối
                                                     </button>
                                                 </form>
-                                            </div>
-                                        }
-                                        else if (p.TrangThai == "Đang mượn" && !daTraHet)
-                                        {
-                                            <form asp-controller="MuonTra" asp-action="Tra"
-                                                  method="post"
-                                                  onsubmit="return confirm('Xác nhận trả sách trong phiếu này?');">
-                                                @Html.AntiForgeryToken()
-                                                <input type="hidden" name="id" value="@p.MaPhieuMuon" />
-                                                <button type="submit" class="btn btn-sm btn-success w-100">
-                                                    Trả sách
-                                                </button>
-                                            </form>
-                                        }
-                                        else if (p.TrangThai == "Đã trả" || daTraHet)
-                                        {
-                                            <span class="text-success">Hoàn tất</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="text-muted small">Không có thao tác</span>
-                                        }
+                                            }
+
+                                            @if (phieu.TrangThai == "Đang mượn")
+                                            {
+                                                <form asp-controller="MuonTra"
+                                                      asp-action="Tra"
+                                                      method="post"
+                                                      onsubmit="return confirm('Xác nhận đã nhận lại sách?');">
+
+                                                    @Html.AntiForgeryToken()
+
+                                                    <input type="hidden"
+                                                           name="id"
+                                                           value="@phieu.MaPhieuMuon" />
+
+                                                    <button type="submit"
+                                                            class="btn btn-sm btn-primary">
+                                                        <i class="bi bi-box-arrow-in-left"></i>
+                                                        Trả sách
+                                                    </button>
+                                                </form>
+                                            }
+
+                                            @if (phieu.TrangThai == "Đã trả")
+                                            {
+                                                <span class="text-success small">
+                                                    <i class="bi bi-check-circle-fill"></i>
+                                                    Hoàn thành
+                                                </span>
+                                            }
+
+                                            @if (phieu.TrangThai == "Từ chối")
+                                            {
+                                                <span class="text-secondary small">
+                                                    <i class="bi bi-x-circle-fill"></i>
+                                                    Đã từ chối
+                                                </span>
+                                            }
+
+                                            @if (phieu.TrangThai == "Đã hủy")
+                                            {
+                                                <span class="text-muted small">
+                                                    Đã hủy
+                                                </span>
+                                            }
+
+                                            @if (phieu.TrangThai == "Chờ xác nhận" ||
+                                                 phieu.TrangThai == "Từ chối" ||
+                                                 phieu.TrangThai == "Đã hủy" ||
+                                                 phieu.TrangThai == "Đã trả")
+                                            {
+                                                <form asp-controller="MuonTra"
+                                                      asp-action="Xoa"
+                                                      method="post"
+                                                      onsubmit="return confirm('Bạn có chắc chắn muốn xóa phiếu này không? Dữ liệu chi tiết của phiếu cũng sẽ bị xóa.');">
+
+                                                    @Html.AntiForgeryToken()
+
+                                                    <input type="hidden"
+                                                           name="id"
+                                                           value="@phieu.MaPhieuMuon" />
+
+                                                    <button type="submit"
+                                                            class="btn btn-sm btn-danger"
+                                                            title="Xóa phiếu">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </form>
+                                            }
+
+                                        </div>
+
                                     </td>
+
                                 </tr>
+
+                                soThuTu++;
                             }
                         }
                         else
                         {
                             <tr>
-                                <td colspan="8" class="text-center py-5 text-muted">
-                                    Không tìm thấy phiếu mượn phù hợp.
+                                <td colspan="8" class="text-center py-5">
+
+                                    <i class="bi bi-inbox fs-1 text-muted"></i>
+
+                                    <p class="text-muted mt-2 mb-0">
+                                        Không tìm thấy phiếu mượn nào.
+                                    </p>
+
                                 </td>
                             </tr>
                         }
+
                     </tbody>
+
                 </table>
+
             </div>
 
-            <!-- Phân trang -->
-            @if (tongSoTrang > 1)
-            {
-                <nav class="mt-4" aria-label="Phân trang phiếu mượn">
-                    <ul class="pagination justify-content-center flex-wrap">
+        </div>
+
+        <!-- PHÂN TRANG -->
+        @if (tongSoTrang > 1)
+        {
+            <div class="card-footer bg-white">
+
+                <nav>
+                    <ul class="pagination justify-content-center mb-0">
+
                         <li class="page-item @(trangHienTai <= 1 ? "disabled" : "")">
+
                             <a class="page-link"
+                               asp-controller="MuonTra"
                                asp-action="Index"
                                asp-route-page="@(trangHienTai - 1)"
-                               asp-route-trangThai="@trangThaiLoc"
-                               asp-route-tuKhoa="@tuKhoa"
-                               asp-route-ngayTu="@ngayTu?.ToString("yyyy-MM-dd")"
-                               asp-route-ngayDen="@ngayDen?.ToString("yyyy-MM-dd")">
+                               asp-route-trangThai="@trangThaiLoc">
                                 Trước
                             </a>
+
                         </li>
 
-                        @for (var i = 1; i <= tongSoTrang; i++)
+                        @for (int i = 1; i <= tongSoTrang; i++)
                         {
                             <li class="page-item @(i == trangHienTai ? "active" : "")">
+
                                 <a class="page-link"
+                                   asp-controller="MuonTra"
                                    asp-action="Index"
                                    asp-route-page="@i"
-                                   asp-route-trangThai="@trangThaiLoc"
-                                   asp-route-tuKhoa="@tuKhoa"
-                                   asp-route-ngayTu="@ngayTu?.ToString("yyyy-MM-dd")"
-                                   asp-route-ngayDen="@ngayDen?.ToString("yyyy-MM-dd")">
+                                   asp-route-trangThai="@trangThaiLoc">
                                     @i
                                 </a>
+
                             </li>
                         }
 
                         <li class="page-item @(trangHienTai >= tongSoTrang ? "disabled" : "")">
+
                             <a class="page-link"
+                               asp-controller="MuonTra"
                                asp-action="Index"
                                asp-route-page="@(trangHienTai + 1)"
-                               asp-route-trangThai="@trangThaiLoc"
-                               asp-route-tuKhoa="@tuKhoa"
-                               asp-route-ngayTu="@ngayTu?.ToString("yyyy-MM-dd")"
-                               asp-route-ngayDen="@ngayDen?.ToString("yyyy-MM-dd")">
+                               asp-route-trangThai="@trangThaiLoc">
                                 Sau
                             </a>
+
                         </li>
+
                     </ul>
                 </nav>
-            }
-        </div>
+
+            </div>
+        }
+
     </div>
+
 </div>
