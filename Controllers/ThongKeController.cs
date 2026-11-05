@@ -51,13 +51,32 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
                 .Select(t => new SachTheoTheLoaiThongKe
                 {
                     TenTheLoai = t.TenTheLoai,
+
                     SoDauSach = _context.Sachs.Count(
                         s => s.MaTheLoai == t.MaTheLoai)
                 })
                 .OrderByDescending(x => x.SoDauSach)
                 .ToListAsync();
 
-            // Báo cáo 2: Lượt mượn theo sách
+            // Báo cáo 2: Số lượng của từng đầu sách
+            model.SoLuongTungSach = await _context.Sachs
+                .AsNoTracking()
+                .Join(
+                    _context.TheLoais.AsNoTracking(),
+                    s => s.MaTheLoai,
+                    t => t.MaTheLoai,
+                    (s, t) => new SoLuongTungSachThongKe
+                    {
+                        TenSach = s.TenSach,
+                        TenTheLoai = t.TenTheLoai,
+                        SoLuong = s.SoLuong,
+                        SoLuongCon = s.SoLuongCon
+                    })
+                .OrderBy(x => x.TenTheLoai)
+                .ThenBy(x => x.TenSach)
+                .ToListAsync();
+
+            // Báo cáo 3: Lượt mượn theo sách
             var thongKeSach = await _context.ChiTietPhieuMuons
                 .AsNoTracking()
                 .GroupBy(ct => ct.MaSach)
@@ -82,7 +101,7 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
 
             model.LuotMuonTheoSach = thongKeSach;
 
-            // Báo cáo 3: Số phiếu theo trạng thái
+            // Báo cáo 4: Số phiếu theo trạng thái
             model.PhieuTheoTrangThai = await _context.PhieuMuons
                 .AsNoTracking()
                 .GroupBy(p => p.TrangThai)
@@ -94,17 +113,17 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
                 .OrderByDescending(x => x.SoPhieu)
                 .ToListAsync();
 
-            // Báo cáo 4: Top 10 sách được mượn nhiều nhất
+            // Báo cáo 5: Top 10 sách được mượn nhiều nhất
             model.TopSachMuonNhieuNhat = thongKeSach
                 .Take(10)
                 .ToList();
 
-            // Giữ thuộc tính dạng chuỗi để tương thích với Module 3.
+            // Giữ thuộc tính dạng chuỗi để tương thích với Module 3
             model.SachMuonNhieuNhat = thongKeSach
                 .Select(x => x.TenSach)
                 .FirstOrDefault() ?? "Chưa có dữ liệu";
 
-            // Báo cáo 5: Số phiếu mượn theo độc giả
+            // Báo cáo 6: Số phiếu mượn theo độc giả
             model.LuotMuonTheoDocGia = await _context.PhieuMuons
                 .AsNoTracking()
                 .GroupBy(p => p.MaDocGia)
@@ -125,7 +144,7 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
                 .OrderByDescending(x => x.SoLuotMuon)
                 .ToListAsync();
 
-            // Báo cáo 6: Số phiếu mượn theo tháng
+            // Báo cáo 7: Số phiếu mượn theo tháng
             model.PhieuMuonTheoThang = await _context.PhieuMuons
                 .AsNoTracking()
                 .GroupBy(p => new
