@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QuanLyThuVien_UNETI04_TI17A1HN.Data;
 using QuanLyThuVien_UNETI04_TI17A1HN.Models;
+using QuanLyThuVien_UNETI04_TI17A1HN.Helpers;
 
 namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
 {
@@ -196,6 +197,7 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
             return View(sach);
         }
 
+        [YeuCauAdmin]
         public async Task<IActionResult> Create()
         {
             await NapDanhSachTheLoaiAsync();
@@ -205,6 +207,7 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
             return View();
         }
 
+        [YeuCauAdmin]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(
@@ -307,6 +310,7 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
             return View(sach);
         }
 
+        [YeuCauAdmin]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -334,6 +338,7 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
             return View(sach);
         }
 
+        [YeuCauAdmin]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(
@@ -408,6 +413,7 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
             return View(sach);
         }
 
+        [YeuCauAdmin]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -430,6 +436,7 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
             return View(sach);
         }
 
+        [YeuCauAdmin]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)

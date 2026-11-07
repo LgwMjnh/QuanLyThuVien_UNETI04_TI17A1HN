@@ -196,16 +196,19 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Migrations
 
                     b.Property<string>("MatKhau")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<int>("SoLanDangNhapSai")
+                        .HasColumnType("int");
 
                     b.Property<string>("TenDangNhap")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<bool>("TrangThai")
-                        .HasColumnType("bit");
+                    b.Property<int>("TrangThai")
+                        .HasColumnType("int");
 
                     b.Property<string>("VaiTro")
                         .IsRequired()

@@ -2,9 +2,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QuanLyThuVien_UNETI04_TI17A1HN.Data;
 using QuanLyThuVien_UNETI04_TI17A1HN.Models;
+using QuanLyThuVien_UNETI04_TI17A1HN.Helpers;
 
 namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
 {
+    [YeuCauAdmin]
     public class TheLoaiController : Controller
     {
         private readonly ApplicationDbContext _context;

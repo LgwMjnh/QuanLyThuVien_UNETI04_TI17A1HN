@@ -1,9 +1,10 @@
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using QuanLyThuVien_UNETI04_TI17A1HN.Data;
 using QuanLyThuVien_UNETI04_TI17A1HN.Models;
-using QuanLyThuVien_UNETI04_TI17A1HN.Helpers;
+using Microsoft.AspNetCore.Identity;
 
 namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
 {
@@ -16,9 +17,48 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
             _context = context;
         }
 
+        // Kiểm tra quyền Admin dựa trên Session và dữ liệu mới nhất trong cơ sở dữ liệu.
+        private async Task<bool> LaAdminDangNhapAsync()
+        {
+            int? maTaiKhoan = HttpContext.Session.GetInt32("MaTaiKhoan");
+
+            if (maTaiKhoan == null)
+                return false;
+
+            return await _context.TaiKhoans.AnyAsync(tk =>
+                tk.MaTaiKhoan == maTaiKhoan.Value &&
+                tk.VaiTro == "Admin" &&
+                tk.TrangThai == TrangThaiTaiKhoan.BinhThuong);
+        }
+
+        // Kiểm tra tài khoản Độc giả đang đăng nhập còn hợp lệ hay không.
+        private async Task<int?> LayMaTaiKhoanDocGiaDangNhapAsync()
+        {
+            int? maTaiKhoan = HttpContext.Session.GetInt32("MaTaiKhoan");
+
+            if (maTaiKhoan == null)
+                return null;
+
+            bool hopLe = await _context.TaiKhoans.AnyAsync(tk =>
+                tk.MaTaiKhoan == maTaiKhoan.Value &&
+                tk.VaiTro == "DocGia" &&
+                tk.TrangThai == TrangThaiTaiKhoan.BinhThuong);
+
+            return hopLe ? maTaiKhoan : null;
+        }
+
+        private IActionResult TuChoiTruyCapAdmin()
+        {
+            TempData["Error"] = "Chức năng này chỉ dành cho Admin đang đăng nhập.";
+            return RedirectToAction("Index", "DangNhap");
+        }
+
         // Xem danh sách và tìm kiếm độc giả (Admin)
         public async Task<IActionResult> Index(string? keyword, string? trangThai)
         {
+            if (!await LaAdminDangNhapAsync())
+                return TuChoiTruyCapAdmin();
+
             var query = _context.DocGias
                 .Include(d => d.TaiKhoan)
                 .AsQueryable();
@@ -30,6 +70,7 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
                 // Hỗ trợ tìm kiếm theo họ tên, email, SĐT, username hoặc mã độc giả (DG001, DG1, 1)
                 int maTimKiem = 0;
                 string normalized = keyword.ToUpper();
+
                 if (normalized.StartsWith("DG"))
                 {
                     int.TryParse(normalized.Substring(2), out maTimKiem);
@@ -65,6 +106,9 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
         // Xem chi tiết độc giả và lịch sử mượn (Admin)
         public async Task<IActionResult> Details(int? id)
         {
+            if (!await LaAdminDangNhapAsync())
+                return TuChoiTruyCapAdmin();
+
             if (id == null)
                 return NotFound();
 
@@ -85,6 +129,9 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
         [HttpGet]
         public async Task<IActionResult> Create()
         {
+            if (!await LaAdminDangNhapAsync())
+                return TuChoiTruyCapAdmin();
+
             await NapDanhSachTaiKhoan();
 
             return View(new DocGia
@@ -94,6 +141,7 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
             });
         }
 
+        // POST: DocGia/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(
@@ -102,6 +150,9 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
             string? tenDangNhap,
             string? matKhau)
         {
+            if (!await LaAdminDangNhapAsync())
+                return TuChoiTruyCapAdmin();
+
             if (docGia.NgaySinh.HasValue &&
                 docGia.NgaySinh.Value.Date > DateTime.Today)
             {
@@ -110,6 +161,14 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
                     "Ngày sinh không được lớn hơn ngày hiện tại.");
             }
 
+            if (string.IsNullOrWhiteSpace(docGia.HoTen))
+            {
+                ModelState.AddModelError(
+                    nameof(docGia.HoTen),
+                    "Họ tên không được để trống.");
+            }
+
+            // Kiểm tra tài khoản được chọn
             if (docGia.MaTaiKhoan > 0)
             {
                 bool taiKhoanTonTai = await _context.TaiKhoans
@@ -132,26 +191,37 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
                         "Tài khoản này đã được liên kết với độc giả khác.");
                 }
             }
-            else if (!string.IsNullOrWhiteSpace(tenDangNhap))
+            else
             {
-                tenDangNhap = tenDangNhap.Trim();
+                // Kiểm tra tên đăng nhập khi tạo tài khoản mới
+                if (!string.IsNullOrWhiteSpace(tenDangNhap))
+                {
+                    tenDangNhap = tenDangNhap.Trim();
 
-                bool trungTen = await _context.TaiKhoans
-                    .AnyAsync(t => t.TenDangNhap == tenDangNhap);
+                    bool trungTen = await _context.TaiKhoans
+                        .AnyAsync(t => t.TenDangNhap == tenDangNhap);
 
-                if (trungTen)
+                    if (trungTen)
+                    {
+                        ModelState.AddModelError(
+                            nameof(tenDangNhap),
+                            "Tên đăng nhập này đã tồn tại.");
+                    }
+                }
+
+                // Bắt buộc nhập mật khẩu khi tạo tài khoản mới
+                if (string.IsNullOrWhiteSpace(matKhau))
                 {
                     ModelState.AddModelError(
-                        nameof(tenDangNhap),
-                        "Tên đăng nhập này đã tồn tại.");
+                        nameof(matKhau),
+                        "Vui lòng nhập mật khẩu cho tài khoản mới.");
                 }
-            }
-
-            if (string.IsNullOrWhiteSpace(docGia.HoTen))
-            {
-                ModelState.AddModelError(
-                    nameof(docGia.HoTen),
-                    "Họ tên không được để trống.");
+                else if (matKhau.Length < 6 || matKhau.Length > 20)
+                {
+                    ModelState.AddModelError(
+                        nameof(matKhau),
+                        "Mật khẩu phải từ 6 đến 20 ký tự.");
+                }
             }
 
             if (ModelState.IsValid)
@@ -162,54 +232,95 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
                 if (string.IsNullOrWhiteSpace(docGia.TrangThai))
                     docGia.TrangThai = "Hoạt động";
 
-                // Nếu chưa chọn tài khoản thì tự tạo tài khoản mới
-                if (docGia.MaTaiKhoan <= 0)
+                bool daTaoTaiKhoanMoi = false;
+
+                // Bắt đầu Transaction để đảm bảo hai bảng được lưu đồng thời
+                await using var transaction =
+                    await _context.Database.BeginTransactionAsync();
+
+                try
                 {
-                    string username = string.IsNullOrWhiteSpace(tenDangNhap)
-                        ? "docgia_" + Guid.NewGuid().ToString("N")[..10]
-                        : tenDangNhap.Trim();
-
-                    bool trungTen = await _context.TaiKhoans
-                        .AnyAsync(t => t.TenDangNhap == username);
-
-                    if (trungTen)
+                    // Nếu chưa chọn tài khoản thì tự động tạo tài khoản mới
+                    if (docGia.MaTaiKhoan <= 0)
                     {
-                        ModelState.AddModelError(
-                            nameof(tenDangNhap),
-                            "Tên đăng nhập này đã tồn tại.");
+                        string username = string.IsNullOrWhiteSpace(tenDangNhap)
+                            ? "docgia_" + Guid.NewGuid().ToString("N")[..10]
+                            : tenDangNhap.Trim();
 
-                        ViewBag.TenDangNhap = tenDangNhap;
-                        await NapDanhSachTaiKhoan();
-                        return View(docGia);
+                        // Kiểm tra lại tên đăng nhập
+                        bool trungTen = await _context.TaiKhoans
+                            .AnyAsync(t => t.TenDangNhap == username);
+
+                        if (trungTen)
+                        {
+                            await transaction.RollbackAsync();
+
+                            ModelState.AddModelError(
+                                nameof(tenDangNhap),
+                                "Tên đăng nhập này đã tồn tại.");
+
+                            ViewBag.TenDangNhap = tenDangNhap;
+                            await NapDanhSachTaiKhoan();
+
+                            return View(docGia);
+                        }
+
+                        var taiKhoan = new TaiKhoan
+                        {
+                            TenDangNhap = username,
+                            HoTen = docGia.HoTen,
+                            VaiTro = "DocGia",
+                            TrangThai = TrangThaiTaiKhoan.BinhThuong,
+                            SoLanDangNhapSai = 0
+                        };
+
+                        // Mã hóa mật khẩu sau khi đã khởi tạo tài khoản
+                        taiKhoan.MatKhau =
+                            new PasswordHasher<TaiKhoan>()
+                            .HashPassword(taiKhoan, matKhau!);
+
+                        _context.TaiKhoans.Add(taiKhoan);
+
+                        // Lưu tài khoản để lấy MaTaiKhoan
+                        await _context.SaveChangesAsync();
+
+                        docGia.MaTaiKhoan = taiKhoan.MaTaiKhoan;
+                        daTaoTaiKhoanMoi = true;
                     }
 
-                    var taiKhoan = new TaiKhoan
-                    {
-                        TenDangNhap = username,
-                        MatKhau = string.IsNullOrWhiteSpace(matKhau)
-                            ? "123456"
-                            : matKhau,
-                        HoTen = docGia.HoTen,
-                        VaiTro = "DocGia",
-                        TrangThai = docGia.TrangThai == "Hoạt động"
-                    };
+                    // Tạo hồ sơ độc giả và liên kết với tài khoản
+                    _context.DocGias.Add(docGia);
 
-                    _context.TaiKhoans.Add(taiKhoan);
                     await _context.SaveChangesAsync();
 
-                    docGia.MaTaiKhoan = taiKhoan.MaTaiKhoan;
+                    // Xác nhận Transaction khi cả hai thao tác thành công
+                    await transaction.CommitAsync();
+
+                    TempData["Success"] =
+                        $"Thêm độc giả '{docGia.HoTen}' thành công!";
+
+                    TempData["ThongBao"] =
+                        $"Thêm độc giả '{docGia.HoTen}' thành công!";
+
+                    return RedirectToAction(nameof(Index));
                 }
+                catch (DbUpdateException)
+                {
+                    // Nếu xảy ra lỗi thì hủy toàn bộ thao tác
+                    await transaction.RollbackAsync();
 
-                _context.DocGias.Add(docGia);
-                await _context.SaveChangesAsync();
+                    if (daTaoTaiKhoanMoi)
+                        docGia.MaTaiKhoan = 0;
 
-                TempData["Success"] =
-                    $"Thêm độc giả '{docGia.HoTen}' thành công!";
+                    ModelState.AddModelError(
+                        string.Empty,
+                        "Không thể lưu thông tin độc giả. Vui lòng kiểm tra dữ liệu và thử lại.");
 
-                TempData["ThongBao"] =
-                    $"Thêm độc giả '{docGia.HoTen}' thành công!";
+                    ViewBag.TenDangNhap = tenDangNhap;
+                    await NapDanhSachTaiKhoan(docGia.MaTaiKhoan);
 
-                return RedirectToAction(nameof(Index));
+                    return View(docGia);
+                }
             }
 
             ViewBag.TenDangNhap = tenDangNhap;
@@ -222,6 +333,9 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
         [HttpGet]
         public async Task<IActionResult> Edit(int? id)
         {
+            if (!await LaAdminDangNhapAsync())
+                return TuChoiTruyCapAdmin();
+
             if (id == null)
                 return NotFound();
 
@@ -244,6 +358,9 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
             [Bind("MaDocGia,MaTaiKhoan,HoTen,NgaySinh,GioiTinh,SoDienThoai,Email,DiaChi,NgayDangKy,TrangThai")]
             DocGia input)
         {
+            if (!await LaAdminDangNhapAsync())
+                return TuChoiTruyCapAdmin();
+
             if (id != input.MaDocGia)
                 return NotFound();
 
@@ -327,6 +444,9 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
             int id,
             string trangThai)
         {
+            if (!await LaAdminDangNhapAsync())
+                return TuChoiTruyCapAdmin();
+
             if (trangThai != "Hoạt động" && trangThai != "Khóa")
             {
                 TempData["Error"] = "Trạng thái không hợp lệ.";
@@ -342,11 +462,6 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
 
             docGia.TrangThai = trangThai;
 
-            if (docGia.TaiKhoan != null)
-            {
-                docGia.TaiKhoan.TrangThai = trangThai == "Hoạt động";
-            }
-
             await _context.SaveChangesAsync();
 
             TempData["Success"] =
@@ -359,7 +474,8 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
         [HttpGet]
         public async Task<IActionResult> HoSo()
         {
-            var maTaiKhoan = QuyenTruyCap.LayMaTaiKhoan(HttpContext);
+            var maTaiKhoan = await LayMaTaiKhoanDocGiaDangNhapAsync();
+
             if (maTaiKhoan == null)
             {
                 TempData["Error"] = "Vui lòng đăng nhập để xem thông tin cá nhân.";
@@ -388,7 +504,8 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
         public async Task<IActionResult> HoSo(
             [Bind("HoTen,NgaySinh,GioiTinh,SoDienThoai,Email,DiaChi")] DocGia input)
         {
-            var maTaiKhoan = QuyenTruyCap.LayMaTaiKhoan(HttpContext);
+            var maTaiKhoan = await LayMaTaiKhoanDocGiaDangNhapAsync();
+
             if (maTaiKhoan == null)
             {
                 TempData["Error"] = "Phiên làm việc đã hết hạn. Vui lòng đăng nhập lại.";

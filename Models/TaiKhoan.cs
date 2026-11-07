@@ -1,8 +1,14 @@
-﻿
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace QuanLyThuVien_UNETI04_TI17A1HN.Models
 {
+    public enum TrangThaiTaiKhoan
+    {
+        BinhThuong = 0,
+        BiKhoa = 1,
+        BiBan = 2
+    }
+
     public class TaiKhoan
     {
         [Key]
@@ -14,8 +20,7 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Models
         public string TenDangNhap { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Mật khẩu không được để trống.")]
-        [StringLength(20, MinimumLength = 6,
-            ErrorMessage = "Mật khẩu phải từ 6 đến 20 ký tự.")]
+        [StringLength(255)]
         public string MatKhau { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Họ tên không được để trống.")]
@@ -28,7 +33,10 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Models
             ErrorMessage = "Vai trò không được vượt quá 30 ký tự.")]
         public string VaiTro { get; set; } = string.Empty;
 
-        public bool TrangThai { get; set; } = true;
+        public TrangThaiTaiKhoan TrangThai { get; set; }
+            = TrangThaiTaiKhoan.BinhThuong;
+
+        public int SoLanDangNhapSai { get; set; } = 0;
 
         public virtual DocGia? DocGia { get; set; }
     }

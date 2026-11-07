@@ -1,6 +1,8 @@
 
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using QuanLyThuVien_UNETI04_TI17A1HN.Data;
+using QuanLyThuVien_UNETI04_TI17A1HN.Models;
 
 namespace QuanLyThuVien_UNETI04_TI17A1HN
 {
@@ -16,6 +18,11 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN
                     builder.Configuration.GetConnectionString("DefaultConnection")));
 
             builder.Services.AddControllersWithViews();
+
+            // Dịch vụ mã hóa và kiểm tra mật khẩu
+            builder.Services.AddScoped<
+                IPasswordHasher<TaiKhoan>,
+                PasswordHasher<TaiKhoan>>();
 
             // Session dùng chung cho Module 1 và Module 3
             builder.Services.AddDistributedMemoryCache();

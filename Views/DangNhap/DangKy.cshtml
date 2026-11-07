@@ -1,0 +1,147 @@
+﻿@model QuanLyThuVien_UNETI04_TI17A1HN.ViewModels.DangKyViewModel
+
+@{
+    ViewData["Title"] = "Đăng ký tài khoản";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+
+            <div class="card shadow">
+                <div class="card-body p-4">
+
+                    <h2 class="text-center mb-2">Đăng ký tài khoản</h2>
+                    <p class="text-center text-muted mb-4">
+                        Đăng ký tài khoản độc giả thư viện UNETI
+                    </p>
+
+                    <form asp-controller="DangNhap"
+                          asp-action="DangKy"
+                          method="post">
+
+                        <div asp-validation-summary="ModelOnly"
+                             class="text-danger mb-3"></div>
+
+                        <h5 class="mb-3">Thông tin tài khoản</h5>
+
+                        <div class="mb-3">
+                            <label asp-for="TenDangNhap" class="form-label"></label>
+                            <input asp-for="TenDangNhap"
+                                   class="form-control"
+                                   placeholder="Nhập tên đăng nhập"
+                                   autocomplete="username" />
+                            <span asp-validation-for="TenDangNhap"
+                                  class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="MatKhau" class="form-label"></label>
+                            <input asp-for="MatKhau"
+                                   class="form-control"
+                                   placeholder="Nhập mật khẩu"
+                                   autocomplete="new-password" />
+                            <span asp-validation-for="MatKhau"
+                                  class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="XacNhanMatKhau" class="form-label"></label>
+                            <input asp-for="XacNhanMatKhau"
+                                   class="form-control"
+                                   placeholder="Nhập lại mật khẩu"
+                                   autocomplete="new-password" />
+                            <span asp-validation-for="XacNhanMatKhau"
+                                  class="text-danger"></span>
+                        </div>
+
+                        <hr />
+
+                        <h5 class="mb-3">Thông tin độc giả</h5>
+
+                        <div class="mb-3">
+                            <label asp-for="HoTen" class="form-label"></label>
+                            <input asp-for="HoTen"
+                                   class="form-control"
+                                   placeholder="Nhập họ và tên" />
+                            <span asp-validation-for="HoTen"
+                                  class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="NgaySinh" class="form-label"></label>
+                            <input asp-for="NgaySinh"
+                                   type="date"
+                                   class="form-control" />
+                            <span asp-validation-for="NgaySinh"
+                                  class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="GioiTinh" class="form-label"></label>
+                            <select asp-for="GioiTinh" class="form-select">
+                                <option value="">-- Chọn giới tính --</option>
+                                <option value="Nam">Nam</option>
+                                <option value="Nữ">Nữ</option>
+                                <option value="Khác">Khác</option>
+                            </select>
+                            <span asp-validation-for="GioiTinh"
+                                  class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="SoDienThoai" class="form-label"></label>
+                            <input asp-for="SoDienThoai"
+                                   class="form-control"
+                                   placeholder="Nhập số điện thoại" />
+                            <span asp-validation-for="SoDienThoai"
+                                  class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label"></label>
+                            <input asp-for="Email"
+                                   type="email"
+                                   class="form-control"
+                                   placeholder="Nhập email" />
+                            <span asp-validation-for="Email"
+                                  class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="DiaChi" class="form-label"></label>
+                            <textarea asp-for="DiaChi"
+                                      class="form-control"
+                                      rows="2"
+                                      placeholder="Nhập địa chỉ"></textarea>
+                            <span asp-validation-for="DiaChi"
+                                  class="text-danger"></span>
+                        </div>
+
+                        <button type="submit"
+                                class="btn btn-primary w-100">
+                            Đăng ký
+                        </button>
+
+                    </form>
+
+                    <div class="text-center mt-3">
+                        Đã có tài khoản?
+                        <a asp-controller="DangNhap"
+                           asp-action="Index">
+                            Đăng nhập
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

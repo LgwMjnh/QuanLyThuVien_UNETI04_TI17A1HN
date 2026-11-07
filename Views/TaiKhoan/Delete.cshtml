@@ -1,5 +1,6 @@
-
 @model QuanLyThuVien_UNETI04_TI17A1HN.Models.TaiKhoan
+
+@using QuanLyThuVien_UNETI04_TI17A1HN.Models
 
 @{
     ViewData["Title"] = "Xóa tài khoản";
@@ -43,20 +44,35 @@
 
                 <dt class="col-sm-3 mb-3">Trạng thái</dt>
                 <dd class="col-sm-9 mb-3">
-                    @if (Model.TrangThai)
+                    @if (Model.TrangThai == TrangThaiTaiKhoan.BinhThuong)
                     {
-                        <span class="badge bg-success">Hoạt động</span>
+                        <span class="badge bg-success">Bình thường</span>
+                    }
+                    else if (Model.TrangThai == TrangThaiTaiKhoan.BiKhoa)
+                    {
+                        <span class="badge bg-warning text-dark">Bị khóa</span>
+                    }
+                    else if (Model.TrangThai == TrangThaiTaiKhoan.BiBan)
+                    {
+                        <span class="badge bg-danger">Bị ban</span>
                     }
                     else
                     {
-                        <span class="badge bg-secondary">Đã khóa</span>
+                        <span class="badge bg-secondary">Không xác định</span>
                     }
+                </dd>
+
+                <dt class="col-sm-3 mb-3">Số lần đăng nhập sai</dt>
+                <dd class="col-sm-9 mb-3">
+                    @Model.SoLanDangNhapSai lần
                 </dd>
             </dl>
         </div>
 
         <div class="card-footer d-flex flex-wrap gap-2">
-            <form asp-action="Delete" method="post">
+            <form asp-action="Delete"
+                  method="post"
+                  onsubmit="return confirm('Bạn có muốn xóa tài khoản này không?');">
                 <input type="hidden" asp-for="MaTaiKhoan" />
 
                 <button type="submit" class="btn btn-danger">
