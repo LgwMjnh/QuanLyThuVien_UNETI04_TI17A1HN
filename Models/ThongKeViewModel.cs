@@ -1,4 +1,3 @@
-
 using System.Collections.Generic;
 
 namespace QuanLyThuVien_UNETI04_TI17A1HN.Models
@@ -35,27 +34,32 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Models
         public List<SachTheoTheLoaiThongKe> SachTheoTheLoai { get; set; }
             = new();
 
-        // Báo cáo 2: Lượt mượn theo sách
+        // Báo cáo 2: Số lượng của từng đầu sách
+        public List<SoLuongTungSachThongKe> SoLuongTungSach { get; set; }
+            = new();
+
+        // Báo cáo 3: Lượt mượn theo sách
         public List<LuotMuonTheoSachThongKe> LuotMuonTheoSach { get; set; }
             = new();
 
-        // Báo cáo 3: Phiếu theo trạng thái
+        // Báo cáo 4: Phiếu theo trạng thái
         public List<PhieuTheoTrangThaiThongKe> PhieuTheoTrangThai { get; set; }
             = new();
 
-        // Báo cáo 4: Top sách được mượn nhiều nhất
+        // Báo cáo 5: Top sách được mượn nhiều nhất
         public List<LuotMuonTheoSachThongKe> TopSachMuonNhieuNhat { get; set; }
             = new();
 
-        // Báo cáo 5: Lượt mượn theo độc giả
+        // Báo cáo 6: Lượt mượn theo độc giả
         public List<LuotMuonTheoDocGiaThongKe> LuotMuonTheoDocGia { get; set; }
             = new();
 
-        // Báo cáo 6: Phiếu mượn theo tháng
+        // Báo cáo 7: Phiếu mượn theo tháng
         public List<PhieuMuonTheoThangThongKe> PhieuMuonTheoThang { get; set; }
             = new();
     }
 
+    // Thống kê số đầu sách theo thể loại
     public class SachTheoTheLoaiThongKe
     {
         public string TenTheLoai { get; set; } = string.Empty;
@@ -63,6 +67,19 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Models
         public int SoDauSach { get; set; }
     }
 
+    // Thống kê số lượng từng đầu sách
+    public class SoLuongTungSachThongKe
+    {
+        public string TenSach { get; set; } = string.Empty;
+
+        public string TenTheLoai { get; set; } = string.Empty;
+
+        public int SoLuong { get; set; }
+
+        public int SoLuongCon { get; set; }
+    }
+
+    // Thống kê lượt mượn theo sách
     public class LuotMuonTheoSachThongKe
     {
         public string TenSach { get; set; } = string.Empty;
@@ -72,6 +89,7 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Models
         public int TongSoLuong { get; set; }
     }
 
+    // Thống kê phiếu theo trạng thái
     public class PhieuTheoTrangThaiThongKe
     {
         public string TrangThai { get; set; } = string.Empty;
@@ -79,6 +97,7 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Models
         public int SoPhieu { get; set; }
     }
 
+    // Thống kê lượt mượn theo độc giả
     public class LuotMuonTheoDocGiaThongKe
     {
         public string HoTen { get; set; } = string.Empty;
@@ -86,6 +105,7 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Models
         public int SoLuotMuon { get; set; }
     }
 
+    // Thống kê phiếu mượn theo tháng
     public class PhieuMuonTheoThangThongKe
     {
         public int Thang { get; set; }

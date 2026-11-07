@@ -1,5 +1,4 @@
-﻿
-@model IEnumerable<QuanLyThuVien_UNETI04_TI17A1HN.Models.Sach>
+﻿@model IEnumerable<QuanLyThuVien_UNETI04_TI17A1HN.Models.Sach>
 
 @using Microsoft.AspNetCore.Mvc.Rendering
 @using QuanLyThuVien_UNETI04_TI17A1HN.Models
@@ -40,7 +39,7 @@
 
 <div class="container mt-4">
 
-    <!-- TIÊU ĐỀ -->
+    <!-- TIÊU ĐỀ VÀ NÚT QUAY LẠI -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="fw-bold">Lập phiếu mượn</h2>
@@ -49,11 +48,14 @@
             </p>
         </div>
 
+        <!-- NÚT QUAY LẠI CHỈ CÓ MŨI TÊN -->
         <a asp-controller="MuonTra"
            asp-action="Index"
-           class="btn btn-secondary">
-            <i class="bi bi-arrow-left me-1"></i>
-            Quay lại
+           class="btn btn-success rounded-circle d-inline-flex align-items-center justify-content-center"
+           style="width: 48px; height: 48px; font-size: 30px; font-weight: bold; text-decoration: none; line-height: 1;"
+           title="Quay lại quản lý mượn trả"
+           aria-label="Quay lại quản lý mượn trả">
+            <span aria-hidden="true">←</span>
         </a>
     </div>
 
