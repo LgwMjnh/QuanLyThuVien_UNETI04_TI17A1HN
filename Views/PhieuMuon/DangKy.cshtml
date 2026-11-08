@@ -2,17 +2,18 @@
 
 @{
     ViewData["Title"] = "Đăng ký mượn sách";
+    var danhSachSach = ViewBag.DanhSachSach as IEnumerable<dynamic>;
 }
 
 <div class="container py-4">
     <div class="row justify-content-center">
-        <div class="col-lg-8">
+        <div class="col-lg-9">
             <div class="card shadow-sm border-0">
                 <div class="card-header bg-primary text-white py-3">
                     <h4 class="mb-0 fw-bold">
                         <i class="bi bi-journal-plus me-2"></i>ĐĂNG KÝ MƯỢN SÁCH TRỰC TUYẾN
                     </h4>
-                    <small>Yêu cầu sẽ ở trạng thái <strong>Chờ xác nhận</strong> cho đến khi thủ thư phê duyệt.</small>
+                    <small>Yêu cầu sẽ ở trạng thái <strong>Chờ xác nhận</strong> cho đến khi thủ thư phê duyệt tại quầy.</small>
                 </div>
 
                 <div class="card-body p-4">
@@ -22,54 +23,95 @@
                             <div>
                                 <i class="bi bi-person-check-fill fs-5 me-2"></i>
                                 Đang đăng ký cho độc giả: <strong>@ViewBag.TenDocGia</strong>
-                                <span class="badge bg-secondary ms-2">Mã độc giả: #@ViewBag.MaDocGia</span>
+                                <span class="badge bg-secondary ms-2">Mã độc giả: @(ViewBag.MaHienThi ?? ("#" + ViewBag.MaDocGia))</span>
                             </div>
                         </div>
                     }
 
-                    <form asp-controller="PhieuMuon" asp-action="DangKy" method="post">
+                    <form asp-controller="PhieuMuon" asp-action="DangKy" method="post" id="formDangKy">
                         @Html.AntiForgeryToken()
-
                         <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
-                        <div class="mb-3">
-                            <label asp-for="MaSach" class="form-label fw-bold">
-                                Chọn sách cần mượn <span class="text-danger">*</span>
-                            </label>
-                            <select asp-for="MaSach" class="form-select" asp-items="ViewBag.MaSach">
-                                <option value="">-- Chọn đầu sách đang phục vụ trong thư viện --</option>
-                            </select>
-                            <span asp-validation-for="MaSach" class="text-danger"></span>
-                            <small class="text-muted d-block mt-1">
-                                Danh sách chỉ hiển thị các đầu sách còn trong kho và đang ở trạng thái phục vụ.
-                            </small>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label asp-for="SoLuongMuon" class="form-label fw-bold">
-                                    Số lượng mượn <span class="text-danger">*</span>
-                                </label>
-                                <input asp-for="SoLuongMuon" type="number" min="1" max="100" class="form-control" />
-                                <span asp-validation-for="SoLuongMuon" class="text-danger"></span>
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Trạng thái khởi tạo</label>
+                                <div>
+                                    <span class="badge bg-warning text-dark fs-6 px-3 py-2">
+                                        <i class="bi bi-clock-history me-1"></i> Chờ xác nhận
+                                    </span>
+                                </div>
                             </div>
 
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-6">
                                 <label asp-for="HanTra" class="form-label fw-bold">
                                     Hạn trả dự kiến <span class="text-danger">*</span>
                                 </label>
                                 <input asp-for="HanTra" type="date" class="form-control" asp-format="{0:yyyy-MM-dd}" />
                                 <span asp-validation-for="HanTra" class="text-danger"></span>
-                                <small class="text-muted d-block mt-1">Mặc định là 14 ngày tính từ hôm nay.</small>
+                                <small class="text-muted d-block mt-1">Mặc định: 14 ngày kể từ hôm nay.</small>
                             </div>
                         </div>
 
-                        <div class="d-flex gap-2 justify-content-end mt-4">
+                        <hr class="my-4" />
+
+                        <!-- Danh sách sách mượn (Mượn 1 hoặc nhiều sách) -->
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <h5 class="fw-bold text-dark mb-0">
+                                        <i class="bi bi-bookshelf me-2"></i>Danh sách sách đăng ký mượn
+                                    </h5>
+                                    <small class="text-muted">Bạn có thể chọn một hoặc nhiều cuốn sách khác nhau (tổng tối đa 5 quyển).</small>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-success" id="btnThemSach">
+                                    <i class="bi bi-plus-circle me-1"></i> + Thêm sách mượn
+                                </button>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="table table-bordered align-middle" id="bangSachMuon">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Tên sách cần mượn <span class="text-danger">*</span></th>
+                                            <th style="width: 170px;" class="text-center">Số lượng</th>
+                                            <th style="width: 90px;" class="text-center">Thao tác</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="danhSachSachBody">
+                                        <!-- Dòng sách đầu tiên mặc định -->
+                                        <tr class="dong-sach">
+                                            <td>
+                                                <select name="danhSachMaSach" class="form-select select-sach" required>
+                                                    <option value="">-- Chọn đầu sách đang phục vụ --</option>
+                                                    @if (danhSachSach != null)
+                                                    {
+                                                        foreach (var s in danhSachSach)
+                                                        {
+                                                            <option value="@s.MaSach">@s.TenHienThi</option>
+                                                        }
+                                                    }
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <input type="number" name="danhSachSoLuong" class="form-control text-center" value="1" min="1" max="5" required />
+                                            </td>
+                                            <td class="text-center">
+                                                <button type="button" class="btn btn-outline-danger btn-sm btn-xoa-dong" title="Xóa dòng này" disabled>
+                                                    Xóa
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2 justify-content-between align-items-center mt-4">
                             <a asp-action="Index" class="btn btn-outline-secondary">
-                                Xem phiếu mượn của tôi
+                                <i class="bi bi-card-list me-1"></i> Xem phiếu mượn của tôi
                             </a>
                             <button type="submit" class="btn btn-primary px-4 fw-bold">
-                                Gửi yêu cầu mượn sách
+                                <i class="bi bi-send me-1"></i> Gửi yêu cầu mượn sách
                             </button>
                         </div>
                     </form>
@@ -81,4 +123,58 @@
 
 @section Scripts {
     @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var btnThem = document.getElementById('btnThemSach');
+            var tbody = document.getElementById('danhSachSachBody');
+
+            // Thêm dòng sách mới
+            btnThem.addEventListener('click', function () {
+                var firstRow = tbody.querySelector('.dong-sach');
+                if (!firstRow) return;
+
+                var newRow = firstRow.cloneNode(true);
+
+                // Reset giá trị trên dòng mới
+                var select = newRow.querySelector('select');
+                if (select) select.value = '';
+
+                var input = newRow.querySelector('input[type="number"]');
+                if (input) input.value = '1';
+
+                tbody.appendChild(newRow);
+                capNhatTrangThaiNutXoa();
+            });
+
+            // Xóa dòng sách
+            tbody.addEventListener('click', function (e) {
+                var btnXoa = e.target.closest('.btn-xoa-dong');
+                if (!btnXoa) return;
+
+                var rows = tbody.querySelectorAll('.dong-sach');
+                if (rows.length > 1) {
+                    var row = btnXoa.closest('.dong-sach');
+                    if (row) {
+                        row.remove();
+                        capNhatTrangThaiNutXoa();
+                    }
+                }
+            });
+
+            function capNhatTrangThaiNutXoa() {
+                var rows = tbody.querySelectorAll('.dong-sach');
+                rows.forEach(function (r) {
+                    var btn = r.querySelector('.btn-xoa-dong');
+                    if (btn) {
+                        if (rows.length === 1) {
+                            btn.setAttribute('disabled', 'disabled');
+                        } else {
+                            btn.removeAttribute('disabled');
+                        }
+                    }
+                });
+            }
+        });
+    </script>
 }

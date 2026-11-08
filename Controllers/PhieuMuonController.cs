@@ -104,6 +104,18 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
         [HttpGet]
         public async Task<IActionResult> Create()
         {
+            if (QuyenTruyCap.LaDocGia(HttpContext))
+            {
+                TempData["Error"] = "Độc giả vui lòng sử dụng chức năng Đăng ký mượn trực tuyến.";
+                return RedirectToAction(nameof(DangKy));
+            }
+
+            if (!QuyenTruyCap.LaAdmin(HttpContext))
+            {
+                TempData["Error"] = "Chức năng này chỉ dành cho Admin / Thủ thư.";
+                return RedirectToAction("Index", "DangNhap");
+            }
+
             await NapDuLieuChonAsync();
 
             return View(new PhieuMuon
@@ -123,6 +135,12 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
             int maSach = 0,
             int soLuongMuon = 1)
         {
+            if (!QuyenTruyCap.LaAdmin(HttpContext))
+            {
+                TempData["Error"] = "Chức năng này chỉ dành cho Admin / Thủ thư.";
+                return RedirectToAction("Index", "DangNhap");
+            }
+
             if (phieuMuon.MaDocGia <= 0)
             {
                 ModelState.AddModelError(nameof(PhieuMuon.MaDocGia), "Vui lòng chọn độc giả mượn sách.");
@@ -244,6 +262,7 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
 
             ViewBag.TenDocGia = docGia.HoTen;
             ViewBag.MaDocGia = docGia.MaDocGia;
+            ViewBag.MaHienThi = docGia.MaHienThi;
             await NapDanhSachSachDangPhucVu();
 
             return View(new DangKyMuonViewModel());
@@ -251,7 +270,10 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DangKy(DangKyMuonViewModel model)
+        public async Task<IActionResult> DangKy(
+            DangKyMuonViewModel model,
+            List<int>? danhSachMaSach,
+            List<int>? danhSachSoLuong)
         {
             var maTaiKhoan = QuyenTruyCap.LayMaTaiKhoan(HttpContext);
             if (maTaiKhoan == null)
@@ -279,37 +301,79 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
                 ModelState.AddModelError(nameof(model.HanTra), "Hạn trả phải sau ngày hôm nay.");
             }
 
-            // Kiểm tra sách tồn tại và đang phục vụ
-            var sach = await _context.Sachs.FirstOrDefaultAsync(s => s.MaSach == model.MaSach);
-            if (sach == null)
+            // Thu thập danh sách sách được chọn (hỗ trợ cả chọn nhiều sách hoặc 1 sách đơn)
+            var sachChonList = new List<(int MaSach, int SoLuong)>();
+            if (danhSachMaSach != null && danhSachMaSach.Any())
             {
-                ModelState.AddModelError(nameof(model.MaSach), "Sách được chọn không tồn tại.");
-            }
-            else
-            {
-                if (sach.TrangThai != "Đang phục vụ")
+                for (int i = 0; i < danhSachMaSach.Count; i++)
                 {
-                    ModelState.AddModelError(nameof(model.MaSach), "Sách này hiện tạm ngừng hoặc không còn phục vụ.");
-                }
-
-                if (model.SoLuongMuon > sach.SoLuongCon)
-                {
-                    ModelState.AddModelError(nameof(model.SoLuongMuon), $"Số lượng mượn vượt quá số lượng sách còn (Chỉ còn {sach.SoLuongCon} quyển).");
+                    int mSach = danhSachMaSach[i];
+                    int sLuong = (danhSachSoLuong != null && i < danhSachSoLuong.Count) ? danhSachSoLuong[i] : 1;
+                    if (mSach > 0)
+                    {
+                        sachChonList.Add((mSach, sLuong <= 0 ? 1 : sLuong));
+                    }
                 }
             }
-
-            // Kiểm tra không tạo yêu cầu trùng không hợp lệ
-            if (sach != null)
+            else if (model.MaSach.HasValue && model.MaSach.Value > 0)
             {
-                bool daCoYeuCauTrung = await _context.PhieuMuons
-                    .Where(p => p.MaDocGia == docGia.MaDocGia &&
-                               (p.TrangThai == "Chờ xác nhận" || p.TrangThai == "Đang mượn"))
-                    .AnyAsync(p => p.ChiTietPhieuMuons.Any(ct => ct.MaSach == model.MaSach && ct.NgayTra == null));
+                sachChonList.Add((model.MaSach.Value, model.SoLuongMuon <= 0 ? 1 : model.SoLuongMuon));
+            }
 
-                if (daCoYeuCauTrung)
+            if (!sachChonList.Any())
+            {
+                ModelState.AddModelError(string.Empty, "Vui lòng chọn ít nhất một cuốn sách cần mượn.");
+            }
+
+            // Kiểm tra trùng lặp sách trong cùng một phiếu
+            var duplicateSach = sachChonList
+                .GroupBy(x => x.MaSach)
+                .Where(g => g.Count() > 1)
+                .Select(g => g.Key)
+                .ToList();
+
+            if (duplicateSach.Any())
+            {
+                ModelState.AddModelError(string.Empty, "Có sách bị chọn trùng lặp nhiều lần trong phiếu. Vui lòng gộp số lượng vào một dòng.");
+            }
+
+            // Kiểm tra tổng số lượng sách mượn không vượt quá 5 quyển
+            int tongSoLuong = sachChonList.Sum(x => x.SoLuong);
+            if (tongSoLuong > 5)
+            {
+                ModelState.AddModelError(string.Empty, "Tổng số lượng sách mượn trong một phiếu không được vượt quá 5 quyển.");
+            }
+
+            // Kiểm tra từng cuốn sách trong kho và kiểm tra yêu cầu trùng lặp
+            foreach (var item in sachChonList)
+            {
+                var sach = await _context.Sachs.FirstOrDefaultAsync(s => s.MaSach == item.MaSach);
+                if (sach == null)
                 {
-                    ModelState.AddModelError(string.Empty,
-                        $"Bạn đang có phiếu mượn hoặc yêu cầu chờ duyệt cho cuốn '{sach.TenSach}'. Vui lòng không tạo yêu cầu trùng lặp.");
+                    ModelState.AddModelError(string.Empty, $"Sách mã #{item.MaSach} không tồn tại.");
+                }
+                else
+                {
+                    if (sach.TrangThai != "Đang phục vụ")
+                    {
+                        ModelState.AddModelError(string.Empty, $"Cuốn '{sach.TenSach}' hiện tạm ngừng hoặc không còn phục vụ.");
+                    }
+
+                    if (item.SoLuong > sach.SoLuongCon)
+                    {
+                        ModelState.AddModelError(string.Empty, $"Cuốn '{sach.TenSach}' chỉ còn {sach.SoLuongCon} quyển trong kho (yêu cầu {item.SoLuong}).");
+                    }
+
+                    // Kiểm tra độc giả đang có phiếu chờ duyệt hoặc đang mượn cuốn này chưa trả
+                    bool daCoYeuKhoanTrung = await _context.PhieuMuons
+                        .Where(p => p.MaDocGia == docGia.MaDocGia &&
+                                   (p.TrangThai == "Chờ xác nhận" || p.TrangThai == "Đang mượn"))
+                        .AnyAsync(p => p.ChiTietPhieuMuons.Any(ct => ct.MaSach == item.MaSach && ct.NgayTra == null));
+
+                    if (daCoYeuKhoanTrung)
+                    {
+                        ModelState.AddModelError(string.Empty, $"Bạn đang có phiếu mượn hoặc yêu cầu chờ duyệt cho cuốn '{sach.TenSach}'. Vui lòng không tạo yêu cầu trùng lặp.");
+                    }
                 }
             }
 
@@ -323,23 +387,27 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
                     TrangThai = "Chờ xác nhận"
                 };
 
-                phieuMuon.ChiTietPhieuMuons.Add(new ChiTietPhieuMuon
+                foreach (var item in sachChonList)
                 {
-                    MaSach = model.MaSach,
-                    SoLuongMuon = model.SoLuongMuon
-                });
+                    phieuMuon.ChiTietPhieuMuons.Add(new ChiTietPhieuMuon
+                    {
+                        MaSach = item.MaSach,
+                        SoLuongMuon = item.SoLuong
+                    });
+                }
 
                 _context.PhieuMuons.Add(phieuMuon);
                 await _context.SaveChangesAsync();
 
                 TempData["Success"] =
-                    $"Đăng ký mượn sách thành công! Yêu cầu #{phieuMuon.MaPhieuMuon} đang ở trạng thái 'Chờ xác nhận'.";
+                    $"Đăng ký mượn sách thành công! Yêu cầu #{phieuMuon.MaPhieuMuon} ({sachChonList.Count} đầu sách, {tongSoLuong} quyển) đang ở trạng thái 'Chờ xác nhận'.";
 
                 return RedirectToAction(nameof(Index));
             }
 
             ViewBag.TenDocGia = docGia.HoTen;
             ViewBag.MaDocGia = docGia.MaDocGia;
+            ViewBag.MaHienThi = docGia.MaHienThi;
             await NapDanhSachSachDangPhucVu(model.MaSach);
 
             return View(model);
@@ -350,6 +418,12 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CapNhatTrangThai(int id, string trangThai)
         {
+            if (!QuyenTruyCap.LaAdmin(HttpContext))
+            {
+                TempData["Error"] = "Chức năng này chỉ dành cho Admin / Thủ thư.";
+                return RedirectToAction("Index", "DangNhap");
+            }
+
             var phieu = await _context.PhieuMuons.FindAsync(id);
 
             if (phieu == null)
@@ -434,6 +508,8 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
 
             ViewBag.MaSach = new SelectList(
                 sachs, "MaSach", "TenHienThi", maSachChon);
+
+            ViewBag.DanhSachSach = sachs;
         }
     }
 }
