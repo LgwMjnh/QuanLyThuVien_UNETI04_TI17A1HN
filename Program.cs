@@ -49,7 +49,7 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN
             app.MapStaticAssets();
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}")
+                pattern: "{controller=trangchu}/{action=Index}/{id?}")
                 .WithStaticAssets();
 
             app.Run();

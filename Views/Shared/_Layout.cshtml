@@ -1,11 +1,14 @@
 @using QuanLyThuVien_UNETI04_TI17A1HN.Helpers
+
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - QuanLyThuVien_UNETI04_TI17A1HN</title>
+    <title>@ViewData["Title"] - Thư viện UNETI</title>
+
     <script type="importmap"></script>
+
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/QuanLyThuVien_UNETI04_TI17A1HN.styles.css" asp-append-version="true" />
@@ -15,85 +18,210 @@
     @{
         var laTrangDangNhap =
             ViewContext.RouteData.Values["controller"]?.ToString() == "DangNhap";
+
+        var laAdmin = QuyenTruyCap.LaAdmin(Context);
+        var laDocGia = QuyenTruyCap.LaDocGia(Context);
+        var daDangNhap = QuyenTruyCap.DaDangNhap(Context);
     }
 
     @if (!laTrangDangNhap)
     {
         <header>
-            <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light border-bottom mb-3">
+            <nav class="navbar navbar-expand-lg navbar-light border-bottom">
                 <div class="container-fluid">
-                    <a class="navbar-brand fw-bold text-primary" asp-area="" asp-controller="Home" asp-action="Index">
-                        <i class="bi bi-book me-1"></i>Thư viện UNETI
+
+                    @* LOGO VÀ TÊN THƯ VIỆN *@
+                    <a class="navbar-brand fw-bold d-flex align-items-center"
+                       asp-area=""
+                       asp-controller="TrangChu"
+                       asp-action="Index">
+
+                        <img src="~/images/logo.png"
+                             alt="Logo Thư viện UNETI"
+                             style="height: 42px; width: auto; margin-right: 8px;" />
+
+                        Thư viện UNETI
                     </a>
 
-                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"
-                            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    @* NÚT MENU TRÊN ĐIỆN THOẠI *@
+                    <button class="navbar-toggler"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#navbarMain"
+                            aria-controls="navbarMain"
+                            aria-expanded="false"
+                            aria-label="Mở menu">
+
                         <span class="navbar-toggler-icon"></span>
                     </button>
 
-                    <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                        <ul class="navbar-nav flex-grow-1">
+                    <div class="collapse navbar-collapse" id="navbarMain">
+
+                        @* MENU CHÍNH *@
+                        <ul class="navbar-nav me-auto">
+
+                            @* TRANG CHỦ *@
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">Trang chủ</a>
+                                <a class="nav-link"
+                                   asp-controller="TrangChu"
+                                   asp-action="Index">
+                                    Trang chủ
+                                </a>
                             </li>
 
-                            @* Menu dành riêng cho Admin *@
-                            @if (QuyenTruyCap.LaAdmin(Context))
+                            @* MENU DÀNH CHO ADMIN *@
+                            @if (laAdmin)
                             {
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="TheLoai" asp-action="Index">Thể loại</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="Sach" asp-action="Index">Quản lý sách</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="DocGia" asp-action="Index">Quản lý độc giả</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="PhieuMuon" asp-action="Index">Quản lý phiếu mượn</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="MuonTra" asp-action="Index">Mượn trả</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="ThongKe" asp-action="Index">Thống kê</a>
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle"
+                                       href="#"
+                                       id="menuQuanLy"
+                                       role="button"
+                                       data-bs-toggle="dropdown"
+                                       aria-expanded="false">
+                                        Quản lý
+                                    </a>
+
+                                    <ul class="dropdown-menu" aria-labelledby="menuQuanLy">
+
+                                        <li>
+                                            <a class="dropdown-item"
+                                               asp-controller="TheLoai"
+                                               asp-action="Index">
+                                                Quản lý thể loại
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a class="dropdown-item"
+                                               asp-controller="Sach"
+                                               asp-action="Index">
+                                                Quản lý sách
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a class="dropdown-item"
+                                               asp-controller="DocGia"
+                                               asp-action="Index">
+                                                Quản lý độc giả
+                                            </a>
+                                        </li>
+
+                                        <li><hr class="dropdown-divider" /></li>
+
+                                        <li>
+                                            <a class="dropdown-item"
+                                               asp-controller="PhieuMuon"
+                                               asp-action="Index">
+                                                Quản lý phiếu mượn
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a class="dropdown-item"
+                                               asp-controller="MuonTra"
+                                               asp-action="Index">
+                                                Quản lý mượn trả
+                                            </a>
+                                        </li>
+
+                                        <li><hr class="dropdown-divider" /></li>
+
+                                        <li>
+                                            <a class="dropdown-item"
+                                               asp-controller="ThongKe"
+                                               asp-action="Index">
+                                                Thống kê
+                                            </a>
+                                        </li>
+
+                                    </ul>
                                 </li>
                             }
-                            @* Menu dành riêng cho Độc giả *@
-                            else if (QuyenTruyCap.LaDocGia(Context))
+
+                            @* MENU DÀNH CHO ĐỘC GIẢ *@
+                            else if (laDocGia)
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="Sach" asp-action="Index">Tra cứu sách</a>
+                                    <a class="nav-link"
+                                       asp-controller="Sach"
+                                       asp-action="Index">
+                                        Tra cứu sách
+                                    </a>
                                 </li>
+
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="PhieuMuon" asp-action="DangKy">Đăng ký mượn</a>
+                                    <a class="nav-link"
+                                       asp-controller="PhieuMuon"
+                                       asp-action="DangKy">
+                                        Đăng ký mượn
+                                    </a>
                                 </li>
+
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="PhieuMuon" asp-action="Index">Phiếu mượn của tôi</a>
+                                    <a class="nav-link"
+                                       asp-controller="PhieuMuon"
+                                       asp-action="Index">
+                                        Phiếu mượn của tôi
+                                    </a>
                                 </li>
+
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="DocGia" asp-action="HoSo">Hồ sơ cá nhân</a>
+                                    <a class="nav-link"
+                                       asp-controller="DocGia"
+                                       asp-action="HoSo">
+                                        Hồ sơ cá nhân
+                                    </a>
                                 </li>
                             }
-                            @* Menu dành cho Khách vãng lai *@
+
+                            @* MENU DÀNH CHO KHÁCH *@
                             else
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="Sach" asp-action="Index">Tra cứu sách</a>
+                                    <a class="nav-link"
+                                       asp-controller="Sach"
+                                       asp-action="Index">
+                                        Tra cứu sách
+                                    </a>
                                 </li>
+
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="Home" asp-action="Privacy">Thông tin</a>
+                                    <a class="nav-link"
+                                       asp-controller="Home"
+                                       asp-action="Privacy">
+                                        Thông tin
+                                    </a>
                                 </li>
                             }
+
                         </ul>
 
-                        <ul class="navbar-nav align-items-sm-center">
-                            @if (QuyenTruyCap.DaDangNhap(Context))
+                        @* KHU VỰC BÊN PHẢI THANH ĐIỀU HƯỚNG *@
+                        <ul class="navbar-nav align-items-lg-center">
+
+                            @if (daDangNhap)
                             {
-                                <li class="nav-item me-2">
-                                    <span class="nav-link text-dark">
-                                        Xin chào, <strong>@Context.Session.GetString("HoTen")</strong>
-                                        @if (QuyenTruyCap.LaAdmin(Context))
+                                @* NÚT DASHBOARD CHỈ HIỆN VỚI ADMIN *@
+                                @if (laAdmin)
+                                {
+                                    <li class="nav-item me-lg-2">
+                                        <a class="btn btn-outline-primary btn-sm"
+                                           asp-controller="Home"
+                                           asp-action="Index">
+                                            Dashboard
+                                        </a>
+                                    </li>
+                                }
+
+                                @* TÊN NGƯỜI DÙNG *@
+                                <li class="nav-item me-lg-2">
+                                    <span class="nav-link">
+                                        Xin chào,
+                                        <strong>@Context.Session.GetString("HoTen")</strong>
+
+                                        @if (laAdmin)
                                         {
                                             <span class="badge bg-danger ms-1">Admin</span>
                                         }
@@ -103,9 +231,15 @@
                                         }
                                     </span>
                                 </li>
-                                <li class="nav-item ms-sm-2">
-                                    <form asp-controller="DangNhap" asp-action="DangXuat" method="post" class="d-inline">
-                                        <button type="submit" class="btn btn-outline-danger btn-sm">
+
+                                @* ĐĂNG XUẤT *@
+                                <li class="nav-item">
+                                    <form asp-controller="DangNhap"
+                                          asp-action="DangXuat"
+                                          method="post">
+
+                                        <button type="submit"
+                                                class="btn btn-outline-danger btn-sm">
                                             Đăng xuất
                                         </button>
                                     </form>
@@ -113,7 +247,8 @@
                             }
                             else
                             {
-                                <li class="nav-item ms-sm-2">
+                                @* ĐĂNG NHẬP *@
+                                <li class="nav-item">
                                     <a class="btn btn-primary btn-sm"
                                        asp-controller="DangNhap"
                                        asp-action="Index">
@@ -121,6 +256,7 @@
                                     </a>
                                 </li>
                             }
+
                         </ul>
                     </div>
                 </div>
@@ -128,13 +264,20 @@
         </header>
     }
 
+    @* NỘI DUNG TRANG *@
     <div class="@(laTrangDangNhap ? "container-fluid p-0" : "container")">
         <main role="main" class="@(laTrangDangNhap ? "p-0" : "pb-3")">
+
             @if (TempData["Success"] != null)
             {
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                     @TempData["Success"]
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="alert"
+                            aria-label="Close">
+                    </button>
                 </div>
             }
 
@@ -142,7 +285,12 @@
             {
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
                     @TempData["Error"]
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="alert"
+                            aria-label="Close">
+                    </button>
                 </div>
             }
 
@@ -150,12 +298,13 @@
         </main>
     </div>
 
+    @* CHÂN TRANG *@
     @if (!laTrangDangNhap)
     {
         <footer class="border-top footer text-muted">
             <div class="container">
-                &copy; 2026 - QuanLyThuVien_UNETI04_TI17A1HN -
-                <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                &copy; 2026 - Thư viện UNETI -
+                <a asp-controller="Home" asp-action="Privacy">Thông tin</a>
             </div>
         </footer>
     }

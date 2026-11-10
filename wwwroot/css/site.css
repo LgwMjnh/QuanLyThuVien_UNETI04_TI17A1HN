@@ -30,6 +30,9 @@ body {
   text-align: start;
 }
 
+footer .container {
+    text-align: center;
+}
 
 /* ==================================================
         QUAN LY THU VIEN
@@ -284,6 +287,7 @@ a {
 /* ===== 12. CHAN TRANG ===== */
 
 footer {
+    background-color: #E8DDC8 !important;
     color: var(--library-muted);
     border-top: 1px solid var(--library-border);
 }
@@ -345,7 +349,7 @@ footer {
     width: 76px;
     height: 60px;
     margin: 0 auto 16px;
-    border: 1px dashed var(--library-gold);
+    border: none;
     border-radius: 10px;
     display: flex;
     align-items: center;
@@ -445,4 +449,1115 @@ footer {
     border: none;
     background: none;
     color: #6c757d;
+}
+
+
+/* =====================================================
+                TRANG CHỦ
+   ===================================================== */
+
+/* ===== 1. KHUNG TRANG CHỦ ===== */
+
+.public-home {
+    width: 100%;
+    color: var(--library-text);
+}
+
+/* ===== 2. KHU VỰC GIỚI THIỆU ===== */
+
+.home-hero {
+    display: grid;
+    grid-template-columns: 0.9fr 1.1fr;
+    align-items: center;
+    gap: 48px;
+    /* Dải nền xám kem trải rộng toàn màn hình */
+    background-color: #D9E0DA;
+    box-shadow: 0 0 0 100vmax #D9E0DA;
+    clip-path: inset(0 -100vmax);
+    padding: 0px 0 64px;
+}
+
+/* ===== 3. NỘI DUNG BÊN TRÁI ===== */
+
+.home-hero-content {
+    padding: 12px 0;
+}
+
+.home-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+    .home-eyebrow img {
+        height: 78px;
+        width: auto;
+        object-fit: contain;
+    }
+
+.home-hero-title {
+    max-width: 520px;
+    margin: 0 0 24px;
+    color: var(--library-green-dark);
+    font-family: Cambria, Georgia, "Times New Roman", serif;
+    font-size: clamp(42px, 5vw, 68px);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -1px;
+}
+
+    .home-hero-title span {
+        display: block;
+        color: var(--library-green);
+    }
+
+.home-hero-description {
+    max-width: 460px;
+    margin-bottom: 30px;
+    color: var(--library-muted);
+    font-size: 15px;
+    line-height: 1.9;
+}
+
+/* ===== 4. CÁC NÚT ĐIỀU HƯỚNG ===== */
+
+.home-hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+}
+
+.home-button-primary,
+.home-button-secondary {
+    display: inline-flex;
+    min-height: 46px;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 24px;
+    border: 1px solid var(--library-green);
+    border-radius: 30px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.25s ease;
+}
+
+.home-button-primary {
+    background-color: var(--library-green);
+    color: #FFFFFF;
+}
+
+    .home-button-primary:hover {
+        background-color: var(--library-green-dark);
+        border-color: var(--library-green-dark);
+        color: #FFFFFF;
+        transform: translateY(-2px);
+    }
+
+.home-button-secondary {
+    background-color: transparent;
+    color: var(--library-green);
+}
+
+    .home-button-secondary:hover {
+        background-color: var(--library-green-soft);
+        color: var(--library-green-dark);
+    }
+
+/* ===== 5. KHUNG ẢNH BÊN PHẢI ===== */
+
+.home-hero-image {
+    position: relative;
+    min-height: 420px;
+    overflow: hidden;
+    border: 1px solid var(--library-border);
+    border-radius: var(--library-radius);
+    background-color: var(--library-green-soft);
+}
+
+.home-image-placeholder {
+    min-height: 420px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: var(--library-green);
+    text-align: center;
+}
+
+    .home-image-placeholder span {
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+    }
+
+    .home-image-placeholder small {
+        color: var(--library-muted);
+        font-size: 12px;
+    }
+
+/* ẢNH THẬT KHI ĐƯỢC BỔ SUNG */
+
+.home-hero-image img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-height: 420px;
+    object-fit: cover;
+}
+
+/* ===== 6. RESPONSIVE ===== */
+
+@media (max-width: 991.98px) {
+
+    .home-hero {
+        grid-template-columns: 1fr 1fr;
+        gap: 28px;
+    }
+
+    .home-hero-image,
+    .home-image-placeholder {
+        min-height: 360px;
+    }
+
+    .home-hero-title {
+        font-size: clamp(38px, 5vw, 54px);
+    }
+}
+
+@media (max-width: 767.98px) {
+
+    .home-hero {
+        grid-template-columns: 1fr;
+        gap: 32px;
+        padding: 30px 0 42px;
+    }
+
+    .home-hero-title {
+        max-width: 100%;
+        font-size: 46px;
+    }
+
+    .home-hero-image,
+    .home-image-placeholder {
+        min-height: 300px;
+    }
+
+        .home-hero-image img {
+            min-height: 300px;
+        }
+}
+
+@media (max-width: 400px) {
+
+    .home-hero-title {
+        font-size: 39px;
+    }
+
+    .home-hero-actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .home-button-primary,
+    .home-button-secondary {
+        width: 100%;
+    }
+}
+
+
+/* =====================================================
+   15. SLIDESHOW TRANG CHỦ - BĂNG CHUYỀN ẢNH
+   ===================================================== */
+
+/* Khung bao ngoài */
+.home-slideshow {
+    position: relative;
+    width: 100%;
+    margin: 12px 0 48px;
+    padding: 24px 48px 58px;
+    overflow: hidden;
+
+    background-color: var(--library-paper);
+    border: 1px solid var(--library-border);
+    border-radius: 14px;
+    box-shadow: var(--library-shadow);
+}
+
+/* Dải chứa toàn bộ ảnh */
+.slideshow-track {
+    display: flex;
+    align-items: center;
+    width: 100%;
+
+    will-change: transform;
+}
+
+/* Từng ô ảnh */
+.slideshow-item {
+    flex: 0 0 calc(100% / var(--visible-count, 1));
+    min-width: 0;
+    height: 320px;
+    padding: 0 49px;
+    box-sizing: border-box;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Ảnh bên trong từng ô */
+.slideshow-item img {
+    display: block;
+    width: 100%;
+    height: 100%;
+
+    object-fit: contain;
+
+    border-radius: 8px;
+    background-color: var(--library-paper);
+}
+
+/* Nút chuyển ảnh trái/phải */
+.slideshow-control {
+    position: absolute;
+    top: 50%;
+    z-index: 2;
+
+    width: 38px;
+    height: 38px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    transform: translateY(-50%);
+
+    border: 1px solid var(--library-border);
+    border-radius: 50%;
+
+    background-color: var(--library-paper);
+    color: var(--library-green);
+
+    font-size: 20px;
+    cursor: pointer;
+
+    transition: all 0.2s ease;
+}
+
+.slideshow-prev {
+    left: 8px;
+}
+
+.slideshow-next {
+    right: 8px;
+}
+
+.slideshow-control:hover {
+    background-color: var(--library-green);
+    color: #FFFFFF;
+    border-color: var(--library-green);
+}
+
+/* Các dấu chấm chỉ vị trí */
+.slideshow-indicators {
+    position: absolute;
+    bottom: 18px;
+    left: 50%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    transform: translateX(-50%);
+}
+
+.slideshow-indicator {
+    width: 9px;
+    height: 9px;
+    padding: 0;
+
+    border: none;
+    border-radius: 20px;
+
+    background-color: var(--library-border);
+    cursor: pointer;
+
+    transition: all 0.25s ease;
+}
+
+.slideshow-indicator.active {
+    width: 24px;
+    background-color: var(--library-green);
+}
+
+/* Trường hợp chưa có ảnh */
+.home-slideshow-empty {
+    margin: 12px 0 48px;
+    padding: 40px 20px;
+
+    text-align: center;
+    color: var(--library-muted);
+
+    background-color: var(--library-paper);
+    border: 1px dashed var(--library-border);
+    border-radius: 14px;
+}
+
+/* Hiển thị trên máy tính bảng */
+@media (max-width: 991.98px) {
+    .slideshow-item {
+        height: 280px;
+    }
+}
+
+/* Hiển thị trên điện thoại */
+@media (max-width: 767.98px) {
+    .home-slideshow {
+        padding: 16px 38px 52px;
+    }
+
+    .slideshow-item {
+        height: 220px;
+        padding: 0 4px;
+    }
+
+    .slideshow-control {
+        width: 30px;
+        height: 30px;
+        font-size: 16px;
+    }
+
+    .slideshow-prev {
+        left: 5px;
+    }
+
+    .slideshow-next {
+        right: 5px;
+    }
+}
+
+
+/* =====================================================
+   16. NAVIGATION BAR - THANH DIEU HUONG
+   ===================================================== */
+
+/* ===== 1. THANH MENU CHINH ===== */
+
+header > .navbar {
+    position: relative;
+    z-index: 1000;
+    min-height: 76px;
+    margin-bottom: 0px !important;
+    padding: 10px 0;
+    background-color: var(--library-paper);
+    border-bottom: 1px solid var(--library-border) !important;
+    box-shadow: 0 3px 14px rgba(43, 54, 43, 0.06);
+}
+
+/* ===== 2. LOGO VA TEN THU VIEN ===== */
+
+.navbar .navbar-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-right: 32px;
+    color: var(--library-green) !important;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    transition: color 0.2s ease;
+}
+
+    .navbar .navbar-brand:hover {
+        color: var(--library-gold) !important;
+    }
+
+    .navbar .navbar-brand img {
+        object-fit: contain;
+        transition: transform 0.25s ease;
+    }
+
+    .navbar .navbar-brand:hover img {
+        transform: scale(1.06);
+    }
+
+/* ===== 3. CAC MUC MENU ===== */
+
+.navbar .navbar-nav {
+    gap: 5px;
+}
+
+    .navbar .navbar-nav .nav-link {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        padding: 10px 13px !important;
+        color: var(--library-text) !important;
+        font-size: 14px;
+        font-weight: 600;
+        transition: color 0.2s ease, background-color 0.2s ease;
+    }
+
+        /* Vach trang tri khi hover */
+
+        .navbar .navbar-nav .nav-link::after {
+            content: "";
+            position: absolute;
+            left: 13px;
+            right: 13px;
+            bottom: 5px;
+            height: 2px;
+            border-radius: 2px;
+            background-color: var(--library-gold);
+            transform: scaleX(0);
+            transform-origin: center;
+            transition: transform 0.25s ease;
+        }
+
+        .navbar .navbar-nav .nav-link:hover {
+            color: var(--library-green) !important;
+            background-color: var(--library-green-soft);
+            border-radius: 8px;
+        }
+
+            .navbar .navbar-nav .nav-link:hover::after {
+                transform: scaleX(1);
+            }
+
+/* ===== 4. MENU THA XUONG ===== */
+
+.navbar .dropdown-menu {
+    min-width: 220px;
+    margin-top: 8px;
+    padding: 8px;
+    background-color: var(--library-paper);
+    border: 1px solid var(--library-border);
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(43, 54, 43, 0.12);
+    animation: menuFadeIn 0.2s ease;
+}
+
+.navbar .dropdown-item {
+    padding: 10px 13px;
+    color: var(--library-text);
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 7px;
+    transition: color 0.2s ease, background-color 0.2s ease, padding-left 0.2s ease;
+}
+
+    .navbar .dropdown-item:hover,
+    .navbar .dropdown-item:focus {
+        padding-left: 18px;
+        color: var(--library-green-dark);
+        background-color: var(--library-green-soft);
+    }
+
+.navbar .dropdown-divider {
+    border-top-color: var(--library-border);
+}
+
+/* Hieu ung hien menu tren may tinh */
+
+@media (min-width: 992px) {
+    .navbar .dropdown:hover > .dropdown-menu,
+    .navbar .dropdown:focus-within > .dropdown-menu {
+        display: block;
+    }
+}
+
+@keyframes menuFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===== 5. NUT DASHBOARD ===== */
+
+.navbar .btn-outline-primary {
+    padding: 8px 15px;
+    color: var(--library-green);
+    background-color: transparent;
+    border: 1px solid var(--library-green);
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+    .navbar .btn-outline-primary:hover {
+        color: #FFFFFF;
+        background-color: var(--library-green);
+        border-color: var(--library-green);
+        transform: translateY(-1px);
+    }
+
+/* ===== 6. NUT DANG NHAP ===== */
+
+.navbar .btn-primary {
+    padding: 9px 19px;
+    border-radius: 25px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+/* ===== 7. THONG TIN NGUOI DUNG ===== */
+
+.navbar .navbar-nav .nav-link strong {
+    color: var(--library-green);
+}
+
+.navbar .badge {
+    padding: 5px 8px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+/* ===== 8. NUT DANG XUAT ===== */
+
+.navbar .btn-outline-danger {
+    padding: 7px 14px;
+    color: var(--library-danger);
+    border-color: var(--library-danger);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+    .navbar .btn-outline-danger:hover {
+        color: #FFFFFF;
+        background-color: var(--library-danger);
+        border-color: var(--library-danger);
+    }
+
+/* ===== 9. NUT MO MENU TREN DIEN THOAI ===== */
+
+.navbar .navbar-toggler {
+    padding: 7px 10px;
+    border: 1px solid var(--library-border);
+    border-radius: 8px;
+    background-color: var(--library-green-soft);
+    box-shadow: none;
+}
+
+    .navbar .navbar-toggler:focus {
+        box-shadow: 0 0 0 3px rgba(41, 75, 58, 0.12);
+    }
+
+/* ===== 10. RESPONSIVE ===== */
+
+@media (max-width: 991.98px) {
+
+    header > .navbar {
+        padding: 10px 12px;
+    }
+
+    .navbar .navbar-collapse {
+        padding: 12px 0 5px;
+    }
+
+    .navbar .navbar-nav {
+        gap: 3px;
+    }
+
+        .navbar .navbar-nav .nav-link {
+            display: flex;
+            width: 100%;
+            padding: 10px 12px !important;
+        }
+
+            .navbar .navbar-nav .nav-link::after {
+                display: none;
+            }
+
+    .navbar .dropdown-menu {
+        margin-top: 3px;
+        margin-left: 10px;
+        box-shadow: none;
+    }
+
+    .navbar .navbar-nav.align-items-lg-center {
+        align-items: stretch !important;
+        padding-top: 12px;
+        border-top: 1px solid var(--library-border);
+    }
+
+        .navbar .navbar-nav.align-items-lg-center .nav-item {
+            margin: 3px 0 !important;
+        }
+
+        .navbar .navbar-nav.align-items-lg-center .nav-link {
+            display: block;
+        }
+
+        .navbar .navbar-nav.align-items-lg-center form {
+            display: inline-block;
+        }
+}
+
+@media (max-width: 575.98px) {
+
+    .navbar .navbar-brand {
+        margin-right: 10px;
+        font-size: 17px;
+    }
+
+        .navbar .navbar-brand img {
+            height: 36px !important;
+        }
+
+    .navbar .navbar-collapse {
+        padding-top: 15px;
+    }
+}
+
+
+/* =====================================================
+   16. SACH MOI BO SUNG - TRANG CHU
+   ===================================================== */
+
+/* Khung bao ngoài khu vực sách mới */
+.home-new-books {
+    width: 100%;
+    margin: 0 0 48px;
+    padding: 28px 32px 32px;
+    background-color: var(--library-paper);
+    border: 1px solid var(--library-border);
+    border-radius: 14px;
+    box-shadow: var(--library-shadow);
+}
+
+/* Tiêu đề khu vực */
+.home-section-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 26px;
+}
+
+    .home-section-heading .home-eyebrow {
+        margin-bottom: 8px;
+    }
+
+    .home-section-heading h2 {
+        margin-bottom: 6px;
+        font-family: Cambria, Georgia, "Times New Roman", serif;
+        font-size: 28px;
+    }
+
+    .home-section-heading p {
+        margin: 0;
+        color: var(--library-muted);
+        font-size: 14px;
+    }
+
+.home-view-all {
+    flex-shrink: 0;
+    color: var(--library-green);
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+    .home-view-all:hover {
+        color: var(--library-gold);
+    }
+
+/* Danh sách 4 cuốn sách */
+.home-book-list {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 20px;
+}
+
+/* Khung riêng từng cuốn sách */
+.home-book-card {
+    min-width: 0;
+    overflow: hidden;
+    background-color: #FFFFFF;
+    border: 1px solid var(--library-border);
+    border-radius: 10px;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+    .home-book-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 6px 18px rgba(43, 54, 43, 0.10);
+    }
+
+/* Khu vực ảnh bìa */
+.home-book-image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 280px;
+    padding: 5px;
+    background-color: var(--library-paper);
+    text-decoration: none;
+    overflow: hidden;
+}
+
+    .home-book-image img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        border-radius: 4px;
+    }
+
+/* Thông tin sách */
+.home-book-info {
+    padding: 16px;
+}
+
+.home-book-category {
+    display: inline-block;
+    margin-bottom: 8px;
+    color: var(--library-gold);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.home-book-info h3 {
+    margin-bottom: 8px;
+    font-size: 16px;
+    line-height: 1.45;
+}
+
+    .home-book-info h3 a {
+        color: var(--library-green-dark);
+        text-decoration: none;
+    }
+
+        .home-book-info h3 a:hover {
+            color: var(--library-gold);
+        }
+
+.home-book-author {
+    margin-bottom: 12px;
+    color: var(--library-muted);
+    font-size: 13px;
+}
+
+.home-book-detail {
+    color: var(--library-green);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+    .home-book-detail:hover {
+        color: var(--library-gold);
+    }
+
+/* Khi chưa có sách */
+.home-book-empty {
+    margin: 0;
+    padding: 28px;
+    color: var(--library-muted);
+    text-align: center;
+    background-color: var(--library-green-soft);
+    border-radius: 8px;
+}
+
+/* Máy tính bảng */
+@media (max-width: 991.98px) {
+    .home-book-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* Điện thoại */
+@media (max-width: 575.98px) {
+    .home-new-books {
+        padding: 22px 16px;
+    }
+
+    .home-section-heading {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+        .home-section-heading h2 {
+            font-size: 24px;
+        }
+
+    .home-book-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .home-book-image {
+        height: 170px;
+    }
+
+    .home-book-info {
+        padding: 12px;
+    }
+
+        .home-book-info h3 {
+            font-size: 14px;
+        }
+}
+
+
+/* =============================================
+   17. CÓ THỂ BẠN QUAN TÂM
+   ============================================= */
+
+.home-category-section {
+    margin-bottom: 48px;
+}
+
+.home-category-list {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.home-category-card {
+    min-width: 0;
+    min-height: 150px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 12px;
+    padding: 20px;
+    background-color: var(--library-paper);
+    border: 1px solid var(--library-border);
+    border-radius: 10px;
+    text-decoration: none;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+    .home-category-card:hover {
+        transform: translateY(-4px);
+        border-color: var(--library-gold);
+        box-shadow: var(--library-shadow);
+    }
+
+.home-category-icon {
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background-color: var(--library-green-soft);
+    color: var(--library-gold);
+    font-size: 23px;
+}
+
+.home-category-name {
+    color: var(--library-green);
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.4;
+}
+
+.home-category-link {
+    color: var(--library-muted);
+    font-size: 13px;
+    transition: color 0.2s ease;
+}
+
+.home-category-card:hover .home-category-link {
+    color: var(--library-green);
+}
+
+@media (max-width: 991.98px) {
+    .home-category-list {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 575.98px) {
+    .home-category-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .home-category-card {
+        min-height: 135px;
+        padding: 14px;
+    }
+
+    .home-category-name {
+        font-size: 14px;
+    }
+}
+
+
+/* =====================================================
+   18. HE THONG THU VIEN UNETI - DIA DIEM
+   ===================================================== */
+
+/* Khung bao ngoài */
+.home-library-section {
+    width: 100%;
+    margin: 0 0 48px;
+    padding: 31px 28px 32px;
+    background-color: var(--library-paper);
+    border: 1px solid var(--library-border);
+    border-radius: 14px;
+    box-shadow: var(--library-shadow);
+}
+
+/* Phần tiêu đề */
+.home-library-header {
+    text-align: center;
+    margin-bottom: 28px;
+}
+
+/* Nhãn phía trên tiêu đề */
+.home-library-label {
+    display: inline-block;
+    margin-bottom: 18px;
+    padding: 7px 13px;
+    background-color: var(--library-green-soft);
+    color: var(--library-green);
+    border: 1px solid var(--library-border);
+    border-radius: 30px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+}
+
+/* Tiêu đề chính */
+.home-library-header h2 {
+    margin-bottom: 12px;
+    color: var(--library-green-dark);
+    font-family: Cambria, Georgia, "Times New Roman", serif;
+    font-size: 28px;
+    font-weight: 700;
+}
+
+/* Thời gian mở cửa */
+.home-library-header p {
+    margin: 0;
+    color: var(--library-muted);
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+/* Danh sách cơ sở */
+.home-library-list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+}
+
+/* Thẻ từng cơ sở */
+.home-library-card {
+    min-width: 0;
+    min-height: 181px;
+    padding: 24px 18px 20px;
+    background-color: #FAF8F0;
+    border: 1px solid var(--library-border);
+    border-radius: 12px;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+    .home-library-card:hover {
+        transform: translateY(-3px);
+        border-color: var(--library-gold);
+        box-shadow: var(--library-shadow);
+    }
+
+/* Biểu tượng địa điểm */
+.home-library-icon {
+    width: 25px;
+    height: 28px;
+    margin-bottom: 14px;
+    color: var(--library-green);
+}
+
+    .home-library-icon svg {
+        display: block;
+        width: 23px;
+        height: 26px;
+        fill: currentColor;
+    }
+
+/* Tên cơ sở */
+.home-library-card h3 {
+    margin-bottom: 9px;
+    color: var(--library-green-dark);
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.45;
+}
+
+/* Địa chỉ */
+.home-library-card p {
+    margin-bottom: 13px;
+    color: var(--library-muted);
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+/* Nhãn dịch vụ */
+.home-library-tag {
+    display: inline-block;
+    padding: 5px 9px;
+    background-color: #F1ECDF;
+    color: var(--library-gold);
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1.5;
+}
+
+/* Responsive tablet */
+@media (max-width: 991.98px) {
+    .home-library-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+    }
+}
+
+/* Responsive điện thoại */
+@media (max-width: 575.98px) {
+    .home-library-section {
+        padding: 24px 16px;
+    }
+
+    .home-library-header {
+        margin-bottom: 23px;
+    }
+
+        .home-library-header h2 {
+            font-size: 24px;
+        }
+
+        .home-library-header p {
+            font-size: 12px;
+        }
+
+    .home-library-list {
+        grid-template-columns: 1fr;
+        gap: 13px;
+    }
+
+    .home-library-card {
+        min-height: 160px;
+        padding: 22px 16px;
+    }
 }

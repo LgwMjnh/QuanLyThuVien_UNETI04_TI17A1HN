@@ -1,0 +1,713 @@
+﻿@{
+    ViewData["Title"] = "Trang chủ";
+
+    var danhSachSachMoi = ViewBag.DanhSachSachMoi
+        as List<QuanLyThuVien_UNETI04_TI17A1HN.Models.Sach>
+        ?? new List<QuanLyThuVien_UNETI04_TI17A1HN.Models.Sach>();
+
+    var danhSachSachNoiBat = ViewBag.DanhSachSachNoiBat
+        as List<QuanLyThuVien_UNETI04_TI17A1HN.Models.Sach>
+        ?? new List<QuanLyThuVien_UNETI04_TI17A1HN.Models.Sach>();
+
+    var danhSachTheLoaiGoiY = ViewBag.DanhSachTheLoaiGoiY
+        as List<QuanLyThuVien_UNETI04_TI17A1HN.Models.TheLoai>
+        ?? new List<QuanLyThuVien_UNETI04_TI17A1HN.Models.TheLoai>();
+}
+
+<div class="public-home">
+
+    <section class="home-hero">
+
+        <!-- CỘT BÊN TRÁI: NỘI DUNG GIỚI THIỆU -->
+        <div class="home-hero-content">
+
+            <span class="home-eyebrow">
+                THƯ VIỆN UNETI
+                <img src="~/images/logo.png"
+                     alt="Logo Thư viện UNETI"
+                     asp-append-version="true" />
+            </span>
+
+            <h1 class="home-hero-title">
+                Tri thức mở lối
+                <span>tương lai.</span>
+            </h1>
+
+            <p class="home-hero-description">
+                Khám phá không gian tri thức với hàng nghìn đầu sách
+                phục vụ học tập, nghiên cứu và phát triển bản thân.
+                Hãy bắt đầu hành trình khám phá của bạn tại thư viện UNETI.
+            </p>
+
+            <div class="home-hero-actions">
+
+                <a asp-controller="Sach"
+                   asp-action="Index"
+                   class="home-button-primary">
+                    Khám phá sách
+                </a>
+
+                <a asp-controller="Home"
+                   asp-action="Privacy"
+                   class="home-button-secondary">
+                    Tìm hiểu thêm
+                </a>
+
+            </div>
+
+        </div>
+
+        <!-- CỘT BÊN PHẢI: KHU VỰC CHỜ ẢNH -->
+        <div class="home-hero-image">
+
+            <div class="home-image-placeholder">
+
+                <span>KHÔNG GIAN THƯ VIỆN</span>
+
+                <small>Hình ảnh sẽ được bổ sung sau</small>
+
+            </div>
+
+            @*
+                TODO: BỔ SUNG ẢNH THẬT SAU
+
+                Khi có ảnh, thay phần placeholder phía trên bằng:
+
+                <img src="~/images/ten-anh-thu-vien.jpg"
+                     alt="Không gian thư viện UNETI"
+                     asp-append-version="true" />
+            *@
+
+        </div>
+
+    </section>
+
+
+    <!-- banner slide chay anh -->
+    @{
+        var danhSachSlides = ViewBag.DanhSachSlides as List<string>
+            ?? new List<string>();
+    }
+
+    @if (danhSachSlides.Count > 0)
+    {
+        <section class="home-slideshow" id="homeSlideshow">
+            <div class="home-section-heading">
+
+                <div>
+                    @* <span class="home-eyebrow">KHÁM PHÁ TRI THỨC</span> *@
+
+                    <h2>Khám phá thế giới qua từng trang sách</h2>
+
+                    <p>
+                        Từ tri thức, lịch sử, văn học cho đến những câu chuyện tiểu thuyết 
+                    </p>
+                </div>
+
+                <a asp-controller="Sach"
+                   asp-action="Index"
+                   class="home-view-all">
+                    Xem tất cả sách →
+                </a>
+
+            </div>
+
+            <div class="slideshow-track">
+
+                @for (int i = 0; i < danhSachSlides.Count; i++)
+                {
+                    <div class="slideshow-item @(i == 0 ? "active" : "")">
+                        <img src="@danhSachSlides[i]"
+                             alt="Hình ảnh giới thiệu thư viện - @(i + 1)" />
+                    </div>
+                }
+
+            </div>
+
+            @if (danhSachSlides.Count > 1)
+            {
+                <button type="button"
+                        class="slideshow-control slideshow-prev"
+                        aria-label="Ảnh trước">
+                    &#10094;
+                </button>
+
+                <button type="button"
+                        class="slideshow-control slideshow-next"
+                        aria-label="Ảnh tiếp theo">
+                    &#10095;
+                </button>
+
+                <div class="slideshow-indicators">
+                    @for (int i = 0; i < danhSachSlides.Count; i++)
+                    {
+                        <button type="button"
+                                class="slideshow-indicator @(i == 0 ? "active" : "")"
+                                data-slide="@i"
+                                aria-label="Chuyển đến ảnh @(i + 1)">
+                        </button>
+                    }
+                </div>
+            }
+
+        </section>
+    }
+    else
+    {
+        <section class="home-slideshow-empty">
+            <p>Chưa có hình ảnh trình chiếu.</p>
+        </section>
+    }
+
+    @* // sach moi add duoc hien thi *@
+
+        <!-- SÁCH MỚI BỔ SUNG -->
+    <section class="home-new-books">
+
+        <div class="home-section-heading">
+
+            <div>
+
+                <h2>Sách mới bổ sung</h2>
+
+                <p>Những đầu sách mới nhất được cập nhật tại thư viện UNETI.</p>
+            </div>
+
+            <a asp-controller="Sach"
+               asp-action="Index"
+               class="home-view-all">
+                Xem tất cả sách →
+            </a>
+
+        </div>
+
+        @if (danhSachSachMoi.Count > 0)
+        {
+            <div class="home-book-list">
+
+                @foreach (var sach in danhSachSachMoi)
+                {
+                    <article class="home-book-card">
+
+                        <a asp-controller="Sach"
+                           asp-action="Details"
+                           asp-route-id="@sach.MaSach"
+                           class="home-book-image">
+
+                            <img src="@sach.HinhAnh"
+                                 alt="@sach.TenSach"
+                                 loading="lazy" />
+
+                        </a>
+
+                        <div class="home-book-info">
+
+                            <span class="home-book-category">
+                                @(sach.TheLoai?.TenTheLoai ?? "Chưa phân loại")
+                            </span>
+
+                            <h3>
+                                <a asp-controller="Sach"
+                                   asp-action="Details"
+                                   asp-route-id="@sach.MaSach">
+                                    @sach.TenSach
+                                </a>
+                            </h3>
+
+                            <p class="home-book-author">
+                                Tác giả: @sach.TacGia
+                            </p>
+
+                            <a asp-controller="Sach"
+                               asp-action="Details"
+                               asp-route-id="@sach.MaSach"
+                               class="home-book-detail">
+                                Xem chi tiết →
+                            </a>
+
+                        </div>
+
+                    </article>
+                }
+
+            </div>
+        }
+        else
+        {
+            <p class="home-book-empty">
+                Hiện chưa có sách mới được bổ sung.
+            </p>
+        }
+
+    </section>
+    
+    <!-- SÁCH NỔI BẬT -->
+    <section class="home-new-books">
+
+        <div class="home-section-heading">
+
+            <div>
+
+                <h2>Sách nổi bật</h2>
+
+                <p>Những cuốn sách được bạn đọc mượn nhiều nhất tại thư viện UNETI.</p>
+            </div>
+
+            <a asp-controller="Sach"
+               asp-action="Index"
+               class="home-view-all">
+                Khám phá thêm →
+            </a>
+
+        </div>
+
+        @if (danhSachSachNoiBat.Count > 0)
+        {
+            <div class="home-book-list">
+
+                @foreach (var sach in danhSachSachNoiBat)
+                {
+                    <article class="home-book-card">
+
+                        <a asp-controller="Sach"
+                           asp-action="Details"
+                           asp-route-id="@sach.MaSach"
+                           class="home-book-image">
+
+                            <img src="@sach.HinhAnh"
+                                 alt="@sach.TenSach"
+                                 loading="lazy" />
+
+                        </a>
+
+                        <div class="home-book-info">
+
+                            <span class="home-book-category">
+                                @(sach.TheLoai?.TenTheLoai ?? "Chưa phân loại")
+                            </span>
+
+                            <h3>
+                                <a asp-controller="Sach"
+                                   asp-action="Details"
+                                   asp-route-id="@sach.MaSach">
+                                    @sach.TenSach
+                                </a>
+                            </h3>
+
+                            <p class="home-book-author">
+                                Tác giả: @sach.TacGia
+                            </p>
+
+                            <a asp-controller="Sach"
+                               asp-action="Details"
+                               asp-route-id="@sach.MaSach"
+                               class="home-book-detail">
+                                Xem chi tiết →
+                            </a>
+
+                        </div>
+
+                    </article>
+                }
+
+            </div>
+        }
+        else
+        {
+            <p class="home-book-empty">
+                Hiện chưa có dữ liệu sách nổi bật.
+            </p>
+        }
+
+    </section>
+
+    
+    <!-- CÓ THỂ BẠN QUAN TÂM -->
+    <section class="home-new-books home-category-section">
+
+        <div class="home-section-heading">
+
+            <div>
+
+                <h2>Có thể bạn quan tâm</h2>
+
+                <p>
+                    Khám phá những lĩnh vực tri thức và tìm cuốn sách
+                    phù hợp với sở thích của bạn.
+                </p>
+            </div>
+
+            <a asp-controller="Sach"
+               asp-action="Index"
+               class="home-view-all">
+                Khám phá thư viện →
+            </a>
+
+        </div>
+
+        @if (danhSachTheLoaiGoiY.Count > 0)
+        {
+            <div class="home-category-list">
+
+                @foreach (var theLoai in danhSachTheLoaiGoiY)
+                {
+                    <a asp-controller="Sach"
+                       asp-action="Index"
+                       asp-route-theLoai="@theLoai.TenTheLoai"
+                       class="home-category-card">
+
+                        <span class="home-category-icon">
+                            ✦
+                        </span>
+
+                        <span class="home-category-name">
+                            @theLoai.TenTheLoai
+                        </span>
+
+                        <span class="home-category-link">
+                            Khám phá sách →
+                        </span>
+
+                    </a>
+                }
+
+            </div>
+        }
+        else
+        {
+            <p class="home-book-empty">
+                Hiện chưa có thể loại sách để giới thiệu.
+            </p>
+        }
+
+    </section>
+
+    
+    <!-- HỆ THỐNG THƯ VIỆN UNETI -->
+    <section class="home-library-section">
+
+        <div class="home-library-header">
+
+            <span class="home-library-label">
+                MẠNG LƯỚI PHỤC VỤ
+            </span>
+
+            <h2>Hệ thống thư viện UNETI</h2>
+
+            <p>
+                Thời gian mở cửa phục vụ: Thứ 2 đến Thứ 6
+                (Sáng: 07:30 - 11:30 | Chiều: 13:00 - 17:00)
+            </p>
+
+        </div>
+
+        <div class="home-library-list">
+
+            <!-- CƠ SỞ MINH KHAI -->
+            <article class="home-library-card">
+
+                <div class="home-library-icon">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M12 2C7.58 2 4 5.58 4 10c0 5.25 8 12 8 12s8-6.75 8-12c0-4.42-3.58-8-8-8zm0 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6z" />
+                    </svg>
+                </div>
+
+                <h3>Cơ sở Minh Khai - Hà Nội</h3>
+
+                <p>
+                    Số 456 Minh Khai, Phường Vĩnh Tuy,
+                    Quận Hai Bà Trưng, TP. Hà Nội
+                </p>
+
+                <span class="home-library-tag">
+                    Phòng đọc • Kho sách chung
+                </span>
+
+            </article>
+
+            <!-- CƠ SỞ LĨNH NAM -->
+            <article class="home-library-card">
+
+                <div class="home-library-icon">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M12 2C7.58 2 4 5.58 4 10c0 5.25 8 12 8 12s8-6.75 8-12c0-4.42-3.58-8-8-8zm0 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6z" />
+                    </svg>
+                </div>
+
+                <h3>Cơ sở Lĩnh Nam - Hà Nội</h3>
+
+                <p>
+                    Số 218 Lĩnh Nam, Phường Vĩnh Hưng,
+                    Quận Hoàng Mai, TP. Hà Nội
+                </p>
+
+                <span class="home-library-tag">
+                    Phòng đọc điện tử • Tự học
+                </span>
+
+            </article>
+
+            <!-- CƠ SỞ NAM ĐỊNH -->
+            <article class="home-library-card">
+
+                <div class="home-library-icon">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M12 2C7.58 2 4 5.58 4 10c0 5.25 8 12 8 12s8-6.75 8-12c0-4.42-3.58-8-8-8zm0 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6z" />
+                    </svg>
+                </div>
+
+                <h3>Cơ sở Nam Định</h3>
+
+                <p>
+                    Số 353 Trần Hưng Đạo,
+                    Phường Bà Triệu, TP. Nam Định
+                </p>
+
+                <span class="home-library-tag">
+                    Kho giáo trình • Tài liệu tham khảo
+                </span>
+
+            </article>
+
+        </div>
+
+    </section>
+
+    <script>
+
+
+            document.addEventListener("DOMContentLoaded", function () {
+
+                const slideshow = document.getElementById("homeSlideshow");
+
+                if (!slideshow) return;
+
+                const track = slideshow.querySelector(".slideshow-track");
+                const slides = Array.from(
+                    track.querySelectorAll(".slideshow-item")
+                );
+
+                const indicators = slideshow.querySelectorAll(".slideshow-indicator");
+                const nextButton = slideshow.querySelector(".slideshow-next");
+                const prevButton = slideshow.querySelector(".slideshow-prev");
+                const indicatorBox = slideshow.querySelector(".slideshow-indicators");
+
+                let visibleCount = 0;
+                let currentIndex = 0;
+                let slideshowTimer;
+                let resizeTimer;
+
+                const transitionStyle = "transform 0.65s ease";
+
+                // Xác định số ảnh hiển thị theo kích thước màn hình.
+                function getVisibleCount() {
+
+                    if (window.innerWidth <= 767.98) {
+                        return 1;
+                    }
+
+                    if (window.innerWidth <= 991.98) {
+                        return 2;
+                    }
+
+                    return 4;
+                }
+
+                // Cập nhật trạng thái các dấu chấm.
+                function updateIndicators() {
+
+                    indicators.forEach((indicator, i) => {
+
+                        indicator.classList.toggle(
+                            "active",
+                            i === currentIndex
+                        );
+
+                    });
+                }
+
+                // Cập nhật vị trí băng chuyền.
+                function updateSlideshow(animate = true) {
+
+                    track.style.transition = animate
+                        ? transitionStyle
+                        : "none";
+
+                    if (slides.length <= visibleCount) {
+                        track.style.transform = "translateX(0)";
+                    } else {
+
+                        const position = visibleCount + currentIndex;
+
+                        track.style.transform =
+                            `translateX(-${position * 100 / visibleCount}%)`;
+                    }
+
+                    updateIndicators();
+
+                    if (!animate) {
+                        track.offsetHeight;
+                        track.style.transition = transitionStyle;
+                    }
+                }
+
+                // Bắt đầu tự động chuyển ảnh.
+                function startSlideshow() {
+
+                    clearInterval(slideshowTimer);
+
+                    if (slides.length <= visibleCount) return;
+
+                    slideshowTimer = setInterval(function () {
+                        nextSlide();
+                    }, 4000);
+                }
+
+                // Chuyển sang ảnh tiếp theo.
+                function nextSlide() {
+
+                    if (slides.length <= visibleCount) return;
+
+                    currentIndex++;
+                    updateSlideshow();
+                }
+
+                // Chuyển về ảnh trước.
+                function previousSlide() {
+
+                    if (slides.length <= visibleCount) return;
+
+                    currentIndex--;
+                    updateSlideshow();
+                }
+
+                // Xử lý vòng lặp vô hạn.
+                track.addEventListener("transitionend", function (event) {
+
+                    if (
+                        event.target !== track ||
+                        event.propertyName !== "transform"
+                    ) {
+                        return;
+                    }
+
+                    if (currentIndex >= slides.length) {
+
+                        currentIndex = 0;
+                        updateSlideshow(false);
+
+                    } else if (currentIndex < 0) {
+
+                        currentIndex = slides.length - 1;
+                        updateSlideshow(false);
+
+                    }
+                });
+
+                // Thiết lập lại slideshow khi số ảnh hiển thị thay đổi.
+                function rebuildSlideshow() {
+
+                    const newVisibleCount = getVisibleCount();
+
+                    if (newVisibleCount === visibleCount && visibleCount !== 0) {
+                        return;
+                    }
+
+                    visibleCount = newVisibleCount;
+
+                    currentIndex = currentIndex % slides.length;
+
+                    track.style.transition = "none";
+                    track.style.transform = "translateX(0)";
+
+                    track.style.setProperty("--visible-count", visibleCount);
+
+                    // Xóa các ảnh cũ và tạo lại băng chuyền.
+                    if (slides.length > visibleCount) {
+
+                        const firstClones = slides
+                            .slice(-visibleCount)
+                            .map(slide => slide.cloneNode(true));
+
+                        const lastClones = slides
+                            .slice(0, visibleCount)
+                            .map(slide => slide.cloneNode(true));
+
+                        track.replaceChildren(
+                            ...firstClones,
+                            ...slides,
+                            ...lastClones
+                        );
+
+                    } else {
+
+                        track.replaceChildren(...slides);
+                    }
+
+                    // Ẩn hoặc hiện các nút điều khiển phù hợp.
+                    const canSlide = slides.length > visibleCount;
+
+                    if (nextButton) nextButton.hidden = !canSlide;
+                    if (prevButton) prevButton.hidden = !canSlide;
+                    if (indicatorBox) indicatorBox.hidden = !canSlide;
+
+                    updateSlideshow(false);
+                    startSlideshow();
+                }
+
+                // Sự kiện nút tiếp theo.
+                if (nextButton) {
+
+                    nextButton.addEventListener("click", function () {
+
+                        nextSlide();
+                        startSlideshow();
+
+                    });
+                }
+
+                // Sự kiện nút quay lại.
+                if (prevButton) {
+
+                    prevButton.addEventListener("click", function () {
+
+                        previousSlide();
+                        startSlideshow();
+
+                    });
+                }
+
+                // Sự kiện các dấu chấm.
+                indicators.forEach((indicator, i) => {
+
+                    indicator.addEventListener("click", function () {
+
+                        if (slides.length <= visibleCount) return;
+
+                        currentIndex = i;
+
+                        updateSlideshow();
+                        startSlideshow();
+
+                    });
+                });
+
+                // Khởi tạo slideshow.
+                rebuildSlideshow();
+
+                // Tự điều chỉnh khi thay đổi kích thước trình duyệt.
+                window.addEventListener("resize", function () {
+
+                    clearTimeout(resizeTimer);
+
+                    resizeTimer = setTimeout(function () {
+                        rebuildSlideshow();
+                    }, 150);
+
+                });
+
+            });
+
+    </script>
+
+</div>
