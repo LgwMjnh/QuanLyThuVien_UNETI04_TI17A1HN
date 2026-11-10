@@ -238,7 +238,7 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
 
         // Độc giả đăng ký mượn sách trực tuyến
         [HttpGet]
-        public async Task<IActionResult> DangKy()
+        public async Task<IActionResult> DangKy(int? maSach = null)
         {
             var maTaiKhoan = QuyenTruyCap.LayMaTaiKhoan(HttpContext);
             if (maTaiKhoan == null)
@@ -263,9 +263,14 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
             ViewBag.TenDocGia = docGia.HoTen;
             ViewBag.MaDocGia = docGia.MaDocGia;
             ViewBag.MaHienThi = docGia.MaHienThi;
+            // Nạp danh sách sách và truyền mã sách chọn sẵn vào
             await NapDanhSachSachDangPhucVu();
 
-            return View(new DangKyMuonViewModel());
+            // Gán mã sách vào ViewModel để View tự động chọn
+            return View(new DangKyMuonViewModel
+            {
+                MaSach = maSach
+            });
         }
 
         [HttpPost]

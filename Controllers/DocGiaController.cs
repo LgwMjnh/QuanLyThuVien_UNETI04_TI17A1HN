@@ -75,17 +75,25 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
                 {
                     int.TryParse(normalized.Substring(2), out maTimKiem);
                 }
-                else if (int.TryParse(normalized, out int parsedDirect) && normalized.Length <= 8)
+                else if (int.TryParse(normalized, out int parsedDirect) && !keyword.StartsWith("0") && keyword.Length <= 4)
                 {
                     maTimKiem = parsedDirect;
                 }
 
-                query = query.Where(d =>
-                    d.HoTen.Contains(keyword) ||
-                    (d.Email != null && d.Email.Contains(keyword)) ||
-                    (d.SoDienThoai != null && d.SoDienThoai.Contains(keyword)) ||
-                    (d.TaiKhoan != null && d.TaiKhoan.TenDangNhap.Contains(keyword)) ||
-                    (maTimKiem > 0 && d.MaDocGia == maTimKiem));
+                // Nếu người dùng nhập mã độc giả thì ưu tiên tìm chính xác theo Mã độc giả
+                if (maTimKiem > 0)
+                {
+                    query = query.Where(d => d.MaDocGia == maTimKiem);
+                }
+                else
+                {
+                    // Khi không phải là mã độc giả (gõ họ tên, email, SĐT bắt đầu bằng 0, hoặc username) mới tìm theo chuỗi
+                    query = query.Where(d =>
+                        d.HoTen.Contains(keyword) ||
+                        (d.Email != null && d.Email.Contains(keyword)) ||
+                        (d.SoDienThoai != null && d.SoDienThoai.Contains(keyword)) ||
+                        (d.TaiKhoan != null && d.TaiKhoan.TenDangNhap.Contains(keyword)));
+                }
             }
 
             if (!string.IsNullOrWhiteSpace(trangThai))

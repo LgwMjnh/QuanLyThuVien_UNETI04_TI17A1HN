@@ -141,7 +141,9 @@
                                                     {
                                                         foreach (var s in danhSachSach)
                                                         {
-                                                            <option value="@s.MaSach">@s.TenHienThi</option>
+                                                            <option value="@s.MaSach" selected="@(Model.MaSach.HasValue && Model.MaSach.Value == s.MaSach)">
+                                                                @s.TenHienThi
+                                                            </option>
                                                         }
                                                     }
                                                 </select>
