@@ -479,16 +479,15 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
                 TenHienThi = $"[DG{d.MaDocGia:D3}] {d.HoTen} (SĐT: {d.SoDienThoai ?? "Chưa có"})"
             }).ToList();
 
-            var sachs = await _context.Sachs
+            var rawSachs = await _context.Sachs
                 .Where(s => s.TrangThai == "Đang phục vụ" && s.SoLuongCon > 0)
                 .OrderBy(s => s.TenSach)
-                .Select(s => new
-                {
-                    s.MaSach,
-                    TenHienThi = s.TenSach + " (Còn: " +
-                        s.SoLuongCon + " quyển)"
-                })
                 .ToListAsync();
+            var sachs = rawSachs.Select(s => new
+            {
+                s.MaSach,
+                TenHienThi = $"[#{s.MaSach} - {s.MaDinhDanh}] {s.TenSach} (Còn: {s.SoLuongCon} quyển)"
+            }).ToList();
 
             ViewBag.MaDocGia = new SelectList(
                 docGias, "MaDocGia", "TenHienThi", maDocGiaChon);
@@ -501,15 +500,15 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
 
         private async Task NapDanhSachSachDangPhucVu(int? maSachChon = null)
         {
-            var sachs = await _context.Sachs
+            var rawSachs = await _context.Sachs
                 .Where(s => s.TrangThai == "Đang phục vụ" && s.SoLuongCon > 0)
                 .OrderBy(s => s.TenSach)
-                .Select(s => new
-                {
-                    s.MaSach,
-                    TenHienThi = s.TenSach + " - Tác giả: " + s.TacGia + " (Còn " + s.SoLuongCon + " quyển)"
-                })
                 .ToListAsync();
+            var sachs = rawSachs.Select(s => new
+            {
+                s.MaSach,
+                TenHienThi = $"[#{s.MaSach} - {s.MaDinhDanh}] {s.TenSach} - Tác giả: {s.TacGia} (Còn {s.SoLuongCon} quyển)"
+            }).ToList();
 
             ViewBag.MaSach = new SelectList(
                 sachs, "MaSach", "TenHienThi", maSachChon);
