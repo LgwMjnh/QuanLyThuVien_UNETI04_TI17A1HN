@@ -2,7 +2,6 @@
 @model QuanLyThuVien_UNETI04_TI17A1HN.Models.PhieuMuon
 
 @{
-    var laAdmin = QuyenTruyCap.LaAdmin(Context);
     ViewData["Title"] = "Chi tiết phiếu mượn";
     var quaHan = Model.TrangThai == "Đang mượn"
         && DateTime.Today > Model.HanTra.Date;
@@ -66,36 +65,6 @@
                     }
                 </dd>
             </dl>
-
-            @* Chỉ hiển thị form duyệt / đổi trạng thái cho Admin *@
-            @if (laAdmin)
-            {
-                <hr class="my-3" />
-                <form asp-action="CapNhatTrangThai"
-                      asp-route-id="@Model.MaPhieuMuon"
-                      method="post"
-                      class="row g-2 align-items-center">
-
-                    @Html.AntiForgeryToken()
-
-                    <div class="col-auto">
-                        <label class="fw-bold">Cập nhật trạng thái (Thủ thư):</label>
-                    </div>
-
-                    <div class="col-auto">
-                        <select name="trangThai" class="form-select form-select-sm">
-                            <option value="Chờ xác nhận" selected="@(Model.TrangThai == "Chờ xác nhận")">Chờ xác nhận</option>
-                            <option value="Đang mượn" selected="@(Model.TrangThai == "Đang mượn")">Đang mượn</option>
-                            <option value="Đã trả" selected="@(Model.TrangThai == "Đã trả")">Đã trả</option>
-                            <option value="Đã hủy" selected="@(Model.TrangThai == "Đã hủy")">Đã hủy</option>
-                        </select>
-                    </div>
-
-                    <div class="col-auto">
-                        <button type="submit" class="btn btn-sm btn-primary">Lưu trạng thái</button>
-                    </div>
-                </form>
-            }
         </div>
     </div>
 

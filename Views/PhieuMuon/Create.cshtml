@@ -5,6 +5,60 @@
     var danhSachSach = ViewBag.DanhSachSach as IEnumerable<dynamic>;
 }
 
+<style>
+    .table-responsive {
+        overflow: visible !important;
+    }
+    .custom-search-select {
+        position: relative;
+    }
+    .custom-search-select .form-select {
+        cursor: pointer;
+        background-color: #fff;
+        padding-right: 2.25rem;
+    }
+    .custom-search-select .form-select.is-invalid {
+        border-color: #dc3545 !important;
+    }
+    .custom-search-select .dropdown-menu {
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        z-index: 1055;
+    }
+    .custom-search-select .options-list {
+        max-height: 240px;
+        overflow-y: auto;
+        padding-right: 4px;
+    }
+    .custom-search-select .options-list::-webkit-scrollbar {
+        width: 6px;
+    }
+    .custom-search-select .options-list::-webkit-scrollbar-thumb {
+        background-color: #ced4da;
+        border-radius: 4px;
+    }
+    .custom-search-select .dropdown-item {
+        font-size: 0.9rem;
+        cursor: pointer;
+        white-space: normal;
+        padding: 8px 12px;
+        border-radius: 6px;
+        margin-bottom: 2px;
+        line-height: 1.4;
+    }
+    .custom-search-select .dropdown-item:hover,
+    .custom-search-select .dropdown-item:focus {
+        background-color: #e9f2ff;
+        color: #0d6efd;
+    }
+    .custom-search-select .dropdown-item.active {
+        background-color: #0d6efd !important;
+        color: #ffffff !important;
+        font-weight: 600;
+    }
+</style>
+
 <div class="container py-3">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
@@ -33,7 +87,7 @@
                         <label asp-for="MaDocGia" class="form-label fw-bold">
                             Độc giả mượn sách <span class="text-danger">*</span>
                         </label>
-                        <select asp-for="MaDocGia" class="form-select" asp-items="ViewBag.MaDocGia">
+                        <select asp-for="MaDocGia" class="form-select select-docgia" asp-items="ViewBag.MaDocGia" id="MaDocGia">
                             <option value="">-- Chọn độc giả --</option>
                         </select>
                         <span asp-validation-for="MaDocGia" class="text-danger"></span>
@@ -134,29 +188,272 @@
     @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
 
     <script>
+        function removeVietnameseTones(str) {
+            if (!str) return '';
+            return str.toLowerCase()
+                .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                .replace(/đ/g, 'd').replace(/Đ/g, 'D');
+        }
+
+        function initSearchableSelect(selectEl, placeholder) {
+            if (!selectEl || selectEl.dataset.searchableInit === 'true') return;
+            selectEl.dataset.searchableInit = 'true';
+            selectEl.removeAttribute('required');
+            selectEl.classList.add('d-none');
+
+            var wrapper = document.createElement('div');
+            wrapper.className = 'dropdown custom-search-select position-relative w-100';
+
+            var toggleBtn = document.createElement('button');
+            toggleBtn.type = 'button';
+            toggleBtn.className = 'form-select text-start d-flex justify-content-between align-items-center';
+            toggleBtn.setAttribute('data-bs-toggle', 'dropdown');
+            toggleBtn.setAttribute('data-bs-auto-close', 'outside');
+            toggleBtn.setAttribute('aria-expanded', 'false');
+
+            var textSpan = document.createElement('span');
+            textSpan.className = 'text-truncate me-2 selected-label';
+
+            var selectedOpt = selectEl.options[selectEl.selectedIndex];
+            var defaultPlaceholder = placeholder || '-- Chọn --';
+            if (selectedOpt && selectedOpt.value) {
+                textSpan.textContent = selectedOpt.text;
+            } else {
+                textSpan.textContent = defaultPlaceholder;
+                textSpan.classList.add('text-muted');
+            }
+
+            toggleBtn.appendChild(textSpan);
+            wrapper.appendChild(toggleBtn);
+
+            var menu = document.createElement('div');
+            menu.className = 'dropdown-menu w-100 p-2 shadow border';
+            menu.style.minWidth = '280px';
+
+            var searchBox = document.createElement('div');
+            searchBox.className = 'mb-2';
+            searchBox.innerHTML = `
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control border-start-0 search-input" placeholder="Gõ để tìm kiếm..." autocomplete="off">
+                    <button type="button" class="btn btn-outline-secondary btn-clear-search d-none">&times;</button>
+                </div>
+            `;
+            menu.appendChild(searchBox);
+
+            var searchInput = searchBox.querySelector('.search-input');
+            var btnClear = searchBox.querySelector('.btn-clear-search');
+
+            var listContainer = document.createElement('div');
+            listContainer.className = 'options-list';
+
+            function buildOptions() {
+                listContainer.innerHTML = '';
+                var curVal = selectEl.value;
+
+                Array.from(selectEl.options).forEach(function (opt) {
+                    var item = document.createElement('a');
+                    item.className = 'dropdown-item rounded py-1 px-2 mb-1';
+                    item.href = 'javascript:void(0);';
+                    item.dataset.value = opt.value;
+                    item.textContent = opt.text;
+
+                    if (!opt.value) {
+                        item.classList.add('text-muted', 'fst-italic');
+                    }
+                    if (opt.value && opt.value === curVal) {
+                        item.classList.add('active');
+                    }
+
+                    item.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        selectOption(opt.value, opt.text);
+                    });
+
+                    listContainer.appendChild(item);
+                });
+
+                var noResult = document.createElement('div');
+                noResult.className = 'text-center text-muted py-2 no-result-msg d-none';
+                noResult.innerHTML = '<small><i class="bi bi-info-circle me-1"></i>Không tìm thấy kết quả phù hợp</small>';
+                listContainer.appendChild(noResult);
+            }
+
+            buildOptions();
+            menu.appendChild(listContainer);
+            wrapper.appendChild(menu);
+
+            selectEl.parentNode.insertBefore(wrapper, selectEl.nextSibling);
+
+            function selectOption(val, text) {
+                selectEl.value = val;
+                textSpan.textContent = val ? text : defaultPlaceholder;
+                if (val) {
+                    textSpan.classList.remove('text-muted');
+                    toggleBtn.classList.remove('border-danger', 'is-invalid');
+                } else {
+                    textSpan.classList.add('text-muted');
+                }
+
+                listContainer.querySelectorAll('.dropdown-item').forEach(function (it) {
+                    if (it.dataset.value === val && val !== '') {
+                        it.classList.add('active');
+                    } else {
+                        it.classList.remove('active');
+                    }
+                });
+
+                selectEl.dispatchEvent(new Event('change', { bubbles: true }));
+
+                var bsDropdown = bootstrap.Dropdown.getInstance(toggleBtn);
+                if (bsDropdown) bsDropdown.hide();
+            }
+
+            function filterOptions() {
+                var query = searchInput.value.trim();
+                var qRaw = query.toLowerCase();
+                var qNorm = removeVietnameseTones(query);
+
+                if (query) {
+                    btnClear.classList.remove('d-none');
+                } else {
+                    btnClear.classList.add('d-none');
+                }
+
+                var items = listContainer.querySelectorAll('.dropdown-item');
+                var visibleCount = 0;
+
+                items.forEach(function (item) {
+                    var text = item.textContent;
+                    var tRaw = text.toLowerCase();
+                    var tNorm = removeVietnameseTones(text);
+
+                    if (!query || tRaw.includes(qRaw) || tNorm.includes(qNorm)) {
+                        item.classList.remove('d-none');
+                        visibleCount++;
+                    } else {
+                        item.classList.add('d-none');
+                    }
+                });
+
+                var noResult = listContainer.querySelector('.no-result-msg');
+                if (noResult) {
+                    if (visibleCount === 0) {
+                        noResult.classList.remove('d-none');
+                    } else {
+                        noResult.classList.add('d-none');
+                    }
+                }
+            }
+
+            searchBox.addEventListener('click', function (e) {
+                e.stopPropagation();
+            });
+
+            searchInput.addEventListener('input', filterOptions);
+
+            btnClear.addEventListener('click', function (e) {
+                e.stopPropagation();
+                searchInput.value = '';
+                filterOptions();
+                searchInput.focus();
+            });
+
+            searchInput.addEventListener('keydown', function (e) {
+                e.stopPropagation();
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    var first = listContainer.querySelector('.dropdown-item:not(.d-none)');
+                    if (first) first.focus();
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    var first = listContainer.querySelector('.dropdown-item:not(.d-none)');
+                    if (first) first.click();
+                } else if (e.key === 'Escape') {
+                    var bsDropdown = bootstrap.Dropdown.getInstance(toggleBtn);
+                    if (bsDropdown) bsDropdown.hide();
+                }
+            });
+
+            toggleBtn.addEventListener('shown.bs.dropdown', function () {
+                searchInput.focus();
+                searchInput.select();
+            });
+
+            toggleBtn.addEventListener('hidden.bs.dropdown', function () {
+                searchInput.value = '';
+                filterOptions();
+            });
+
+            selectEl.addEventListener('change', function () {
+                var opt = selectEl.options[selectEl.selectedIndex];
+                if (opt && opt.value) {
+                    textSpan.textContent = opt.text;
+                    textSpan.classList.remove('text-muted');
+                    toggleBtn.classList.remove('border-danger', 'is-invalid');
+                } else {
+                    textSpan.textContent = defaultPlaceholder;
+                    textSpan.classList.add('text-muted');
+                }
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
             var btnThem = document.getElementById('btnThemSach');
             var tbody = document.getElementById('danhSachSachBody');
+            var form = document.getElementById('formTaoPhieu');
 
-            // Thêm dòng sách mới
+            // 1. Khởi tạo tìm kiếm cho dropdown độc giả
+            var selectDocGia = document.getElementById('MaDocGia');
+            if (selectDocGia) {
+                initSearchableSelect(selectDocGia, '-- Chọn độc giả --');
+            }
+
+            // Lưu mẫu HTML option sách để dùng khi thêm dòng
+            var firstSelectSach = tbody.querySelector('select.select-sach');
+            var optionsSachHtml = firstSelectSach ? firstSelectSach.innerHTML : '';
+
+            // 2. Khởi tạo tìm kiếm cho dòng sách đầu tiên
+            if (firstSelectSach) {
+                initSearchableSelect(firstSelectSach, '-- Chọn sách cần mượn --');
+            }
+
+            // 3. Thêm dòng sách mới
             btnThem.addEventListener('click', function () {
-                var firstRow = tbody.querySelector('.dong-sach');
-                if (!firstRow) return;
+                var rows = tbody.querySelectorAll('.dong-sach');
+                if (rows.length >= 5) {
+                    alert('Chỉ được mượn tối đa 5 cuốn sách trong một phiếu!');
+                    return;
+                }
 
-                var newRow = firstRow.cloneNode(true);
-
-                // Reset giá trị trên dòng mới
-                var select = newRow.querySelector('select');
-                if (select) select.value = '';
-
-                var input = newRow.querySelector('input[type="number"]');
-                if (input) input.value = '1';
+                var newRow = document.createElement('tr');
+                newRow.className = 'dong-sach';
+                newRow.innerHTML = `
+                    <td>
+                        <select name="danhSachMaSach" class="form-select select-sach" required>
+                            ${optionsSachHtml}
+                        </select>
+                    </td>
+                    <td>
+                        <input type="number" name="danhSachSoLuong" class="form-control text-center" value="1" min="1" max="5" required />
+                    </td>
+                    <td class="text-center">
+                        <button type="button" class="btn btn-outline-danger btn-sm btn-xoa-dong" title="Xóa dòng này">
+                            Xóa
+                        </button>
+                    </td>
+                `;
 
                 tbody.appendChild(newRow);
+
+                var newSelect = newRow.querySelector('select.select-sach');
+                newSelect.value = '';
+                initSearchableSelect(newSelect, '-- Chọn sách cần mượn --');
+
                 capNhatTrangThaiNutXoa();
             });
 
-            // Xóa dòng sách
+            // 4. Xóa dòng sách
             tbody.addEventListener('click', function (e) {
                 var btnXoa = e.target.closest('.btn-xoa-dong');
                 if (!btnXoa) return;
@@ -181,6 +478,57 @@
                         } else {
                             btn.removeAttribute('disabled');
                         }
+                    }
+                });
+            }
+
+            // 5. Kiểm tra trùng sách giữa các dòng
+            tbody.addEventListener('change', function (e) {
+                if (e.target && e.target.classList.contains('select-sach')) {
+                    var selected = [];
+                    var duplicate = false;
+                    tbody.querySelectorAll('select.select-sach').forEach(function (sel) {
+                        if (sel.value) {
+                            if (selected.includes(sel.value)) {
+                                duplicate = true;
+                                sel.value = '';
+                                sel.dispatchEvent(new Event('change'));
+                            } else {
+                                selected.push(sel.value);
+                            }
+                        }
+                    });
+                    if (duplicate) {
+                        alert('Cuốn sách này đã được chọn ở một dòng khác. Vui lòng chọn sách khác hoặc tăng số lượng mượn!');
+                    }
+                }
+            });
+
+            // 6. Kiểm tra hợp lệ trước khi submit form
+            if (form) {
+                form.addEventListener('submit', function (e) {
+                    var hopLe = true;
+
+                    if (selectDocGia && (!selectDocGia.value || selectDocGia.value === '0')) {
+                        var wrapper = selectDocGia.nextElementSibling;
+                        var btn = wrapper ? wrapper.querySelector('.form-select') : null;
+                        if (btn) btn.classList.add('border-danger', 'is-invalid');
+                        hopLe = false;
+                    }
+
+                    var selects = tbody.querySelectorAll('select.select-sach');
+                    selects.forEach(function (sel) {
+                        if (!sel.value) {
+                            var wrapper = sel.nextElementSibling;
+                            var btn = wrapper ? wrapper.querySelector('.form-select') : null;
+                            if (btn) btn.classList.add('border-danger', 'is-invalid');
+                            hopLe = false;
+                        }
+                    });
+
+                    if (!hopLe) {
+                        e.preventDefault();
+                        alert('Vui lòng chọn đầy đủ thông tin độc giả và đầu sách cần mượn!');
                     }
                 });
             }
