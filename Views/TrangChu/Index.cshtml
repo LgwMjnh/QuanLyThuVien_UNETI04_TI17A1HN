@@ -1,4 +1,4 @@
-﻿@{
+@{
     ViewData["Title"] = "Trang chủ";
 
     var danhSachSachMoi = ViewBag.DanhSachSachMoi
@@ -57,27 +57,11 @@
 
         </div>
 
-        <!-- CỘT BÊN PHẢI: KHU VỰC CHỜ ẢNH -->
-        <div class="home-hero-image">
-
-            <div class="home-image-placeholder">
-
-                <span>KHÔNG GIAN THƯ VIỆN</span>
-
-                <small>Hình ảnh sẽ được bổ sung sau</small>
-
-            </div>
-
-            @*
-                TODO: BỔ SUNG ẢNH THẬT SAU
-
-                Khi có ảnh, thay phần placeholder phía trên bằng:
-
-                <img src="~/images/ten-anh-thu-vien.jpg"
-                     alt="Không gian thư viện UNETI"
-                     asp-append-version="true" />
-            *@
-
+        <div class="home-hero-image" style="background-color: #ffffff; display: flex; align-items: center; justify-content: center;">
+            <img src="~/images/khong-gian-thu-vien.png"
+                 alt="Không gian thư viện UNETI"
+                 style="object-fit: contain; max-height: 420px; padding: 12px;"
+                 asp-append-version="true" />
         </div>
 
     </section>

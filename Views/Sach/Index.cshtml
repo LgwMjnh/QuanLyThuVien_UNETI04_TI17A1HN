@@ -18,26 +18,26 @@
     }
 
     .split-view-list::-webkit-scrollbar-thumb {
-        background: #cbd5e1;
+        background: var(--library-border);
         border-radius: 4px;
     }
 
     .book-item-card {
         cursor: pointer;
         transition: all .15s ease-in-out;
-        border: 1px solid #e2e8f0;
-        background: #fff;
+        border: 1px solid var(--library-border);
+        background: var(--library-paper);
     }
 
     .book-item-card:hover {
-        border-color: #93c5fd;
-        background: #f8fafc;
+        border-color: var(--library-green);
+        background: rgba(231, 238, 231, 0.45);
     }
 
     .book-item-card.active-card {
-        border-color: #3b82f6 !important;
-        background: #eff6ff !important;
-        box-shadow: 0 1px 3px rgba(59, 130, 246, .15);
+        border-color: var(--library-green) !important;
+        background: var(--library-green-soft) !important;
+        box-shadow: 0 2px 8px rgba(41, 75, 58, .15);
     }
 
     .detail-sticky-pane {
@@ -55,7 +55,7 @@
     }
 
     .search-highlight {
-        background-color: #0d6efd;
+        background-color: var(--library-green);
         color: #ffffff;
         padding: 1px 4px;
         border-radius: 3px;
@@ -209,7 +209,7 @@
 
         <div class="col-lg-5">
             <div class="card shadow-sm border-0 detail-sticky-pane">
-                <div class="card-header bg-white border-bottom p-3 d-flex justify-content-between align-items-center gap-2">
+                <div class="card-header border-bottom p-3 d-flex justify-content-between align-items-center gap-2">
                     <span class="badge bg-primary-subtle text-primary text-truncate" id="dCategory">Thể loại</span>
                     <span id="dStatusBadge" class="badge bg-success text-nowrap flex-shrink-0">Đang phục vụ</span>
                 </div>

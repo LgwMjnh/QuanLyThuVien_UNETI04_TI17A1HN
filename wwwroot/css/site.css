@@ -9,7 +9,7 @@ html {
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem rgba(41, 75, 58, 0.2);
 }
 
 html {
@@ -169,6 +169,71 @@ a {
         color: #FFFFFF;
     }
 
+.btn-warning {
+    background-color: var(--library-gold);
+    border-color: var(--library-gold);
+    color: #FFFFFF;
+}
+
+    .btn-warning:hover,
+    .btn-warning:focus {
+        background-color: #8E6F3E;
+        border-color: #8E6F3E;
+        color: #FFFFFF;
+    }
+
+.btn-danger {
+    background-color: var(--library-danger);
+    border-color: var(--library-danger);
+    color: #FFFFFF;
+}
+
+    .btn-danger:hover,
+    .btn-danger:focus {
+        background-color: #883430;
+        border-color: #883430;
+        color: #FFFFFF;
+    }
+
+.btn-outline-danger {
+    color: var(--library-danger);
+    border-color: var(--library-danger);
+    background-color: transparent;
+}
+
+    .btn-outline-danger:hover,
+    .btn-outline-danger:focus {
+        background-color: var(--library-danger);
+        border-color: var(--library-danger);
+        color: #FFFFFF;
+    }
+
+.btn-secondary {
+    background-color: var(--library-green-soft);
+    border-color: var(--library-border);
+    color: var(--library-green-dark);
+}
+
+    .btn-secondary:hover,
+    .btn-secondary:focus {
+        background-color: #D6E0D6;
+        border-color: var(--library-green);
+        color: var(--library-green-dark);
+    }
+
+.btn-outline-secondary {
+    color: var(--library-muted);
+    border-color: var(--library-border);
+    background-color: var(--library-paper);
+}
+
+    .btn-outline-secondary:hover,
+    .btn-outline-secondary:focus {
+        color: var(--library-green-dark);
+        border-color: var(--library-green);
+        background-color: var(--library-green-soft);
+    }
+
 /* ===== 7. O NHAP LIEU ===== */
 
 .form-control,
@@ -280,8 +345,110 @@ a {
 
 /* ===== 11. MAU CHO PHAN XAC NHAN ===== */
 
+.text-white,
+.text-white h1,
+.text-white h2,
+.text-white h3,
+.text-white h4,
+.text-white h5,
+.text-white h6,
+.bg-primary h1,
+.bg-primary h2,
+.bg-primary h3,
+.bg-primary h4,
+.bg-primary h5,
+.bg-primary h6,
+.card-header.bg-primary,
+.card-header.bg-primary h1,
+.card-header.bg-primary h2,
+.card-header.bg-primary h3,
+.card-header.bg-primary h4,
+.card-header.bg-primary h5,
+.card-header.bg-primary h6 {
+    color: #FFFFFF !important;
+}
+
 .text-danger {
     color: var(--library-danger) !important;
+}
+
+.text-primary {
+    color: var(--library-green) !important;
+}
+
+.bg-primary {
+    background-color: var(--library-green) !important;
+    color: #FFFFFF !important;
+}
+
+.bg-primary-subtle {
+    background-color: var(--library-green-soft) !important;
+    color: var(--library-green-dark) !important;
+    border: 1px solid var(--library-border);
+}
+
+.border-primary {
+    border-color: var(--library-green) !important;
+}
+
+.pagination .page-link {
+    color: var(--library-green);
+    background-color: var(--library-paper);
+    border-color: var(--library-border);
+    font-weight: 500;
+}
+
+.pagination .page-link:hover,
+.pagination .page-link:focus {
+    color: var(--library-green-dark);
+    background-color: var(--library-green-soft);
+    border-color: var(--library-green);
+}
+
+.pagination .page-item.active .page-link {
+    background-color: var(--library-green) !important;
+    border-color: var(--library-green) !important;
+    color: #FFFFFF !important;
+}
+
+.pagination .page-item.disabled .page-link {
+    color: var(--library-muted);
+    background-color: #F8F5EE;
+    border-color: var(--library-border);
+}
+
+.breadcrumb-item a {
+    color: var(--library-green);
+    text-decoration: none;
+}
+
+.breadcrumb-item a:hover {
+    color: var(--library-green-dark);
+    text-decoration: underline;
+}
+
+.breadcrumb-item.active {
+    color: var(--library-muted);
+}
+
+.badge.bg-success {
+    background-color: #2E6B4A !important;
+    color: #FFFFFF !important;
+}
+
+.badge.bg-warning {
+    background-color: #EBD9B4 !important;
+    color: #5D4314 !important;
+}
+
+.badge.bg-danger {
+    background-color: #F4DCD9 !important;
+    color: var(--library-danger) !important;
+}
+
+.badge.bg-secondary {
+    background-color: #E3DFD4 !important;
+    color: var(--library-text) !important;
 }
 
 /* ===== 12. CHAN TRANG ===== */
