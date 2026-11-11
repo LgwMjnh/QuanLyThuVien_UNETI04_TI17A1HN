@@ -1,7 +1,10 @@
+@using QuanLyThuVien_UNETI04_TI17A1HN.Helpers
 @model QuanLyThuVien_UNETI04_TI17A1HN.Models.SachFilterViewModel
 
 @{
-    ViewData["Title"] = "Quản lý & Tra cứu Sách";
+    var laAdmin = QuyenTruyCap.LaAdmin(Context);
+    var laDocGia = QuyenTruyCap.LaDocGia(Context);
+    ViewData["Title"] = laAdmin ? "Quản lý & Tra cứu Sách" : "Tra cứu & Mượn Sách";
 }
 
 <style>
@@ -64,33 +67,40 @@
 
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3 pb-2 border-bottom">
         <div>
-            <h3 class="fw-bold text-dark mb-0">Quản lý & Tra cứu Sách</h3>
+            <h3 class="fw-bold text-dark mb-0">
+                @(laAdmin ? "Quản lý & Tra cứu Sách" : "Tra cứu & Mượn Sách")
+            </h3>
             <small class="text-muted">
-                Hệ thống thư viện UNETI • Phân hệ Quản lý Sách (Module 2)
+                @(laAdmin
+                    ? "Hệ thống thư viện UNETI • Phân hệ Quản lý Sách (Module 2)"
+                    : "Hệ thống thư viện UNETI • Tra cứu tài liệu và đăng ký mượn trực tuyến")
             </small>
         </div>
 
-        <a asp-controller="Sach" asp-action="Create"
-           class="btn btn-primary btn-sm px-3 shadow-sm">
-            <i class="bi bi-plus-circle me-1"></i> Thêm sách mới
-        </a>
+        @if (laAdmin)
+        {
+            <a asp-controller="Sach" asp-action="Create"
+               class="btn btn-primary btn-sm px-3 shadow-sm">
+                <i class="bi bi-plus-circle me-1"></i> Thêm sách mới
+            </a>
+        }
+        else
+        {
+            <div class="d-flex gap-2">
+                @if (laDocGia)
+                {
+                    <a asp-controller="PhieuMuon" asp-action="Index"
+                       class="btn btn-outline-primary btn-sm px-3">
+                        <i class="bi bi-card-list me-1"></i> Phiếu mượn của tôi
+                    </a>
+                }
+                <a asp-controller="PhieuMuon" asp-action="DangKy"
+                   class="btn btn-primary btn-sm px-3 shadow-sm">
+                    <i class="bi bi-journal-plus me-1"></i> Đăng ký mượn sách
+                </a>
+            </div>
+        }
     </div>
-
-    @if (TempData["Success"] != null)
-    {
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            @TempData["Success"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
-        </div>
-    }
-
-    @if (TempData["Error"] != null)
-    {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            @TempData["Error"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
-        </div>
-    }
 
     <div class="row g-3 align-items-start">
 
@@ -100,7 +110,7 @@
                     <div class="row g-2">
                         <div class="col-12">
                             <label for="liveSearchInput" class="form-label small fw-semibold mb-1">
-                                Tìm kiếm sách 
+                                Tìm kiếm sách
                             </label>
                             <div class="input-group input-group-sm">
                                 <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
@@ -167,7 +177,7 @@
                             </select>
                         </div>
 
-                        <div class="col-6 col-md-3">
+                        <div class="col-6 col-md-4">
                             <label for="liveYearFrom" class="form-label small fw-semibold mb-1">
                                 Từ năm
                             </label>
@@ -175,7 +185,7 @@
                                    placeholder="VD: 2018" value="@Model.NamTu" />
                         </div>
 
-                        <div class="col-6 col-md-3">
+                        <div class="col-6 col-md-4">
                             <label for="liveYearTo" class="form-label small fw-semibold mb-1">
                                 Đến năm
                             </label>
@@ -183,8 +193,8 @@
                                    placeholder="@DateTime.Now.Year" value="@Model.NamDen" />
                         </div>
 
-                        <div class="col-12 col-md-6 d-flex align-items-end justify-content-end gap-2 mt-2">
-                            <button type="button" id="resetFilters" class="btn btn-outline-secondary btn-sm">
+                        <div class="col-12 col-md-4 d-flex align-items-end">
+                            <button type="button" id="resetFilters" class="btn btn-outline-secondary btn-sm w-100">
                                 <i class="bi bi-arrow-counterclockwise me-1"></i> Xóa bộ lọc
                             </button>
                         </div>
@@ -199,9 +209,9 @@
 
         <div class="col-lg-5">
             <div class="card shadow-sm border-0 detail-sticky-pane">
-                <div class="card-header bg-white border-bottom p-3 d-flex justify-content-between align-items-center">
-                    <span class="badge bg-primary-subtle text-primary" id="dCategory">Thể loại</span>
-                    <span id="dStatusBadge" class="badge bg-success">Đang phục vụ</span>
+                <div class="card-header bg-white border-bottom p-3 d-flex justify-content-between align-items-center gap-2">
+                    <span class="badge bg-primary-subtle text-primary text-truncate" id="dCategory">Thể loại</span>
+                    <span id="dStatusBadge" class="badge bg-success text-nowrap flex-shrink-0">Đang phục vụ</span>
                 </div>
 
                 <div class="card-body p-4">
@@ -219,9 +229,8 @@
                             <p class="text-muted small mb-2">Tác giả: <strong class="text-dark" id="dAuthor">-</strong></p>
 
                             <div class="p-2 border rounded-2 bg-light mb-2">
-                                <small class="text-muted d-block" style="font-size: 0.72rem;">Mã sách tự động (2 nửa)</small>
+                                <small class="text-muted d-block" style="font-size: 0.72rem;">Mã sách</small>
                                 <strong class="text-primary font-monospace fs-6 d-block" id="dId">#T9LS500021</strong>
-                                <small class="text-secondary font-monospace" style="font-size: 0.75rem;" id="dCodeSplit">(T9LS5 + 00021)</small>
                             </div>
                         </div>
                     </div>
@@ -260,12 +269,27 @@
                     </div>
 
                     <div class="d-flex gap-2 pt-2 border-top">
-                        <a id="btnEditLink" href="#" class="btn btn-warning flex-grow-1 btn-sm fw-bold">
-                            <i class="bi bi-pencil-square me-1"></i> Sửa sách
-                        </a>
-                        <a id="btnDeleteLink" href="#" class="btn btn-outline-danger btn-sm px-3">
-                            <i class="bi bi-trash me-1"></i> Xóa
-                        </a>
+                        @if (laAdmin)
+                        {
+                            <a id="btnEditLink" href="#" class="btn btn-warning flex-grow-1 btn-sm fw-bold">
+                                <i class="bi bi-pencil-square me-1"></i> Sửa sách
+                            </a>
+                            <a id="btnDetailsLink" href="#" class="btn btn-outline-primary btn-sm px-3">
+                                Chi tiết
+                            </a>
+                            <a id="btnDeleteLink" href="#" class="btn btn-outline-danger btn-sm px-3">
+                                <i class="bi bi-trash me-1"></i> Xóa
+                            </a>
+                        }
+                        else
+                        {
+                            <a id="btnBorrowLink" href="#" class="btn btn-primary flex-grow-1 btn-sm fw-bold">
+                                <i class="bi bi-journal-plus me-1"></i> Mượn sách này
+                            </a>
+                            <a id="btnDetailsLink" href="#" class="btn btn-outline-primary btn-sm px-3">
+                                Xem chi tiết
+                            </a>
+                        }
                     </div>
                 </div>
             </div>
@@ -303,8 +327,6 @@
             card.classList.add("active-card");
 
             const code = card.getAttribute("data-code") || ("T9LS5" + String(id).padStart(5, "0"));
-            const prefix = card.getAttribute("data-prefix") || "T9LS5";
-            const suffix = card.getAttribute("data-suffix") || String(id).padStart(5, "0");
             const cover = card.getAttribute("data-cover") || "/images/books/default-cover.svg";
             const title = card.getAttribute("data-title");
             const author = card.getAttribute("data-author");
@@ -317,7 +339,6 @@
             const desc = card.getAttribute("data-desc");
 
             document.getElementById("dId").innerText = "#" + code;
-            document.getElementById("dCodeSplit").innerText = `(${prefix} + ${suffix})`;
             document.getElementById("dCoverImg").src = cover;
             document.getElementById("dTitle").innerText = title;
             document.getElementById("dAuthor").innerText = author;
@@ -338,10 +359,35 @@
 
             const sBadge = document.getElementById("dStatusBadge");
             sBadge.innerText = status;
-            sBadge.className = "badge " + (status === "Đang phục vụ" ? "bg-success" : (status === "Tạm ngừng" ? "bg-warning text-dark" : "bg-secondary"));
+            sBadge.className = "badge text-nowrap flex-shrink-0 " + (status === "Đang phục vụ" ? "bg-success" : (status === "Tạm ngừng" ? "bg-warning text-dark" : "bg-secondary"));
 
-            document.getElementById("btnEditLink").href = card.getAttribute("data-edit-url") || "#";
-            document.getElementById("btnDeleteLink").href = card.getAttribute("data-delete-url") || "#";
+            const btnEdit = document.getElementById("btnEditLink");
+            if (btnEdit) {
+                btnEdit.href = card.getAttribute("data-edit-url") || "#";
+            }
+
+            const btnDelete = document.getElementById("btnDeleteLink");
+            if (btnDelete) {
+                btnDelete.href = card.getAttribute("data-delete-url") || "#";
+            }
+
+            const btnDetails = document.getElementById("btnDetailsLink");
+            if (btnDetails) {
+                btnDetails.href = card.getAttribute("data-details-url") || "#";
+            }
+
+            const btnBorrow = document.getElementById("btnBorrowLink");
+            if (btnBorrow) {
+                if (status === "Đang phục vụ" && remaining > 0) {
+                    btnBorrow.href = card.getAttribute("data-borrow-url") || "#";
+                    btnBorrow.className = "btn btn-primary flex-grow-1 btn-sm fw-bold";
+                    btnBorrow.innerHTML = '<i class="bi bi-journal-plus me-1"></i> Mượn sách này';
+                } else {
+                    btnBorrow.href = "#";
+                    btnBorrow.className = "btn btn-secondary flex-grow-1 btn-sm fw-bold disabled pe-none";
+                    btnBorrow.innerHTML = '<i class="bi bi-slash-circle me-1"></i> Tạm hết sách / Không phục vụ';
+                }
+            }
         }
 
         function selectFirstBook() {
@@ -350,7 +396,6 @@
                 selectBook(firstCard.getAttribute("data-id"));
             } else {
                 document.getElementById("dId").innerText = "#0000000000";
-                document.getElementById("dCodeSplit").innerText = "(-)";
                 document.getElementById("dCoverImg").src = "/images/books/default-cover.svg";
                 document.getElementById("dTitle").innerText = "Không có sách nào";
                 document.getElementById("dAuthor").innerText = "-";
@@ -362,6 +407,12 @@
                 const remainingEl = document.getElementById("dRemaining");
                 remainingEl.innerText = "Còn 0 cuốn";
                 remainingEl.className = "text-muted fw-bold fs-6";
+
+                const btnBorrow = document.getElementById("btnBorrowLink");
+                if (btnBorrow) {
+                    btnBorrow.href = "#";
+                    btnBorrow.className = "btn btn-secondary flex-grow-1 btn-sm fw-bold disabled pe-none";
+                }
             }
         }
 
