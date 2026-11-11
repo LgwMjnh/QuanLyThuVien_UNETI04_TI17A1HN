@@ -46,6 +46,8 @@ else
                  data-remaining="@item.SoLuongCon"
                  data-status="@trangThai"
                  data-desc="@(string.IsNullOrWhiteSpace(item.MoTa) ? "Chưa có mô tả cho sách này." : item.MoTa)"
+                 data-details-url="@Url.Action("Details", "Sach", new { id = item.MaSach })"
+                 data-borrow-url="@Url.Action("DangKy", "PhieuMuon", new { maSach = item.MaSach })"
                  data-edit-url="@Url.Action("Edit", "Sach", new { id = item.MaSach })"
                  data-delete-url="@Url.Action("Delete", "Sach", new { id = item.MaSach })">
 
@@ -64,7 +66,7 @@ else
                                 #@item.MaDinhDanh
                             </span>
                             <span class="badge bg-primary-subtle text-primary">@tenTheLoai</span>
-                            <span class="badge @badgeClass ms-auto">@trangThai</span>
+                            <span class="badge @badgeClass text-nowrap ms-auto">@trangThai</span>
                         </div>
 
                         <h6 class="fw-bold text-dark text-break mb-1 card-book-title">@item.TenSach</h6>
