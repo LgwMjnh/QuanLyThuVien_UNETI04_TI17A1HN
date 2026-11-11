@@ -1,11 +1,9 @@
-@model IEnumerable<QuanLyThuVien_UNETI04_TI17A1HN.Models.TaiKhoan>
+@model QuanLyThuVien_UNETI04_TI17A1HN.ViewModels.TaiKhoanDanhSachViewModel
 
 @using QuanLyThuVien_UNETI04_TI17A1HN.Models
 
 @{
     ViewData["Title"] = "Quản lý tài khoản";
-
-    var trangThaiLoc = Context.Request.Query["trangThai"].ToString();
 }
 
 <div class="container py-4">
@@ -22,31 +20,44 @@
         </a>
     </div>
 
+    <!-- Tìm kiếm và lọc -->
     <div class="card mb-4">
         <div class="card-body">
             <form asp-action="Index" method="get">
                 <div class="row align-items-end g-3">
+
                     <div class="col-md-5">
-                        <label class="form-label">Lọc theo trạng thái</label>
+                        <label class="form-label">
+                            Tìm kiếm tài khoản
+                        </label>
+
+                        <input type="text"
+                               name="tuKhoa"
+                               value="@Model.TuKhoa"
+                               class="form-control"
+                               placeholder="Nhập ID, tên đăng nhập hoặc họ tên..." />
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">
+                            Lọc theo trạng thái
+                        </label>
 
                         <select name="trangThai" class="form-select">
-                            <option value=""
-                                    selected="@(string.IsNullOrEmpty(trangThaiLoc))">
-                                Tất cả tài khoản
-                            </option>
+                            <option value="">Tất cả tài khoản</option>
 
                             <option value="0"
-                                    selected="@(trangThaiLoc == "0")">
+                                    selected="@(Model.TrangThai == 0)">
                                 Bình thường
                             </option>
 
                             <option value="1"
-                                    selected="@(trangThaiLoc == "1")">
+                                    selected="@(Model.TrangThai == 1)">
                                 Bị khóa
                             </option>
 
                             <option value="2"
-                                    selected="@(trangThaiLoc == "2")">
+                                    selected="@(Model.TrangThai == 2)">
                                 Bị ban
                             </option>
                         </select>
@@ -54,7 +65,7 @@
 
                     <div class="col-auto">
                         <button type="submit" class="btn btn-primary">
-                            Lọc
+                            Tìm kiếm
                         </button>
 
                         <a asp-action="Index"
@@ -62,21 +73,27 @@
                             Làm mới
                         </a>
                     </div>
+
                 </div>
             </form>
         </div>
     </div>
 
+    <!-- Danh sách tài khoản -->
     <div class="card">
-        <div class="card-header py-3">
-            Danh sách tài khoản
+        <div class="card-header py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <strong>Danh sách tài khoản</strong>
+
+            <span class="text-muted">
+                Tổng cộng: @Model.TongSoTaiKhoan tài khoản
+            </span>
         </div>
 
         <div class="card-body">
-            @if (Model == null || !Model.Any())
+            @if (!Model.TaiKhoans.Any())
             {
                 <p class="text-center text-muted py-4 mb-0">
-                    Chưa có tài khoản nào trong hệ thống.
+                    Không tìm thấy tài khoản phù hợp.
                 </p>
             }
             else
@@ -85,6 +102,7 @@
                     <table class="table table-hover mb-0">
                         <thead>
                             <tr>
+                                <th>ID tài khoản</th>
                                 <th>Tên đăng nhập</th>
                                 <th>Họ và tên</th>
                                 <th>Vai trò</th>
@@ -94,9 +112,13 @@
                         </thead>
 
                         <tbody>
-                            @foreach (var item in Model)
+                            @foreach (var item in Model.TaiKhoans)
                             {
                                 <tr>
+                                    <td>
+                                        <strong>@item.MaTaiKhoan</strong>
+                                    </td>
+
                                     <td>@item.TenDangNhap</td>
 
                                     <td>@item.HoTen</td>
@@ -157,6 +179,56 @@
                         </tbody>
                     </table>
                 </div>
+
+                <!-- Phân trang -->
+                @if (Model.TongSoTrang > 1)
+                {
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mt-4">
+
+                        <div class="text-muted">
+                            Trang @Model.TrangHienTai / @Model.TongSoTrang
+                        </div>
+
+                        <nav aria-label="Phân trang tài khoản">
+                            <ul class="pagination mb-0">
+
+                                <li class="page-item @(Model.TrangHienTai == 1 ? "disabled" : "")">
+                                    <a class="page-link"
+                                       asp-action="Index"
+                                       asp-route-trang="@(Model.TrangHienTai - 1)"
+                                       asp-route-tuKhoa="@Model.TuKhoa"
+                                       asp-route-trangThai="@Model.TrangThai">
+                                        Trước
+                                    </a>
+                                </li>
+
+                                @for (int i = 1; i <= Model.TongSoTrang; i++)
+                                {
+                                    <li class="page-item @(i == Model.TrangHienTai ? "active" : "")">
+                                        <a class="page-link"
+                                           asp-action="Index"
+                                           asp-route-trang="@i"
+                                           asp-route-tuKhoa="@Model.TuKhoa"
+                                           asp-route-trangThai="@Model.TrangThai">
+                                            @i
+                                        </a>
+                                    </li>
+                                }
+
+                                <li class="page-item @(Model.TrangHienTai == Model.TongSoTrang ? "disabled" : "")">
+                                    <a class="page-link"
+                                       asp-action="Index"
+                                       asp-route-trang="@(Model.TrangHienTai + 1)"
+                                       asp-route-tuKhoa="@Model.TuKhoa"
+                                       asp-route-trangThai="@Model.TrangThai">
+                                        Sau
+                                    </a>
+                                </li>
+
+                            </ul>
+                        </nav>
+                    </div>
+                }
             }
         </div>
     </div>

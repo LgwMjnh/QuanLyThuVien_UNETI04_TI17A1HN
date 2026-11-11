@@ -250,7 +250,7 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
                 await transaction.CommitAsync();
 
                 TempData["ThongBao"] =
-                    "Đăng ký tài khoản thành công. Vui lòng đăng nhập.";
+                    "Đăng ký tài khoản thành công.";
 
                 return RedirectToAction(nameof(Index));
             }

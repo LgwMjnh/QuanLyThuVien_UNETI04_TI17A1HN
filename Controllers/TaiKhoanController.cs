@@ -78,7 +78,10 @@ public class TaiKhoanController : Controller
     }
 
     // GET: TaiKhoans
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(
+        string? tuKhoa,
+        int? trangThai,
+        int trang = 1)
     {
         var admin = await LayAdminDangNhapAsync();
 
@@ -87,9 +90,72 @@ public class TaiKhoanController : Controller
             return RedirectToAction("Index", "DangNhap");
         }
 
-        return View(await _context.TaiKhoans
+        // Số tài khoản hiển thị trên mỗi trang (10)
+        const int SoTaiKhoanMoiTrang = 10;
+
+        var query = _context.TaiKhoans.AsNoTracking();
+
+        // Tìm kiếm theo mã tài khoản, tên đăng nhập hoặc họ tên.
+        if (!string.IsNullOrWhiteSpace(tuKhoa))
+        {
+            string tuKhoaTimKiem = tuKhoa.Trim();
+
+            if (int.TryParse(tuKhoaTimKiem, out int maTaiKhoan))
+            {
+                query = query.Where(tk => tk.MaTaiKhoan == maTaiKhoan);
+            }
+            else
+            {
+                query = query.Where(tk =>
+                    tk.TenDangNhap.Contains(tuKhoaTimKiem) ||
+                    tk.HoTen.Contains(tuKhoaTimKiem));
+            }
+        }
+
+        // Lọc theo trạng thái tài khoản.
+        if (trangThai.HasValue &&
+            Enum.IsDefined(typeof(TrangThaiTaiKhoan), trangThai.Value))
+        {
+            query = query.Where(tk =>
+                (int)tk.TrangThai == trangThai.Value);
+        }
+
+        // Đếm tổng số tài khoản sau khi áp dụng bộ lọc
+        int tongSoTaiKhoan = await query.CountAsync();
+
+        // Tính tổng số trang
+        int tongSoTrang = (int)Math.Ceiling(
+            tongSoTaiKhoan / (double)SoTaiKhoanMoiTrang);
+
+        // Đảm bảo trang hiện tại hợp lệ
+        if (tongSoTrang == 0)
+        {
+            trang = 1;
+        }
+        else
+        {
+            trang = Math.Clamp(trang, 1, tongSoTrang);
+        }
+
+        // Chỉ lấy dữ liệu của trang hiện tại
+        var danhSach = await query
             .OrderBy(tk => tk.MaTaiKhoan)
-            .ToListAsync());
+            .Skip((trang - 1) * SoTaiKhoanMoiTrang)
+            .Take(SoTaiKhoanMoiTrang)
+            .ToListAsync();
+
+        var model = new TaiKhoanDanhSachViewModel
+        {
+            TaiKhoans = danhSach,
+            TrangHienTai = trang,
+            TongSoTrang = tongSoTrang,
+            SoTaiKhoanMoiTrang = SoTaiKhoanMoiTrang,
+            TongSoTaiKhoan = tongSoTaiKhoan,
+            TuKhoa = tuKhoa,
+            TrangThai = trangThai
+        };
+
+        return View(model);
     }
 
     // GET: TaiKhoans/Details/5
@@ -124,7 +190,7 @@ public class TaiKhoanController : Controller
         bool daCoAdmin = await DaCoAdminAsync();
         var admin = await LayAdminDangNhapAsync();
 
-        // Nếu đã có Admin thì chỉ Admin hiện tại mới được tạo tài khoản.
+        // Nếu đã có Admin thì chỉ Admin hiện tại mới được tạo tài khoản
         if (daCoAdmin && admin == null)
         {
             return RedirectToAction("Index", "DangNhap");
@@ -132,7 +198,7 @@ public class TaiKhoanController : Controller
 
         var model = new TaiKhoanTaoViewModel();
 
-        // Nếu chưa có Admin, bắt buộc tạo Admin đầu tiên.
+        // Nếu chưa có Admin, bắt buộc tạo Admin đầu tiên
         if (!daCoAdmin)
         {
             model.TaoAdmin = true;

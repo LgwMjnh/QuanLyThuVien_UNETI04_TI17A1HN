@@ -108,6 +108,14 @@
                                             </a>
                                         </li>
 
+                                        <li>
+                                            <a class="dropdown-item"
+                                               asp-controller="TaiKhoan"
+                                               asp-action="Index">
+                                                Quản lý tài khoản
+                                            </a>
+                                        </li>
+
                                         <li><hr class="dropdown-divider" /></li>
 
                                         <li>
@@ -285,6 +293,19 @@
             {
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
                     @TempData["Error"]
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="alert"
+                            aria-label="Close">
+                    </button>
+                </div>
+            }
+
+            @if (TempData["ThongBao"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    @TempData["ThongBao"]
 
                     <button type="button"
                             class="btn-close"

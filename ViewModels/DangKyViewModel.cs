@@ -31,19 +31,23 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.ViewModels
         [Display(Name = "Họ và tên")]
         public string HoTen { get; set; } = string.Empty;
 
+        [Required(ErrorMessage = "Vui lòng chọn ngày sinh.")]
         [DataType(DataType.Date)]
         [Display(Name = "Ngày sinh")]
         public DateTime? NgaySinh { get; set; }
 
+        [Required(ErrorMessage = "Vui lòng chọn giới tính.")]
         [StringLength(10)]
         [Display(Name = "Giới tính")]
         public string? GioiTinh { get; set; }
 
-        [RegularExpression(@"^$|^(0[0-9]{9})$",
+        [Required(ErrorMessage = "Vui lòng nhập số điện thoại.")]
+        [RegularExpression(@"^0[0-9]{9}$",
             ErrorMessage = "Số điện thoại phải gồm 10 chữ số và bắt đầu bằng số 0.")]
         [Display(Name = "Số điện thoại")]
         public string? SoDienThoai { get; set; }
 
+        [Required(ErrorMessage = "Vui lòng nhập email.")]
         [EmailAddress(ErrorMessage = "Email không đúng định dạng.")]
         [Display(Name = "Email")]
         public string? Email { get; set; }

@@ -45,4 +45,21 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.ViewModels
         public TrangThaiTaiKhoan TrangThai { get; set; }
                 = TrangThaiTaiKhoan.BinhThuong;
     }
+
+    public class TaiKhoanDanhSachViewModel
+    {
+        public List<TaiKhoan> TaiKhoans { get; set; } = new();
+
+        public int TrangHienTai { get; set; }
+
+        public int TongSoTrang { get; set; }
+
+        public int SoTaiKhoanMoiTrang { get; set; }
+
+        public int TongSoTaiKhoan { get; set; }
+
+        public string? TuKhoa { get; set; }
+
+        public int? TrangThai { get; set; }
+    }
 }
