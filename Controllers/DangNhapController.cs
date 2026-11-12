@@ -145,7 +145,7 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
             HttpContext.Session.SetString(
                 "VaiTro", taiKhoan.VaiTro);
 
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Index", "TrangChu");
         }
 
         // Hiển thị trang đăng ký tài khoản Độc giả
@@ -272,7 +272,7 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
         {
             HttpContext.Session.Clear();
 
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Index", "TrangChu");
         }
     }
 }

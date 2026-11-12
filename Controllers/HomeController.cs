@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using QuanLyThuVien_UNETI04_TI17A1HN.Data;
 using QuanLyThuVien_UNETI04_TI17A1HN.Models;
 using System.Diagnostics;
+using QuanLyThuVien_UNETI04_TI17A1HN.Helpers;
 
 namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
 {
@@ -15,6 +16,7 @@ namespace QuanLyThuVien_UNETI04_TI17A1HN.Controllers
             _context = context;
         }
 
+        [YeuCauAdmin]
         public async Task<IActionResult> Index()
         {
             var homNay = DateTime.Today;

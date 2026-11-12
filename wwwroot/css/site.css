@@ -744,6 +744,7 @@ footer {
     border: 1px solid var(--library-border);
     border-radius: var(--library-radius);
     background-color: var(--library-green-soft);
+    transform: translateY(40px);
 }
 
 .home-image-placeholder {
