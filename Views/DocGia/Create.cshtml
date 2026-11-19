@@ -17,44 +17,27 @@
 
                 <h5 class="mb-3">Thông tin tài khoản</h5>
 
-                <div class="mb-3">
-                    <label asp-for="MaTaiKhoan" class="form-label">
-                        Tài khoản đã có (nếu có)
-                    </label>
-                    <select asp-for="MaTaiKhoan"
-                            asp-items="ViewBag.MaTaiKhoan"
-                            class="form-select">
-                        <option value="">-- Chọn tài khoản có sẵn --</option>
-                    </select>
-                    <span asp-validation-for="MaTaiKhoan"
-                          class="text-danger"></span>
-                    <small class="text-muted">
-                        Nếu chọn tài khoản có sẵn, hãy để trống phần tạo tài khoản mới bên dưới.
-                    </small>
-                </div>
 
                 <div class="mb-3">
                     <label class="form-label">
-                        Hoặc tạo tài khoản mới
+                        Tạo tài khoản mới
                     </label>
                     <input type="text"
                            name="tenDangNhap"
                            value="@ViewBag.TenDangNhap"
                            class="form-control"
-                           placeholder="Tên đăng nhập (không bắt buộc)" />
+                           placeholder="Tên đăng nhập" />
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label">
-                        Mật khẩu tài khoản mới
+                        Mật khẩu tài khoản
                     </label>
                     <input type="password"
                            name="matKhau"
                            class="form-control"
-                           placeholder="Để trống nếu không tạo tài khoản mới" />
-                    <small class="text-muted">
-                        Mật khẩu mặc định là 123456.
-                    </small>
+                           placeholder="Mật khẩu" />
+
                 </div>
 
                 <hr class="my-4" />

@@ -127,7 +127,7 @@ public class TaiKhoanController : Controller
         int tongSoTrang = (int)Math.Ceiling(
             tongSoTaiKhoan / (double)SoTaiKhoanMoiTrang);
 
-        // Đảm bảo trang hiện tại hợp lệ
+    
         if (tongSoTrang == 0)
         {
             trang = 1;
