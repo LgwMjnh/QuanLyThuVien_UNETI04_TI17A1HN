@@ -1,0 +1,12 @@
+link GitHub https://github.com/LgwMjnh/QuanLyThuVien_UNETI04_TI17A1HN (private)
+
+link git clone https://github.com/LgwMjnh/QuanLyThuVien_UNETI04_TI17A1HN.git
+
+chạy bằng vs studio 2026 và cần Get-Migration 
+
+admin đầu tiên được tạo bằng đường link:/TaiKhoan/Create (vd: http://localhost:5076/TaiKhoan/Create)
+
+mã bảo mật được tạo bằng 2 câu lệnh trong Package Manager Console :
+	dotnet user-secrets init
+	dotnet user-secrets set "Security:FirstAdminCode" "#4546"
+	trong đó #4546 là mật khẩu tùy chỉnh 
